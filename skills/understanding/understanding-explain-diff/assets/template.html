@@ -1,0 +1,333 @@
+<!DOCTYPE html>
+<!--
+  explain-diff template.
+  Replace every {{PLACEHOLDER}} and the example blocks with generated content.
+  Keep the <head> (CDN links, styles, mermaid init) and the diff2html script at
+  the bottom of <body> as is.
+  Component markup to copy: see the commented examples inside <main>.
+-->
+<html lang="{{LANG}}">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>{{TITLE}}</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@picocss/pico@2/css/pico.min.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/diff2html@3/bundles/css/diff2html.min.css">
+<script src="https://cdn.jsdelivr.net/npm/diff2html@3/bundles/js/diff2html-ui.min.js"></script>
+<style>
+  /* === Semantic color language ==========================================
+     Color always encodes ONE of two axes, kept visually disjoint so a hue is
+     never ambiguous:
+       RISK (how much attention): --risk-high red / --risk-med amber / --risk-low green.
+         Used by risk badges, chunk borders, and review-plan budget lines.
+       CHANGE (before vs after): --before muted grey / --after accent.
+         Used by mental-model cards and before/after table columns.
+     Inside the collapsed diff viewer, red/green keep their diff meaning
+     (removed/added); that palette is boxed and does not leak onto the page.
+     To re-theme, change these five variables only. ===================== */
+  :root {
+    --pico-font-size: 100%;
+    --risk-high: #d93526;
+    --risk-med:  #e8a13c;
+    --risk-low:  #3ca370;
+    --before:    var(--pico-muted-border-color);
+    --after:     var(--pico-primary);
+  }
+  main.container { max-width: 1080px; }
+
+  /* --- header meta --- */
+  .doc-meta { font-size: 0.875rem; color: var(--pico-muted-color); }
+  .doc-meta code { font-size: 0.8125rem; }
+
+  /* --- table of contents --- */
+  /* Pico lays out <nav> (and nav ol/li/a) as a horizontal flex header-nav —
+     reset to a plain vertical numbered list. */
+  nav.toc { display: block; border: 1px solid var(--pico-muted-border-color); border-radius: var(--pico-border-radius); padding: 1rem 1.5rem; margin-bottom: 2rem; }
+  nav.toc ol { display: block; padding-left: 1.5rem; margin-bottom: 0; }
+  nav.toc li { display: list-item; list-style: decimal; padding: 0; margin: 0; }
+  nav.toc li a { display: inline; padding: 0; margin: 0; }
+
+  /* --- review plan (attention budget) --- */
+  .review-plan { border: 1px solid var(--pico-muted-border-color); border-left: 6px solid var(--pico-primary); border-radius: var(--pico-border-radius); padding: 1rem 1.5rem; margin-bottom: 2rem; }
+  .review-plan > h2 { font-size: 1.1rem; margin-bottom: 0.75rem; }
+  .review-plan .progress-line { font-size: 0.8125rem; color: var(--pico-muted-color); margin-bottom: 0; }
+  /* budget lines carry the same RISK colors the walkthrough uses — this is
+     where the reader first learns the color language. */
+  ul.budget { list-style: none; padding-left: 0; margin-bottom: 0.75rem; }
+  ul.budget li { border-left: 5px solid var(--pico-muted-border-color); padding: 0.15rem 0 0.15rem 0.75rem; margin-bottom: 0.4rem; }
+  ul.budget li[data-risk="high"]   { border-left-color: var(--risk-high); }
+  ul.budget li[data-risk="medium"] { border-left-color: var(--risk-med); }
+  ul.budget li[data-risk="low"]    { border-left-color: var(--risk-low); }
+
+  /* --- walkthrough chunk cards --- */
+  article.chunk { border-left: 6px solid var(--pico-muted-border-color); }
+  article.chunk[data-risk="high"]   { border-left-color: var(--risk-high); }
+  article.chunk[data-risk="medium"] { border-left-color: var(--risk-med); }
+  article.chunk[data-risk="low"]    { border-left-color: var(--risk-low); }
+  .risk-badge { display: inline-block; padding: 0.125rem 0.625rem; border-radius: 1rem; font-size: 0.75rem; font-weight: 700; color: #fff; vertical-align: middle; }
+  .risk-badge[data-risk="high"]   { background: var(--risk-high); }
+  .risk-badge[data-risk="medium"] { background: var(--risk-med); }
+  .risk-badge[data-risk="low"]    { background: var(--risk-low); }
+  .pattern-tag { display: inline-block; padding: 0.125rem 0.5rem; border: 1px solid var(--pico-muted-border-color); border-radius: 0.25rem; font-size: 0.75rem; color: var(--pico-muted-color); vertical-align: middle; }
+  .chunk-files { font-size: 0.8125rem; color: var(--pico-muted-color); word-break: break-all; }
+
+  /* --- per-chunk verification status --- */
+  .verify-status { font-size: 0.8125rem; margin: 0.35rem 0 0; }
+  .verify-status[data-tested="yes"] { color: var(--risk-low); }
+  .verify-status[data-tested="no"]  { color: var(--risk-high); font-weight: 600; }
+
+  /* --- machine-verified fact marker (inline, in prose) --- */
+  .verified { color: var(--risk-low); font-weight: 600; }
+  .verified::before { content: "\2713\00a0"; } /* ✓ + nbsp */
+
+  /* --- before/after (CHANGE axis) --- */
+  /* Conceptual before vs after, e.g. in the mental-model section. before =
+     muted grey (the past), after = accent (the new state). Same axis as the
+     before/after table columns below, never reusing a RISK hue. */
+  .ba-pair { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin: 1rem 0; }
+  @media (max-width: 640px) { .ba-pair { grid-template-columns: 1fr; } }
+  .ba-before, .ba-after { border-left: 5px solid; border-radius: var(--pico-border-radius); padding: 0.5rem 1rem; }
+  .ba-before { border-left-color: var(--before); }
+  .ba-after  { border-left-color: var(--after); }
+  .ba-before > strong, .ba-after > strong { display: block; margin-bottom: 0.35rem; font-size: 0.9rem; }
+  .ba-before > strong { color: var(--pico-muted-color); }
+  .ba-after  > strong { color: var(--after); }
+  /* before/after table columns share the CHANGE axis */
+  table th.col-after, table td.col-after { color: var(--after); }
+  table th.col-before, table td.col-before { color: var(--pico-muted-color); }
+
+  /* --- inferred / low-confidence note (amber = caution, a RISK hue reused
+     for "trust this less") --- */
+  .inferred-note { border-left: 5px solid var(--risk-med); border-radius: var(--pico-border-radius); padding: 0.5rem 1rem; font-size: 0.875rem; }
+
+  /* --- read-progress checkbox --- */
+  .chunk-check { float: right; font-size: 0.8125rem; color: var(--pico-muted-color); font-weight: 400; }
+  .chunk-check input { vertical-align: middle; margin-right: 0.25rem; }
+  article.chunk.reviewed { opacity: 0.5; transition: opacity 0.15s; }
+  article.chunk.reviewed:hover, article.chunk.reviewed:focus-within { opacity: 1; }
+
+  /* --- diff rendering (diff2html) --- */
+  /* Pico's global table styles (cell padding, borders, table margin) leak into
+     diff2html's <table> layout — its absolutely-positioned line-number cells
+     assume zero cell padding, so Pico's padding skews row alignment. Reset all
+     of it; do NOT touch background-color (it would override d2h-ins/d2h-del). */
+  .d2h-diff-table { margin: 0; }
+  .d2h-diff-table th, .d2h-diff-table td { border: 0; padding: 0; }
+  .diff-render { margin-top: 0.5rem; }
+  .d2h-wrapper { font-size: 0.8125rem; }
+  .d2h-file-header { font-size: 0.8125rem; }
+  .diff-format-toggle button { width: auto; display: inline-block; margin-right: 0.5rem; padding: 0.25rem 0.875rem; font-size: 0.8125rem; }
+
+  /* --- review points --- */
+  .review-point { border-left: 4px solid var(--pico-primary); padding-left: 1rem; margin-bottom: 1.5rem; }
+
+  details > summary { cursor: pointer; }
+  pre.mermaid { background: transparent; text-align: center; }
+</style>
+<script type="module">
+  import mermaid from "https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.esm.min.mjs";
+  const dark = window.matchMedia("(prefers-color-scheme: dark)").matches;
+  mermaid.initialize({ startOnLoad: true, theme: dark ? "dark" : "neutral" });
+</script>
+</head>
+<body>
+<main class="container">
+
+  <header>
+    <h1>{{TITLE}}</h1>
+    <p class="doc-meta">
+      {{META: e.g. PR #123 · feature/foo → main · 12 files, +340 −85 · generated 2026-07-05}}
+    </p>
+  </header>
+
+  <section class="review-plan">
+    <h2>{{REVIEW_PLAN_HEADING: e.g. レビュー計画}}</h2>
+    <!-- Attention budget from the risk aggregate: how much to read and where.
+         One bullet per risk tier that is present; drop tiers with no chunks.
+         data-risk on each li colors it with the walkthrough's risk palette —
+         this is where the reader learns red=scrutinize / amber=skim / green=safe. -->
+    <ul class="budget">
+      <li data-risk="high">{{e.g. <strong>精読が必要</strong>: 2 チャンク（推定 ~15 分）}}</li>
+      <li data-risk="medium">{{e.g. <strong>流し読み</strong>: 1 チャンク（~5 分）}}</li>
+      <li data-risk="low">{{e.g. <strong>確認不要</strong>: 機械的変更 32 ファイル（パターン検証済み）}}</li>
+    </ul>
+    <p class="progress-line"><span data-progress-count>0</span> / <span data-progress-total>0</span> {{REVIEWED_LABEL: e.g. チャンク確認済み}}</p>
+  </section>
+
+  <nav class="toc" aria-label="Table of contents">
+    <strong>{{TOC_HEADING}}</strong>
+    <ol>
+      <li><a href="#background">…</a></li>
+      <!-- one entry per section, plus one per walkthrough chunk -->
+    </ol>
+  </nav>
+
+  <section id="background">
+    <h2>{{SECTION: Background & Why}}</h2>
+    <!-- Purpose of the change, linked issues, prerequisite knowledge. -->
+    <!-- When no context material was provided and this is inferred from the
+         diff alone, wrap that admission in an .inferred-note (amber = trust
+         this less). Delete the note when real context was given. -->
+    <p class="inferred-note">{{e.g. この節はコンテキスト資料がないため diff とコミットメッセージからの推測です。}}</p>
+  </section>
+
+  <section id="mental-model">
+    <h2>{{SECTION: Mental model}}</h2>
+    <!-- Prose-first: explain what changes conceptually BEFORE showing code. -->
+    <p>{{One or two sentences framing the shift.}}</p>
+    <!-- before/after cards make the CHANGE axis visible: grey = old world,
+         accent = new world. Use for the one system-level shift; omit if the
+         change has no clean before/after framing. -->
+    <div class="ba-pair">
+      <div class="ba-before"><strong>{{Before}}</strong>{{how it worked / behaved before}}</div>
+      <div class="ba-after"><strong>{{After}}</strong>{{how it works / behaves now}}</div>
+    </div>
+  </section>
+
+  <section id="diagrams">
+    <h2>{{SECTION: Diagrams}}</h2>
+    <!-- Only include diagrams that add understanding. Omit the whole section
+         if a diagram would just restate the prose. classDef colors nodes by
+         change role (stroke-only so it reads in both light/dark themes):
+         added=green, removed=red, changed=amber — reusing the RISK palette so
+         the diagram speaks the same color language as the rest of the page. -->
+    <pre class="mermaid">
+flowchart LR
+  A["existing"] --> B["new step"]:::added
+  A --> C["old step"]:::removed
+  classDef added stroke:#3ca370,stroke-width:2px;
+  classDef removed stroke:#d93526,stroke-width:2px,stroke-dasharray:4 3;
+  classDef changed stroke:#e8a13c,stroke-width:2px;
+    </pre>
+  </section>
+
+  <section id="walkthrough">
+    <h2>{{SECTION: Guided walkthrough}}</h2>
+    <p class="diff-format-toggle" role="group">
+      <button type="button" class="outline" data-diff-format="line-by-line">{{LABEL: Unified}}</button>
+      <button type="button" class="outline" data-diff-format="side-by-side">{{LABEL: Side by side}}</button>
+    </p>
+    <!-- Chunks ordered by understanding order, NOT file order.
+         One article.chunk element per chunk (written as CSS selectors here so
+         these comments never collide with searches for the real markup).
+
+         Each diff excerpt goes into pre.diff-source (keep the hidden
+         attribute) as a VALID unified diff: keep the "diff --git" and
+         old/new file headers and intact @@ hunks, HTML-escaped (& < >).
+         It must be IMMEDIATELY followed by an empty div.diff-render —
+         the script at the bottom renders every such pair with diff2html.
+         Example: -->
+    <article class="chunk" data-risk="high" data-chunk-id="{{SLUG: stable per-chunk id, e.g. retry-semantics}}">
+      <header>
+        <label class="chunk-check"><input type="checkbox" data-review-check> {{REVIEWED_LABEL}}</label>
+        <span class="risk-badge" data-risk="high">{{RISK_LABEL}}</span>
+        <!-- pattern-tag: name a recognizable change pattern to compress it
+             (e.g. "Strangler 移行", "rename の波及", "guard clause 追加").
+             Omit the span entirely when no pattern fits. -->
+        <span class="pattern-tag">{{PATTERN_NAME}}</span>
+        <strong>{{CHUNK_TITLE}}</strong>
+        <div class="chunk-files"><code>src/foo/bar.ts</code>, <code>src/foo/baz.ts</code></div>
+        <!-- verification status: data-tested="yes" names the covering test(s);
+             "no" means untested → the reviewer's job. Always include one. -->
+        <p class="verify-status" data-tested="no">{{e.g. テストなし — 挙動は要精査 / tested by src/foo/bar.test.ts}}</p>
+      </header>
+      <!-- Mark claims confirmed by a command with <span class="verified">…</span>;
+           leave unverified inferences unmarked. -->
+      <p>{{Explanation. e.g. <span class="verified">呼び出し元 12 箇所すべて更新済み（rg で確認）</span>。}}</p>
+
+      <!-- optional: behavior-change table — only for chunks that change runtime
+           behavior. Delete the whole table when nothing behavioral changed. -->
+      <table>
+        <thead><tr><th>{{入力/状況}}</th><th class="col-before">{{旧の挙動}}</th><th class="col-after">{{新の挙動}}</th></tr></thead>
+        <tbody>
+          <tr><td>{{タイムアウト3回}}</td><td class="col-before">{{例外を送出}}</td><td class="col-after">{{指数バックオフで再試行}}</td></tr>
+        </tbody>
+      </table>
+
+      <details> <!-- diffs collapsed by default: prose first, code on demand -->
+        <summary>diff</summary>
+        <pre class="diff-source" hidden>diff --git a/src/foo/bar.ts b/src/foo/bar.ts
+--- a/src/foo/bar.ts
++++ b/src/foo/bar.ts
+@@ -10,6 +10,8 @@ function process()
+ context line (HTML-escaped: List&lt;Foo&gt;)
+-removed line
++added line</pre>
+        <div class="diff-render"></div>
+      </details>
+    </article>
+  </section>
+
+  <section id="review-points">
+    <h2>{{SECTION: Review points}}</h2>
+    <!-- One .review-point per item: design decisions and their alternatives,
+         untested areas, and concrete questions for the reviewer. -->
+    <div class="review-point">
+      <strong>{{POINT_TITLE}}</strong>
+      <p>{{Why this needs reviewer judgment, and what to check.}}</p>
+    </div>
+  </section>
+
+  <footer>
+    <hr>
+    <p class="doc-meta">{{FOOTER: generator note, source range, truncation notice if any}}</p>
+  </footer>
+
+</main>
+
+<script>
+  // Renders every <pre class="diff-source"> + <div class="diff-render"> pair
+  // with diff2html. Keep as is.
+  document.addEventListener("DOMContentLoaded", () => {
+    const dark = window.matchMedia("(prefers-color-scheme: dark)").matches;
+    const render = (format) => {
+      document.querySelectorAll(".diff-render").forEach((el) => {
+        const src = el.previousElementSibling;
+        if (!src || !src.classList.contains("diff-source")) return;
+        el.innerHTML = "";
+        new Diff2HtmlUI(el, src.textContent, {
+          drawFileList: false,
+          matching: "lines",
+          outputFormat: format,
+          highlight: true,
+          colorScheme: dark ? "dark" : "light",
+        }).draw();
+      });
+    };
+    render("line-by-line");
+    document.querySelectorAll("[data-diff-format]").forEach((btn) =>
+      btn.addEventListener("click", () => render(btn.dataset.diffFormat)));
+  });
+</script>
+<script>
+  // Read-progress: persist per-chunk "reviewed" state in localStorage and keep
+  // the review-plan counter in sync. Keyed by pathname + chunk id so the same
+  // page (e.g. pr/123/) remembers state across visits. Keep as is.
+  document.addEventListener("DOMContentLoaded", () => {
+    const chunks = [...document.querySelectorAll("article.chunk")];
+    const countEl = document.querySelector("[data-progress-count]");
+    const totalEl = document.querySelector("[data-progress-total]");
+    if (totalEl) totalEl.textContent = chunks.length;
+    const key = (id) => "explain-diff:" + location.pathname + "#" + id;
+    const refresh = () => {
+      if (countEl) countEl.textContent = chunks.filter((c) => c.classList.contains("reviewed")).length;
+    };
+    chunks.forEach((c) => {
+      const id = c.dataset.chunkId;
+      const box = c.querySelector("[data-review-check]");
+      if (!id || !box) return;
+      let saved = false;
+      try { saved = localStorage.getItem(key(id)) === "1"; } catch (e) {}
+      box.checked = saved;
+      c.classList.toggle("reviewed", saved);
+      box.addEventListener("change", () => {
+        c.classList.toggle("reviewed", box.checked);
+        try { localStorage.setItem(key(id), box.checked ? "1" : "0"); } catch (e) {}
+        refresh();
+      });
+    });
+    refresh();
+  });
+</script>
+</body>
+</html>
