@@ -1,6 +1,6 @@
 ---
 name: paper-studio-summarize
-description: This skill should be used when the user wants to digest an academic paper PDF (a conference/journal paper or preprint, mainly CS; usually 8–30 pages — but content type, not page count, is the deciding factor) into a structured summary — an Ochiai-format overview plus per-perspective detail reports (method / experiments / discussion / related-work). Triggers on "この論文をまとめて/要約して", "論文サマリを作って", "落合フォーマットで読んで", "summarize this paper", "digest this arXiv paper", "make a paper report". Should NOT trigger for non-paper documents (books, manuals, dissertations — use pdf-studio-summarize), for papers so long they exceed a single reading pass (~30+ pages of body — offer pdf-studio-summarize, but default here for anything the user calls a "paper"), for drilling further into one section of an already-digested document (use pdf-studio-deep-dive), or for raw OCR/text extraction without synthesis.
+description: This skill should be used when the user wants to digest an academic paper PDF (a conference/journal paper or preprint, mainly CS; usually 8–30 pages — but content type, not page count, is the deciding factor) into a structured summary — an Ochiai-format overview plus per-perspective detail reports (background / method / experiments / discussion / related-work). Triggers on "この論文をまとめて/要約して", "論文サマリを作って", "落合フォーマットで読んで", "summarize this paper", "digest this arXiv paper", "make a paper report". Should NOT trigger for non-paper documents (books, manuals, dissertations — use pdf-studio-summarize), for papers so long they exceed a single reading pass (~30+ pages of body — offer pdf-studio-summarize, but default here for anything the user calls a "paper"), for drilling further into one section of an already-digested document (use pdf-studio-deep-dive), or for raw OCR/text extraction without synthesis.
 version: 0.1.0
 user-invocable: true
 ---
@@ -11,9 +11,10 @@ Digest an academic paper into `reports/overview.md` (a TL;DR + key figure, the O
 
 ```
 Phase 1 (orchestrator, inline)              Phase 2 (paper-detail, parallel)
-read paper (local MinerU OCR)          →    reports/method.md
-biblio metadata + section map [pNN]         reports/experiments.md
-write reports/overview.md                   reports/discussion.md
+read paper (local MinerU OCR)          →    reports/background.md
+biblio metadata + section map [pNN]         reports/method.md
+write reports/overview.md                   reports/experiments.md
+                                            reports/discussion.md
                                             reports/related-work.md   (dblp-verified)
 ```
 
@@ -59,6 +60,7 @@ Build the slug as lowercase ASCII kebab-case, filesystem-safe:
 │   └── figures/fig-03.jpg     # figures & tables, named by paper number (fig-NN / table-NN)
 └── reports/
     ├── overview.md            # Phase 1: Ochiai-format overview + section map
+    ├── background.md          # Phase 2: 背景と問題設定（動機・提案の意義）
     ├── method.md              # Phase 2: 技術・手法の詳細
     ├── experiments.md         # Phase 2: 実験設定と結果
     ├── discussion.md          # Phase 2: 議論・限界・今後
@@ -69,7 +71,7 @@ Build the slug as lowercase ASCII kebab-case, filesystem-safe:
 
 One interactive gate before any work; do not re-prompt between phases. (OCR needs no question — MinerU runs locally and was already verified in Prerequisites; mention it will run and that a first run downloads models and takes a while.) Ask:
 
-1. **Detail reports** — *default: all four* (method / experiments / discussion / related-work). Accept a subset or "overview only".
+1. **Detail reports** — *default: all five* (background / method / experiments / discussion / related-work). Accept a subset or "overview only".
 2. **Collect the source PDF into the work dir at Finalize?** — note the answer now so it is not asked again.
 
 ## Phase 1 — Read the paper and write the overview (inline)
@@ -92,28 +94,28 @@ No subagent: a paper fits the orchestrator's context, and Phase 2 needs the sect
 **Write `reports/overview.md`** following the template below, in the conversation language (or the user's requested language). Rules:
 - **Follow each item's writing discipline** (the bracketed guidance in the template). The Ochiai format's value is the sharpness of its six questions — a vague, adjective-laden answer wastes it. Concretely: item 1 must contain a one-sentence "X は Y する Z である" definition; item 2 must name the specific prior methods the paper compares against (never anonymous "既存手法"); item 4 must give numbers (`<baseline> 比 +N% on <benchmark>`), not "大幅に改善".
 - **Key figure:** place the paper's single most explanatory figure — usually its Fig. 1 architecture/overview diagram, from `ocr/figures/` — right after the metadata block, with a one-line caption and its `[pNN]`.
-- Each of items 3–6 ends with a pointer to its detail report — only for reports in Step 0 scope.
+- Items 1–2 (何を提案 / 新規性) point to `background.md`; items 3–6 each point to their own detail report — only for reports in Step 0 scope.
 - Item 6 needs dblp-verified entries, which Phase 2 produces — leave it as `(Phase 2 完了後に確定)` for now and complete it at Finalize. If related-work is out of scope, instead pick 1–3 entries from the References section and verify them yourself with `bash <SKILL_DIR>/scripts/dblp_lookup.sh "<title> <first-author surname>"` before writing them (include the surname — title-only queries for generic titles miss the right paper).
 - Close with **前提知識** and **原文の読み方** (both short), then the section map (it doubles as the outline pdf-studio-deep-dive resolves spans from).
 
 ## Phase 2 — Perspective detail reports (parallel)
 
-Write one perspective detail report per in-scope perspective (method / experiments / discussion / related-work) by applying the **`paper-studio-paper-detail`** skill — it holds the per-perspective report templates and the strict bibliographic constraints. Run the perspectives **in parallel**:
+Write one perspective detail report per in-scope perspective (background / method / experiments / discussion / related-work) by applying the **`paper-studio-paper-detail`** skill — it holds the per-perspective report templates and the strict bibliographic constraints. Run the perspectives **in parallel**:
 
 - **Under Claude Code**, dispatch one `paper-studio-paper-detail` subagent per in-scope perspective (multiple Agent calls in one message) so each report is written in an isolated context and they run concurrently.
 - **Otherwise**, apply the `paper-studio-paper-detail` skill inline, once per perspective, keeping each report's work self-contained.
 
 Either way, provide each perspective run only the inputs below; the report structure and constraints come from the skill itself, not from the orchestrator:
 
-- The perspective (`method` / `experiments` / `discussion` / `related-work`)
+- The perspective (`background` / `method` / `experiments` / `discussion` / `related-work`)
 - The source — OCR ran: absolute path to `<WORK_DIR>/ocr/paper.md`; otherwise: the PDF absolute path plus the perspective's page span (from the section map, ±1 page margin; when in doubt, the span may generously cover the whole body — papers are short)
 - The section map (compact, from Phase 1)
-- **The assigned figure/table files** — from `<WORK_DIR>/ocr/figures/`, the files whose page falls in this perspective's span. Read each file's page from `<WORK_DIR>/ocr/figures.md` (the filename encodes the paper number, not the page). Every one must be explained. **Assign each figure to exactly one in-scope perspective** so none is duplicated or dropped: by its page → the perspective whose span contains it; when a page is shared, route by kind (architecture/overview/method figures → method; result plots/tables → experiments). Hold any figure whose page is covered *only* by an out-of-scope perspective for the overview (handled at Finalize).
+- **The assigned figure/table files** — from `<WORK_DIR>/ocr/figures/`, the files whose page falls in this perspective's span. Read each file's page from `<WORK_DIR>/ocr/figures.md` (the filename encodes the paper number, not the page). Every one must be explained. **Assign each figure to exactly one in-scope perspective** so none is duplicated or dropped: by its page → the perspective whose span contains it; when a page is shared, route by kind (teaser/motivating-example figures → background; architecture/overview/method figures → method; result plots/tables → experiments). Hold any figure whose page is covered *only* by an out-of-scope perspective for the overview (handled at Finalize).
 - The output absolute path `<WORK_DIR>/reports/<perspective>.md`
 - The report language
 - For `related-work` additionally: the absolute path to `<SKILL_DIR>/scripts/dblp_lookup.sh` and the References `[pNN]` span
 
-Perspective → relevant sections, when resolving spans: method → approach/method + preliminaries; experiments → experiments/evaluation + result appendices; discussion → discussion/limitations/conclusion; related-work → related work + introduction + references.
+Perspective → relevant sections, when resolving spans: background → abstract + introduction + motivation/background sections; method → approach/method + preliminaries; experiments → experiments/evaluation + result appendices; discussion → discussion/limitations/conclusion; related-work → related work + introduction + references. (background and related-work both draw on the introduction — background from its motivation/problem framing, related-work from its cited prior work.)
 
 **Context hygiene:** each perspective writes its report to a file and returns only a path + one-line status. Do not read the finished detail reports back into the orchestrator — the single exception is the "次に読むべき論文" section of `related-work.md`, needed at Finalize. (When dispatching to subagents this is automatic; when applying the skill inline, keep the same discipline — do not fold a full detail report back into the overview context.)
 
@@ -160,6 +162,8 @@ BibTeX: [`../paper.bib`](../paper.bib)
 ## 2. 先行研究と比べて新規な部分は?
 <"<a specific prior method named in the paper> では〜だったが、本研究は〜" contrast.
  Do not use an anonymous comparison target like "既存手法" / "従来研究".>
+
+→ 詳細（背景・問題設定・提案の意義）: [background.md](background.md)
 
 ## 3. 技術・手法のキモは?
 <Two paragraphs: (1) the intuition for *why it works*, no equations; (2) one technical paragraph.>

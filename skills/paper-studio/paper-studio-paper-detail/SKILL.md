@@ -1,6 +1,6 @@
 ---
 name: paper-studio-paper-detail
-description: Internal Phase 2 procedure for the paper-studio-summarize skill — write ONE perspective-specific detail report (method / experiments / discussion / related-work) for an academic paper already digested in Phase 1, reading either the OCR Markdown or a resolved PDF page span. Applied once per in-scope perspective, in parallel, by the summarize orchestrator (dispatched to a paper-studio-paper-detail subagent under Claude Code, or applied inline otherwise). NOT a user-facing skill and NOT triggered directly by user requests.
+description: Internal Phase 2 procedure for the paper-studio-summarize skill — write ONE perspective-specific detail report (background / method / experiments / discussion / related-work) for an academic paper already digested in Phase 1, reading either the OCR Markdown or a resolved PDF page span. Applied once per in-scope perspective, in parallel, by the summarize orchestrator (dispatched to a paper-studio-paper-detail subagent under Claude Code, or applied inline otherwise). NOT a user-facing skill and NOT triggered directly by user requests.
 version: 0.1.0
 user-invocable: false
 ---
@@ -11,13 +11,13 @@ Write ONE perspective-specific detail report for an academic paper that the `pap
 
 ## When this applies
 
-The `paper-studio-summarize` skill applies this procedure once per in-scope perspective (method / experiments / discussion / related-work), in parallel — one isolated run each. It is not for direct user requests and is not invoked proactively.
+The `paper-studio-summarize` skill applies this procedure once per in-scope perspective (background / method / experiments / discussion / related-work), in parallel — one isolated run each. It is not for direct user requests and is not invoked proactively.
 
 ## Inputs provided by the caller
 
 The caller provides the following. If any is missing, report what is missing and stop.
 
-- **Perspective**: one of `method` / `experiments` / `discussion` / `related-work`
+- **Perspective**: one of `background` / `method` / `experiments` / `discussion` / `related-work`
 - **Source** (exactly one of):
   - OCR path: absolute path to `<WORK_DIR>/ocr/paper.md` (full text with `[pNN]` anchors; extracted figure images live next to it in `ocr/figures/`)
   - Visual path: absolute path to the PDF **and** the page span to read (PDF page numbers, START–END)
@@ -46,6 +46,18 @@ The caller provides the following. If any is missing, report what is missing and
 ## Report templates by perspective
 
 Every report starts with an H1 title (`# <perspective label> — <paper short title>`) and a one-line scope note (which sections / page span it covers). Then follow the assigned perspective's structure. Sections that genuinely do not apply to the paper may be dropped — note the omission in the scope line rather than padding.
+
+### `background` → 背景と問題設定
+
+This report answers *why this paper exists*: what is proposed, and why it matters. It is the deep version of overview items 1–2 (何を提案 / 新規性) plus the motivation the Ochiai overview compresses away. Keep it conceptual — the formal problem with notation lives in `method.md`, and the systematic prior-work catalog lives in `related-work.md`.
+
+1. **背景・動機** — the real-world or research context driving the work: what pain / need / opportunity motivates it, and why now. Draw on the Abstract and the Introduction's opening.
+2. **問題設定** — the problem the paper actually tackles, stated informally with its scope and assumptions, **and why it is hard** (the core challenges). This is the *motivating* problem, not the formal notation (that belongs in `method.md`) — keep it at the level a non-specialist can follow.
+3. **既存アプローチの限界（概念レベル）** — why current approaches fall short, at a conceptual level, to establish why a new method is needed. This is the framing gap that justifies the paper, NOT a catalog of specific prior works (that belongs in `related-work.md`) — name approaches only as far as needed to make the gap concrete.
+4. **提案の要旨（非技術）** — what the paper proposes at a conceptual level (the core idea, no equations) and how it addresses the problem set above. One or two paragraphs; the mechanics are `method.md`'s job.
+5. **なぜ重要か・インパクト** — the significance: what becomes possible, who benefits, and why the community should care. Keep author-claimed impact and your own inference clearly separated.
+
+Assigned figures are usually the paper's teaser / motivating-example figure — embed and explain it where it supports the motivation.
 
 ### `method` → 技術・手法の詳細
 
