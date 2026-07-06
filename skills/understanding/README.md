@@ -10,6 +10,7 @@ Inspired by [Understanding is the new bottleneck](https://www.geoffreylitt.com/2
 | Skill | Description |
 |-------|-------------|
 | `explain-diff` | Generate a reviewer-facing HTML explanation of a git diff: background, mental model, diagrams, guided walkthrough with risk annotations, review points |
+| `html-docs` | Shared design system (`base.css`) + progressive-enhancement kit (`base.js`) + authoring principles for self-contained HTML explanation documents. Delegated to by name (e.g. by `explain-diff`); not invoked directly |
 
 ## When Skills Activate
 

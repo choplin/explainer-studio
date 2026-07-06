@@ -78,9 +78,23 @@ with a rough time estimate. This is the first thing the reviewer sees.
 ### 3. Generate the HTML
 
 Copy `assets/template.html` (resolve relative to this skill's installed
-directory) and replace the placeholders. Keep the `<head>` — CDN links
-(Pico.css, diff2html, mermaid), styles, and mermaid init — and the diff2html
-render script at the bottom of `<body>` unchanged. The template's commented
+directory) and replace the placeholders. The document's design foundation is the
+shared `understanding-html-docs` skill; keep the output a single self-contained file
+by **inlining** that base rather than linking it:
+
+- Read `assets/base.css` from the `understanding-html-docs` skill (resolve relative to
+  *its* installed directory) and paste its entire contents, unmodified, into the
+  `<style id="html-docs-base">` element. This is the typography, color model, and base
+  components; the `<style id="explain-diff">` block right after it is this skill's
+  own context layer (risk/change axes, chunk cards, diff2html tweaks) — keep it.
+- Do **not** inline `base.js`: the walkthrough puts multiple `article.chunk`
+  elements directly under `main`, which the base kit's `main article` assumption
+  would mis-target. The base CSS's `color-scheme: light dark` already gives
+  automatic light/dark; this skill's own scripts (diff render, read-progress)
+  own the interactivity.
+
+Keep the diff2html CDN links and the mermaid init in `<head>`, and the two
+scripts at the bottom of `<body>`, unchanged. The template's commented
 `<article class="chunk">` / `.review-point` blocks show the exact component
 markup to repeat.
 
@@ -94,8 +108,10 @@ side-by-side toggle) at load time.
 ### Color language
 
 Color carries meaning, so keep it consistent — one hue, one meaning, everywhere.
-The template defines exactly two page-level axes; apply them, and do not invent
-other colors:
+On top of the base design system's palette, the `explain-diff` context layer
+defines exactly two page-level axes (risk maps to the base's `--bad`/`--warn`/
+`--tip` hues, change to `--muted`/`--accent`, so they inherit light/dark). Apply
+them, and do not invent other colors:
 
 - **Risk** (how much attention): red / amber / green. Carried by `data-risk` on
   risk badges, chunk borders, and the review-plan budget lines (`ul.budget`
@@ -176,8 +192,13 @@ unmarked. Over-marking destroys the signal, so when in doubt, leave it unmarked.
 - **Do not inline the full raw diff for large changes.** The document is an
   explanation, not a mirror of the diff — the PR itself remains the source of
   truth for exact content. Cap per-chunk excerpts and say what was omitted.
-- The document assumes an online viewer: Pico.css and mermaid load from CDN.
-  There is no offline fallback by design.
+- The document assumes an online viewer: diff2html and mermaid load from CDN.
+  base.css is inlined (not a CDN dependency), so the styling itself works
+  offline; only the diff/diagram rendering needs the network.
+- **Inline base.css verbatim.** Paste `understanding-html-docs/assets/base.css` into
+  `<style id="html-docs-base">` unchanged — do not hand-tune it per document (edit the
+  context layer or the base skill instead). A drifted copy diverges from the
+  shared design system across future regenerations.
 
 ## Success criteria
 
@@ -198,5 +219,7 @@ Verify before reporting completion; fix and re-check on any No:
       the generated file for known generic types or `->` arrows in the diff).
 - [ ] Every `pre.diff-source` starts with a `diff --git` (or `---`/`+++`) file
       header and each is immediately followed by an empty `div.diff-render`.
-- [ ] The file opens standalone in a browser with no local dependencies
-      (CDN-only externals).
+- [ ] `<style id="html-docs-base">` holds the full, unmodified contents of
+      `understanding-html-docs/assets/base.css` (not the placeholder comment).
+- [ ] The file is a single self-contained HTML file (base.css inlined; only
+      diff2html and mermaid are external), and opens standalone in a browser.

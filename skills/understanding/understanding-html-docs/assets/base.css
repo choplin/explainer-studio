@@ -1,0 +1,191 @@
+/* understanding-html-docs base design system.
+   The shared substrate for self-contained explanatory HTML documents: typography,
+   layout, a two-layer color model, base components, and the styles the
+   progressive-enhancement kit (base.js) toggles. Consuming skills copy this file
+   verbatim and layer their own context-specific stylesheet on top — do not edit
+   this file per document; keep the selectors stable so base.js stays in sync.
+
+   Color model — two layers:
+   1. Semantic colors carry MEANING. Callout variants (note/tip/warn/danger/key)
+      and inline <mark> map a fixed hue to a fixed meaning, so a reader learns the
+      code once and reads faster everywhere. Never reuse a semantic hue for
+      decoration.
+   2. Categorical hues are WAYFINDING. A `hue-N` class (cycled across sections,
+      chapters, or documents) tints `--cat`/`--cat-soft`, answering "where am I"
+      by color at a glance. It falls back to the global accent when unset.
+      Interactive color (links, CTA) stays the single global accent on purpose.
+
+   Light/dark: every color is a light-dark() pair resolved against `color-scheme`.
+   The theme toggle (base.js) sets color-scheme to `light dark` (auto/OS), `light`,
+   or `dark` via the .theme-* classes below — no duplicated palettes. To re-theme,
+   change the variables in :root only. */
+
+:root {
+  color-scheme: light dark;                 /* auto: follow the OS */
+
+  --bg: light-dark(#ffffff, #16181d);
+  --fg: light-dark(#1c1e21, #e5e7eb);
+  --muted: light-dark(#6b7280, #9ca3af);
+  --line: light-dark(#e5e7eb, #30343b);
+  --accent: light-dark(#2563eb, #7aa2ff);
+  --accent-soft: light-dark(#eff6ff, #1d2536);
+  --card: light-dark(#f8fafc, #1e2127);
+  --code: light-dark(#f3f4f6, #23262d);
+
+  /* semantic (meaning) — keep hue↔meaning fixed across every document */
+  --note: light-dark(#2563eb, #7aa2ff); --note-soft: light-dark(#eff6ff, #1d2536);
+  --tip:  light-dark(#15803d, #4ade80); --tip-soft:  light-dark(#f0fdf4, #10241a);
+  --warn: light-dark(#b45309, #fbbf24); --warn-soft: light-dark(#fffbeb, #271f0e);
+  --bad:  light-dark(#b91c1c, #f87171); --bad-soft:  light-dark(#fef2f2, #2a1414);
+  --key:  light-dark(#7c3aed, #c4b5fd); --key-soft:  light-dark(#f5f3ff, #201a2e);
+  --mark: light-dark(#ffe08a, #b8912f);   /* highlighter-pen band color */
+
+  /* categorical (wayfinding) — defaults to the global accent until a hue-N sets it */
+  --cat: var(--accent); --cat-soft: var(--accent-soft);
+}
+:root.theme-light { color-scheme: light; }
+:root.theme-dark  { color-scheme: dark; }
+
+/* categorical hues — cycle hue-1..hue-6 (set on <body>, a section, or a card).
+   Each light-dark() pair is legible on its own surface. */
+.hue-1 { --cat: light-dark(#2563eb, #7aa2ff); --cat-soft: light-dark(#eff6ff, #16203a); }
+.hue-2 { --cat: light-dark(#0d9488, #2dd4bf); --cat-soft: light-dark(#effcf9, #0c2420); }
+.hue-3 { --cat: light-dark(#7c3aed, #c4b5fd); --cat-soft: light-dark(#f5f3ff, #1c1730); }
+.hue-4 { --cat: light-dark(#c2410c, #fb923c); --cat-soft: light-dark(#fff5ec, #2a1a0e); }
+.hue-5 { --cat: light-dark(#be123c, #fb7185); --cat-soft: light-dark(#fff1f3, #2a1218); }
+.hue-6 { --cat: light-dark(#4d7c0f, #a3e635); --cat-soft: light-dark(#f6fdea, #1a2410); }
+
+/* --- foundation --- */
+* { box-sizing: border-box; }
+body {
+  margin: 0; background: var(--bg); color: var(--fg);
+  font-family: -apple-system, BlinkMacSystemFont, "Hiragino Sans", "Noto Sans JP", sans-serif;
+  line-height: 1.9; -webkit-text-size-adjust: 100%;
+}
+main { max-width: 45rem; margin: 0 auto; padding: 1rem 1.25rem 4rem; }
+header.site {
+  position: sticky; top: 0; z-index: 10; background: var(--bg);
+  border-bottom: 1px solid var(--line); padding: .6rem 1.25rem; font-size: .9rem;
+  display: flex; align-items: center; justify-content: space-between; gap: 1rem;
+}
+header.site a { color: var(--muted); text-decoration: none; }
+a { color: var(--accent); }
+h1 { font-size: 1.55rem; line-height: 1.4; margin: 1rem 0 .6rem; }
+h2 { font-size: 1.2rem; margin: 2.2rem 0 .6rem; padding-bottom: .25rem; border-bottom: 1px solid var(--line); scroll-margin-top: 3.4rem; }
+h3 { font-size: 1.05rem; margin: 1.6rem 0 .4rem; scroll-margin-top: 3.4rem; }
+p { margin: .7rem 0; }
+hr { border: 0; border-top: 1px solid var(--line); margin: 2rem 0; }
+blockquote { margin: 1rem 0; padding: .1rem 1rem; border-left: 3px solid var(--line); color: var(--muted); }
+code { background: var(--code); border-radius: 4px; padding: .1em .35em; font-size: .88em; }
+pre { background: var(--code); border-radius: 8px; padding: .8rem 1rem; overflow-x: auto; }
+pre code { background: none; padding: 0; }
+/* highlighter-pen underline: a color band under the lower part of the glyphs,
+   not a full background — keeps the text on the page surface and readable. */
+mark {
+  background: linear-gradient(transparent 56%, var(--mark) 56%);
+  color: inherit; padding: 0 .05em;
+}
+footer { max-width: 45rem; margin: 0 auto; padding: 0 1.25rem 2rem; color: var(--muted); font-size: .8rem; }
+
+/* --- tables --- */
+.tablewrap { overflow-x: auto; margin: 1rem 0; }
+table { border-collapse: collapse; font-size: .92rem; min-width: 60%; }
+th, td { border: 1px solid var(--line); padding: .35rem .6rem; text-align: left; }
+th { background: var(--card); }
+
+/* --- callout: semantic message box. Base class = note (blue/info); add a
+   variant class (tip/warn/danger/key) to change meaning + color + icon. --- */
+.callout {
+  --c: var(--note); --c-soft: var(--note-soft);
+  position: relative; background: var(--c-soft); border: 1px solid var(--line);
+  border-left: 4px solid var(--c); border-radius: 8px;
+  padding: .6rem 1rem .6rem 2.7rem; margin: 1.2rem 0; font-size: .95rem;
+}
+.callout::before {
+  content: "ℹ️"; position: absolute; left: .85rem; top: .6rem; font-size: 1rem; line-height: 1.4;
+}
+.callout.tip    { --c: var(--tip);  --c-soft: var(--tip-soft);  }
+.callout.warn   { --c: var(--warn); --c-soft: var(--warn-soft); }
+.callout.danger { --c: var(--bad);  --c-soft: var(--bad-soft);  }
+.callout.key    { --c: var(--key);  --c-soft: var(--key-soft);  }
+.callout.tip::before    { content: "💡"; }
+.callout.warn::before   { content: "⚠️"; }
+.callout.danger::before { content: "🚫"; }
+.callout.key::before    { content: "🔑"; }
+/* optional bold lead-in inside a callout, colored to match */
+.callout .label { color: var(--c); font-weight: 700; }
+
+/* --- pullquote: an emphatic single line; uses the categorical hue for the marks --- */
+.pullquote {
+  margin: 1.8rem 0; padding: 0 1.2rem; border: 0;
+  font-size: 1.15rem; line-height: 1.9; color: var(--fg); text-align: center;
+}
+.pullquote::before { content: "“"; color: var(--cat); font-size: 1.6rem; }
+.pullquote::after { content: "”"; color: var(--cat); font-size: 1.6rem; }
+
+/* --- chip: a small label. Base is muted; consumers add meaning-carrying
+   variants (e.g. .chip.accent) in their own stylesheet. --- */
+.chip {
+  display: inline-flex; align-items: center; gap: .25em; font-size: .78rem; color: var(--muted);
+  background: var(--card); border: 1px solid var(--line); border-radius: 999px;
+  padding: .05rem .7rem; white-space: nowrap;
+}
+.chip.accent { color: var(--accent); border-color: var(--accent); }
+
+/* ==========================================================================
+   Progressive enhancement (base.js). Everything below is injected/toggled by
+   JS; the page is fully readable without it. Keep these class names in sync
+   with base.js.
+   ========================================================================== */
+
+/* reading-progress bar (top of viewport) */
+.progress { position: fixed; top: 0; left: 0; right: 0; height: 3px; z-index: 20; background: transparent; }
+.progress > i { display: block; height: 100%; width: 0; background: var(--cat); transition: width .1s linear; }
+
+/* theme toggle button (mounted in header.site, or floating if none) */
+.theme-btn {
+  border: 1px solid var(--line); background: var(--card); color: var(--fg);
+  border-radius: 999px; padding: .15rem .7rem; font-size: .82rem; cursor: pointer;
+  display: inline-flex; align-items: center; gap: .3em;
+}
+.theme-btn:hover { border-color: var(--accent); }
+.theme-btn.floating { position: fixed; top: .7rem; right: .8rem; z-index: 20; box-shadow: 0 2px 8px rgba(0,0,0,.15); }
+
+/* floating action buttons (bottom-right): TOC + back-to-top */
+.fab { position: fixed; right: 1rem; bottom: 1rem; z-index: 18; display: flex; flex-direction: column; gap: .5rem; }
+.fab button {
+  width: 2.8rem; height: 2.8rem; border-radius: 50%; border: 1px solid var(--line);
+  background: var(--card); color: var(--fg); font-size: 1.1rem; cursor: pointer;
+  box-shadow: 0 2px 8px rgba(0,0,0,.18); display: flex; align-items: center; justify-content: center;
+  opacity: 0; transform: translateY(.4rem); transition: opacity .2s, transform .2s; pointer-events: none;
+}
+.fab button.show { opacity: 1; transform: none; pointer-events: auto; }
+.fab button.toc-btn { border-color: var(--cat); color: var(--cat); }
+
+/* table-of-contents panel (slides up from the bottom on mobile) */
+.toc-backdrop {
+  position: fixed; inset: 0; z-index: 21; background: rgba(0,0,0,.4);
+  opacity: 0; pointer-events: none; transition: opacity .2s;
+}
+.toc-backdrop.open { opacity: 1; pointer-events: auto; }
+.toc-panel {
+  position: fixed; left: 0; right: 0; bottom: 0; z-index: 22; max-height: 70vh; overflow-y: auto;
+  background: var(--bg); border-top: 3px solid var(--cat);
+  border-radius: 16px 16px 0 0; padding: .8rem 1.1rem 1.4rem;
+  transform: translateY(100%); transition: transform .25s ease;
+}
+.toc-panel.open { transform: none; }
+.toc-panel h2 { font-size: .95rem; border: 0; margin: .2rem 0 .6rem; color: var(--cat); }
+.toc-panel ol { list-style: none; margin: 0; padding: 0; }
+.toc-panel li { margin: 0; }
+.toc-panel li.sub a { padding-left: 1.6rem; font-size: .9rem; color: var(--muted); }
+.toc-panel a {
+  display: block; padding: .5rem .6rem; text-decoration: none; color: var(--fg);
+  border-radius: 8px; border-left: 3px solid transparent; line-height: 1.5;
+}
+.toc-panel a.active { color: var(--cat); border-left-color: var(--cat); background: var(--cat-soft); font-weight: 600; }
+
+@media (prefers-reduced-motion: reduce) {
+  .progress > i, .fab button, .toc-backdrop, .toc-panel { transition: none; }
+  html { scroll-behavior: auto; }
+}

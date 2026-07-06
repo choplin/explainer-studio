@@ -2,8 +2,16 @@
 <!--
   explain-diff template.
   Replace every {{PLACEHOLDER}} and the example blocks with generated content.
-  Keep the <head> (CDN links, styles, mermaid init) and the diff2html script at
-  the bottom of <body> as is.
+
+  Design foundation comes from the understanding-html-docs skill: paste the full
+  contents of its assets/base.css into the <style id="html-docs-base"> element below,
+  verbatim (see SKILL.md "Generate the HTML"). The <style id="explain-diff">
+  block is explain-diff's own context layer (risk/change axes, chunk cards,
+  diff2html tweaks) — keep it. Keep the diff2html CDN links, the mermaid init,
+  and the two scripts at the bottom of <body>.
+
+  Single-file by design: base.css is inlined (not linked) so the output stays
+  one self-contained file. Only diff2html and mermaid load from a CDN.
   Component markup to copy: see the commented examples inside <main>.
 -->
 <html lang="{{LANG}}">
@@ -11,56 +19,49 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>{{TITLE}}</title>
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@picocss/pico@2/css/pico.min.css">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/diff2html@3/bundles/css/diff2html.min.css">
 <script src="https://cdn.jsdelivr.net/npm/diff2html@3/bundles/js/diff2html-ui.min.js"></script>
-<style>
-  /* === Semantic color language ==========================================
-     Color always encodes ONE of two axes, kept visually disjoint so a hue is
-     never ambiguous:
-       RISK (how much attention): --risk-high red / --risk-med amber / --risk-low green.
-         Used by risk badges, chunk borders, and review-plan budget lines.
-       CHANGE (before vs after): --before muted grey / --after accent.
-         Used by mental-model cards and before/after table columns.
-     Inside the collapsed diff viewer, red/green keep their diff meaning
-     (removed/added); that palette is boxed and does not leak onto the page.
-     To re-theme, change these five variables only. ===================== */
+<style id="html-docs-base">/* {{BASE_CSS}}: paste the entire contents of understanding-html-docs/assets/base.css here, unmodified. */</style>
+<style id="explain-diff">
+  /* explain-diff context layer over understanding-html-docs. Two axes layered on top
+     of the base's semantic/categorical color model:
+       RISK (how much attention): high/med/low, reusing the base's bad/warn/tip
+         hues so risk speaks the same palette (and inherits light/dark).
+       CHANGE (before vs after): before = muted, after = accent.
+     diff2html's own red/green keeps its diff meaning inside the collapsed viewer
+     and does not leak onto the page. */
   :root {
-    --pico-font-size: 100%;
-    --risk-high: #d93526;
-    --risk-med:  #e8a13c;
-    --risk-low:  #3ca370;
-    --before:    var(--pico-muted-border-color);
-    --after:     var(--pico-primary);
+    --risk-high: var(--bad);
+    --risk-med:  var(--warn);
+    --risk-low:  var(--tip);
+    --before:    var(--muted);
+    --after:     var(--accent);
   }
   main.container { max-width: 1080px; }
 
   /* --- header meta --- */
-  .doc-meta { font-size: 0.875rem; color: var(--pico-muted-color); }
+  .doc-meta { font-size: 0.875rem; color: var(--muted); }
   .doc-meta code { font-size: 0.8125rem; }
 
   /* --- table of contents --- */
-  /* Pico lays out <nav> (and nav ol/li/a) as a horizontal flex header-nav —
-     reset to a plain vertical numbered list. */
-  nav.toc { display: block; border: 1px solid var(--pico-muted-border-color); border-radius: var(--pico-border-radius); padding: 1rem 1.5rem; margin-bottom: 2rem; }
-  nav.toc ol { display: block; padding-left: 1.5rem; margin-bottom: 0; }
-  nav.toc li { display: list-item; list-style: decimal; padding: 0; margin: 0; }
-  nav.toc li a { display: inline; padding: 0; margin: 0; }
+  nav.toc { border: 1px solid var(--line); border-radius: 8px; padding: 1rem 1.5rem; margin-bottom: 2rem; }
+  nav.toc ol { padding-left: 1.5rem; margin-bottom: 0; }
+  nav.toc li { margin: 0; }
 
   /* --- review plan (attention budget) --- */
-  .review-plan { border: 1px solid var(--pico-muted-border-color); border-left: 6px solid var(--pico-primary); border-radius: var(--pico-border-radius); padding: 1rem 1.5rem; margin-bottom: 2rem; }
-  .review-plan > h2 { font-size: 1.1rem; margin-bottom: 0.75rem; }
-  .review-plan .progress-line { font-size: 0.8125rem; color: var(--pico-muted-color); margin-bottom: 0; }
-  /* budget lines carry the same RISK colors the walkthrough uses — this is
-     where the reader first learns the color language. */
+  .review-plan { border: 1px solid var(--line); border-left: 6px solid var(--accent); border-radius: 8px; padding: 1rem 1.5rem; margin-bottom: 2rem; }
+  .review-plan > h2 { font-size: 1.1rem; margin: 0 0 0.75rem; border: 0; }
+  .review-plan .progress-line { font-size: 0.8125rem; color: var(--muted); margin-bottom: 0; }
+  /* budget lines carry the same RISK colors the walkthrough uses — this is where
+     the reader first learns the color language. */
   ul.budget { list-style: none; padding-left: 0; margin-bottom: 0.75rem; }
-  ul.budget li { border-left: 5px solid var(--pico-muted-border-color); padding: 0.15rem 0 0.15rem 0.75rem; margin-bottom: 0.4rem; }
+  ul.budget li { border-left: 5px solid var(--line); padding: 0.15rem 0 0.15rem 0.75rem; margin-bottom: 0.4rem; }
   ul.budget li[data-risk="high"]   { border-left-color: var(--risk-high); }
   ul.budget li[data-risk="medium"] { border-left-color: var(--risk-med); }
   ul.budget li[data-risk="low"]    { border-left-color: var(--risk-low); }
 
   /* --- walkthrough chunk cards --- */
-  article.chunk { border-left: 6px solid var(--pico-muted-border-color); }
+  article.chunk { background: var(--card); border: 1px solid var(--line); border-left: 6px solid var(--line); border-radius: 8px; padding: 1rem 1.25rem; margin: 1.5rem 0; }
   article.chunk[data-risk="high"]   { border-left-color: var(--risk-high); }
   article.chunk[data-risk="medium"] { border-left-color: var(--risk-med); }
   article.chunk[data-risk="low"]    { border-left-color: var(--risk-low); }
@@ -68,8 +69,8 @@
   .risk-badge[data-risk="high"]   { background: var(--risk-high); }
   .risk-badge[data-risk="medium"] { background: var(--risk-med); }
   .risk-badge[data-risk="low"]    { background: var(--risk-low); }
-  .pattern-tag { display: inline-block; padding: 0.125rem 0.5rem; border: 1px solid var(--pico-muted-border-color); border-radius: 0.25rem; font-size: 0.75rem; color: var(--pico-muted-color); vertical-align: middle; }
-  .chunk-files { font-size: 0.8125rem; color: var(--pico-muted-color); word-break: break-all; }
+  .pattern-tag { display: inline-block; padding: 0.125rem 0.5rem; border: 1px solid var(--line); border-radius: 0.25rem; font-size: 0.75rem; color: var(--muted); vertical-align: middle; }
+  .chunk-files { font-size: 0.8125rem; color: var(--muted); word-break: break-all; }
 
   /* --- per-chunk verification status --- */
   .verify-status { font-size: 0.8125rem; margin: 0.35rem 0 0; }
@@ -81,52 +82,54 @@
   .verified::before { content: "\2713\00a0"; } /* ✓ + nbsp */
 
   /* --- before/after (CHANGE axis) --- */
-  /* Conceptual before vs after, e.g. in the mental-model section. before =
-     muted grey (the past), after = accent (the new state). Same axis as the
-     before/after table columns below, never reusing a RISK hue. */
   .ba-pair { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin: 1rem 0; }
   @media (max-width: 640px) { .ba-pair { grid-template-columns: 1fr; } }
-  .ba-before, .ba-after { border-left: 5px solid; border-radius: var(--pico-border-radius); padding: 0.5rem 1rem; }
+  .ba-before, .ba-after { border-left: 5px solid; border-radius: 8px; padding: 0.5rem 1rem; }
   .ba-before { border-left-color: var(--before); }
   .ba-after  { border-left-color: var(--after); }
   .ba-before > strong, .ba-after > strong { display: block; margin-bottom: 0.35rem; font-size: 0.9rem; }
-  .ba-before > strong { color: var(--pico-muted-color); }
+  .ba-before > strong { color: var(--muted); }
   .ba-after  > strong { color: var(--after); }
   /* before/after table columns share the CHANGE axis */
   table th.col-after, table td.col-after { color: var(--after); }
-  table th.col-before, table td.col-before { color: var(--pico-muted-color); }
+  table th.col-before, table td.col-before { color: var(--muted); }
 
-  /* --- inferred / low-confidence note (amber = caution, a RISK hue reused
-     for "trust this less") --- */
-  .inferred-note { border-left: 5px solid var(--risk-med); border-radius: var(--pico-border-radius); padding: 0.5rem 1rem; font-size: 0.875rem; }
+  /* --- inferred / low-confidence note (amber = a RISK hue reused for
+     "trust this less") --- */
+  .inferred-note { border-left: 5px solid var(--risk-med); border-radius: 8px; padding: 0.5rem 1rem; font-size: 0.875rem; }
 
   /* --- read-progress checkbox --- */
-  .chunk-check { float: right; font-size: 0.8125rem; color: var(--pico-muted-color); font-weight: 400; }
+  .chunk-check { float: right; font-size: 0.8125rem; color: var(--muted); font-weight: 400; }
   .chunk-check input { vertical-align: middle; margin-right: 0.25rem; }
   article.chunk.reviewed { opacity: 0.5; transition: opacity 0.15s; }
   article.chunk.reviewed:hover, article.chunk.reviewed:focus-within { opacity: 1; }
 
   /* --- diff rendering (diff2html) --- */
-  /* Pico's global table styles (cell padding, borders, table margin) leak into
-     diff2html's <table> layout — its absolutely-positioned line-number cells
-     assume zero cell padding, so Pico's padding skews row alignment. Reset all
-     of it; do NOT touch background-color (it would override d2h-ins/d2h-del). */
-  .d2h-diff-table { margin: 0; }
+  /* base.css styles all <table> cells (padding, borders, min-width) — that leaks
+     into diff2html's <table>, whose absolutely-positioned line-number cells
+     assume zero cell padding. Reset the layout bits; do NOT touch background
+     (it drives d2h-ins/d2h-del row colors). */
+  .d2h-diff-table { margin: 0; min-width: 0; }
   .d2h-diff-table th, .d2h-diff-table td { border: 0; padding: 0; }
   .diff-render { margin-top: 0.5rem; }
   .d2h-wrapper { font-size: 0.8125rem; }
   .d2h-file-header { font-size: 0.8125rem; }
-  .diff-format-toggle button { width: auto; display: inline-block; margin-right: 0.5rem; padding: 0.25rem 0.875rem; font-size: 0.8125rem; }
+  .diff-format-toggle button { cursor: pointer; width: auto; display: inline-block; margin-right: 0.5rem; padding: 0.25rem 0.875rem; font-size: 0.8125rem; background: var(--card); color: var(--fg); border: 1px solid var(--line); border-radius: 999px; }
+  .diff-format-toggle button:hover { border-color: var(--accent); }
 
   /* --- review points --- */
-  .review-point { border-left: 4px solid var(--pico-primary); padding-left: 1rem; margin-bottom: 1.5rem; }
+  .review-point { border-left: 4px solid var(--accent); padding-left: 1rem; margin-bottom: 1.5rem; }
 
   details > summary { cursor: pointer; }
   pre.mermaid { background: transparent; text-align: center; }
 </style>
 <script type="module">
   import mermaid from "https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.esm.min.mjs";
-  const dark = window.matchMedia("(prefers-color-scheme: dark)").matches;
+  // Resolve the theme the same way base.css does: an explicit .theme-* class
+  // wins, otherwise follow the OS.
+  const dark = document.documentElement.classList.contains("theme-dark")
+    || (!document.documentElement.classList.contains("theme-light")
+        && window.matchMedia("(prefers-color-scheme: dark)").matches);
   mermaid.initialize({ startOnLoad: true, theme: dark ? "dark" : "neutral" });
 </script>
 </head>
@@ -204,8 +207,8 @@ flowchart LR
   <section id="walkthrough">
     <h2>{{SECTION: Guided walkthrough}}</h2>
     <p class="diff-format-toggle" role="group">
-      <button type="button" class="outline" data-diff-format="line-by-line">{{LABEL: Unified}}</button>
-      <button type="button" class="outline" data-diff-format="side-by-side">{{LABEL: Side by side}}</button>
+      <button type="button" data-diff-format="line-by-line">{{LABEL: Unified}}</button>
+      <button type="button" data-diff-format="side-by-side">{{LABEL: Side by side}}</button>
     </p>
     <!-- Chunks ordered by understanding order, NOT file order.
          One article.chunk element per chunk (written as CSS selectors here so
@@ -279,7 +282,9 @@ flowchart LR
   // Renders every <pre class="diff-source"> + <div class="diff-render"> pair
   // with diff2html. Keep as is.
   document.addEventListener("DOMContentLoaded", () => {
-    const dark = window.matchMedia("(prefers-color-scheme: dark)").matches;
+    const dark = document.documentElement.classList.contains("theme-dark")
+      || (!document.documentElement.classList.contains("theme-light")
+          && window.matchMedia("(prefers-color-scheme: dark)").matches);
     const render = (format) => {
       document.querySelectorAll(".diff-render").forEach((el) => {
         const src = el.previousElementSibling;
