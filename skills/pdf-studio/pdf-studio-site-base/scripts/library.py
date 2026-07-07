@@ -11,7 +11,10 @@ Layout:
   ├── library.json              metadata (NOT deployed): project, books, access
   └── public/                   the deploy root (uploaded whole by wrangler)
       ├── index.html            library index, rebuilt from library.json
-      ├── assets/style.css      shared design system (copied from generate-site)
+      ├── assets/base.css       shared base design system (from understanding-html-docs)
+      ├── assets/pdf-studio.css pdf-studio context layer (from pdf-studio-site-base)
+      ├── assets/base.js        base PE kit: theme toggle, back-to-top (from understanding-html-docs)
+      ├── assets/pdf-studio.js  card live filter (from pdf-studio-site-base)
       └── <slug>/               one book's authored site (copied from a work dir)
 
 Subcommands:
@@ -69,10 +72,43 @@ def save_meta(meta):
     )
 
 
-def style_css_source():
-    # This script's own bundled copy of the shared design system:
-    # pdf-studio-site-base/scripts/library.py -> pdf-studio-site-base/assets/style.css
-    return Path(__file__).resolve().parents[1] / "assets" / "style.css"
+def base_css_source():
+    # The shared base design system, owned by the sibling understanding-html-docs
+    # skill (skills install as flat siblings under the skills root):
+    # <root>/pdf-studio-site-base/scripts/library.py
+    #   -> <root>/understanding-html-docs/assets/base.css
+    return (
+        Path(__file__).resolve().parents[2]
+        / "understanding-html-docs"
+        / "assets"
+        / "base.css"
+    )
+
+
+def context_css_source():
+    # This skill's own pdf-studio context layer, applied on top of base.css:
+    # pdf-studio-site-base/scripts/library.py -> pdf-studio-site-base/assets/pdf-studio.css
+    return Path(__file__).resolve().parents[1] / "assets" / "pdf-studio.css"
+
+
+def base_js_source():
+    # The base progressive-enhancement kit (theme toggle, back-to-top, etc.),
+    # owned by the sibling understanding-html-docs skill:
+    # <root>/pdf-studio-site-base/scripts/library.py
+    #   -> <root>/understanding-html-docs/assets/base.js
+    return (
+        Path(__file__).resolve().parents[2]
+        / "understanding-html-docs"
+        / "assets"
+        / "base.js"
+    )
+
+
+def context_js_source():
+    # This skill's own pdf-studio enhancement (the card live filter), shared by
+    # the generate-site landing page and this library index:
+    # pdf-studio-site-base/scripts/library.py -> pdf-studio-site-base/assets/pdf-studio.js
+    return Path(__file__).resolve().parents[1] / "assets" / "pdf-studio.js"
 
 
 def today():
@@ -80,6 +116,19 @@ def today():
 
 
 # ---------------------------------------------------------------- index render
+
+# Progressive-enhancement scripts for the index (theme toggle from base.js, card
+# live filter from pdf-studio.js). Passed to INDEX as a preformatted value so its
+# `{`/`}` JS braces never reach str.format(). The boot snippet's storage key must
+# match base.js's THEME_KEY; it applies the saved theme before first paint.
+INDEX_SCRIPTS = (
+    "<script>try{var t=localStorage.getItem('html-docs-theme');"
+    "if(t==='dark')document.documentElement.classList.add('theme-dark');"
+    "else if(t==='light')document.documentElement.classList.add('theme-light');}"
+    "catch(e){}</script>\n"
+    '<script src="assets/base.js" defer></script>\n'
+    '<script src="assets/pdf-studio.js" defer></script>'
+)
 
 INDEX = """\
 <!DOCTYPE html>
@@ -89,7 +138,9 @@ INDEX = """\
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="generator" content="pdf-studio">
 <title>{title}</title>
-<link rel="stylesheet" href="assets/style.css">
+<link rel="stylesheet" href="assets/base.css">
+<link rel="stylesheet" href="assets/pdf-studio.css">
+{scripts}
 </head>
 <body>
 <main>
@@ -128,22 +179,44 @@ def render_index(meta):
         lede = "まだ本がありません。deploy-site スキルで本を追加してください。"
         body = "  <p>（蔵書は空です）</p>"
     return INDEX.format(
-        title=title, lede=html.escape(lede), count=len(books), body=body
+        title=title,
+        lede=html.escape(lede),
+        count=len(books),
+        body=body,
+        scripts=INDEX_SCRIPTS,
     )
 
 
 def write_public_scaffold(meta):
     pub = public_dir()
-    (pub / "assets").mkdir(parents=True, exist_ok=True)
-    src = style_css_source()
-    if src.exists():
-        shutil.copy2(src, pub / "assets" / "style.css")
+    assets = pub / "assets"
+    assets.mkdir(parents=True, exist_ok=True)
+
+    base = base_css_source()
+    if base.exists():
+        shutil.copy2(base, assets / "base.css")
     else:
-        # Fallback: minimal readable stylesheet if the sibling asset moved.
-        (pub / "assets" / "style.css").write_text(
+        # Fallback: minimal readable stylesheet if understanding-html-docs is not
+        # installed as a sibling, so the index still renders.
+        (assets / "base.css").write_text(
             "body{font-family:sans-serif;max-width:45rem;margin:0 auto;padding:1rem;}",
             encoding="utf-8",
         )
+
+    ctx = context_css_source()
+    if ctx.exists():
+        shutil.copy2(ctx, assets / "pdf-studio.css")
+    else:
+        # The context layer is optional styling; an empty file keeps the link valid.
+        (assets / "pdf-studio.css").write_text("", encoding="utf-8")
+
+    # Progressive-enhancement scripts. They are optional (the index is fully
+    # readable without them), so a missing source is simply skipped — the tag
+    # 404s silently rather than breaking the page.
+    for src, name in ((base_js_source(), "base.js"), (context_js_source(), "pdf-studio.js")):
+        if src.exists():
+            shutil.copy2(src, assets / name)
+
     (pub / "index.html").write_text(render_index(meta), encoding="utf-8")
 
 

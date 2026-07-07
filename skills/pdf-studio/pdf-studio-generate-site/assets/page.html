@@ -1,18 +1,20 @@
 <!DOCTYPE html>
 <!-- pdf-studio generate-site: chapter/report page skeleton.
      Replace the UPPERCASE placeholders; keep the overall structure and only
-     use classes from the style.css catalog. Delete optional blocks that do
-     not apply. No <script>, no external URLs. -->
+     use classes from the base.css + pdf-studio.css catalog. Delete optional
+     blocks that do not apply. No external URLs; keep the four <head> asset refs. -->
 <html lang="ja">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="generator" content="pdf-studio">
 <title>PAGE_TITLE — SITE_TITLE</title>
-<link rel="stylesheet" href="assets/style.css">
-<!-- theme boot: apply the saved theme before first paint (no flash). Keep verbatim. -->
-<script>try{var t=localStorage.getItem('pdfstudio-theme');if(t==='dark')document.documentElement.classList.add('theme-dark');else if(t==='light')document.documentElement.classList.add('theme-light');}catch(e){}</script>
-<script src="assets/app.js" defer></script>
+<link rel="stylesheet" href="assets/base.css">
+<link rel="stylesheet" href="assets/pdf-studio.css">
+<!-- theme boot: apply the saved theme before first paint (no flash). Keep verbatim; key must match base.js THEME_KEY. -->
+<script>try{var t=localStorage.getItem('html-docs-theme');if(t==='dark')document.documentElement.classList.add('theme-dark');else if(t==='light')document.documentElement.classList.add('theme-light');}catch(e){}</script>
+<script src="assets/base.js" defer></script>
+<script src="assets/pdf-studio.js" defer></script>
 </head>
 <!-- HUE_CLASS = this page's chapter hue, hue-1..hue-6, cycled in reading order.
      It tints the kicker, key-points box, card accent and top rule. -->
