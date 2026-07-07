@@ -1,6 +1,6 @@
 ---
 name: pdf-studio-deploy-site
-description: This skill should be used when the user wants to publish an already-generated pdf-studio book site (a <WORK_DIR>/site/ dir) to the internet — adding it as a subpath to the shared Cloudflare Pages library set up by pdf-studio-initialize-site, then deploying the whole library so it is reachable (Access-protected) from a phone. Triggers on "サイトをデプロイして", "この本を公開して", "ホストして", "ネットで読めるようにして", "deploy the site", "publish this book", "put it online". Should NOT trigger for the one-time hosting setup (use pdf-studio-initialize-site first), for building the site (use pdf-studio-generate-site), for producing reports (use pdf-studio-summarize / pdf-studio-deep-dive), or for the audio guide (use pdf-studio-audio-dialogue / pdf-studio-audio-narrate).
+description: This skill should be used when the user wants to publish an already-generated pdf-studio book site (a <WORK_DIR>/site/ dir) to the internet — adding it as a subpath to the shared Cloudflare Pages library set up by pdf-studio-initialize-site, then deploying so it is reachable (Access-protected) from a phone. Triggers on "サイトをデプロイして", "この本を公開して", "ホストして", "ネットで読めるようにして", "deploy the site", "publish this book", "put it online". Should NOT trigger for the one-time hosting setup (use pdf-studio-initialize-site first), for building the site (use pdf-studio-generate-site), for producing reports (use pdf-studio-summarize / pdf-studio-deep-dive), or for the audio guide (use pdf-studio-audio-dialogue / pdf-studio-audio-narrate).
 version: 0.2.0
 user-invocable: true
 ---

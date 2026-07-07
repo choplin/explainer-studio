@@ -1,6 +1,6 @@
 ---
 name: pdf-studio-audio-dialogue
-description: This skill should be used when the user wants a NotebookLM-style audio guide / audio overview / two-host podcast of a document — specifically the FIRST step: writing the two-speaker dialogue script (台本). Triggers on "音声ガイドを作って", "この本の音声概要が欲しい", "ポッドキャスト風の対話にして", "NotebookLMみたいな音声を作りたい", "make an audio guide / audio overview", "turn this report into a two-host dialogue script". Works on any Markdown, especially pdf-studio output: reports/overview.md (whole-document overview → a broad guide) or a deep-dive reports/<section>.md report (one section → a focused, deeper guide). It writes a dialogue script file in the A:/B: line format that the pdf-studio-audio-narrate skill then turns into audio. Should NOT trigger for the audio synthesis step itself (use pdf-studio-audio-narrate), or for producing the source report (use pdf-studio-summarize / pdf-studio-deep-dive).
+description: This skill should be used when the user wants a NotebookLM-style audio guide / audio overview / two-host podcast of a document — the FIRST step: writing the two-speaker dialogue script (台本). Triggers on "音声ガイドを作って", "この本の音声概要が欲しい", "ポッドキャスト風の対話にして", "NotebookLMみたいな音声を作りたい", "make an audio guide / audio overview", "turn this report into a two-host dialogue script". Works on any Markdown, especially pdf-studio reports. Should NOT trigger for the audio synthesis step itself (use pdf-studio-audio-narrate), or for producing the source report (use pdf-studio-summarize / pdf-studio-deep-dive).
 version: 0.1.0
 user-invocable: true
 ---
