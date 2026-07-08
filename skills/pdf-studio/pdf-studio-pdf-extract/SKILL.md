@@ -17,24 +17,28 @@ The `pdf-studio-summarize` skill splits a large PDF into chunks and applies this
 
 The caller provides the following. If any is missing, do not guess — report what is missing and stop.
 
-- Absolute path to the target PDF
-- Assigned page range (PDF page numbers, START–END)
-- Absolute output path (e.g. `<WORK_DIR>/extract/chunk-<START>-<END>.md`)
+- The source to read, in one of two modes:
+  - **Visual mode (default):** the absolute path to the target PDF, plus the assigned page range (PDF page numbers, START–END).
+  - **Text-layer mode:** the absolute path to a pre-extracted text file (`extract/text-<START>-<END>.md`) that already holds the assigned pages as faithful `[pNN]`-anchored text. Read that file instead of the PDF; the page range is still given for context.
+- Assigned page range (PDF page numbers, START–END).
+- Absolute output path (e.g. `<WORK_DIR>/extract/chunk-<START>-<END>.md`).
+- **Assigned figures (optional):** rows from `ocr/figures.md` (label / file / page / caption) for figures whose page falls in this range. Record each in the material (see the format) so none is dropped downstream.
 
 ## Constraints (strict)
 
 - Do NOT install any software (brew / pip / uv / apt / npm, etc.). poppler and similar tools are assumed to be pre-installed in the environment.
-- Read the PDF ONLY via the Read tool's `pages` parameter. Actually "see" the PDF as images.
-- Do NOT convert or extract the PDF with external tools (pdftoppm / pdftotext / pypdf, etc.). Limit PDF handling to the Read tool. (Under Claude Code this runs without the Bash tool, so no workaround is possible anyway.)
+- **Visual mode:** read the PDF ONLY via the Read tool's `pages` parameter. Actually "see" the PDF as images. Do NOT convert or extract the PDF with external tools (pdftoppm / pdftotext / pypdf, etc.). (Under Claude Code this runs without the Bash tool, so no workaround is possible anyway.)
+- **Text-layer mode:** read ONLY the given text file with the Read tool. Do NOT also open the PDF. The text is already faithful (code, commands, numbers, console/box-drawing tables); transcribe it as-is and ignore running headers/footers (page numbers, chapter titles repeated at page tops/bottoms) — they are page furniture, not content.
 - If the Read tool errors (e.g. `pdftoppm failed:`), do not work around it — report the error verbatim and stop.
 - Write output to the file and return only a short status to the caller. Do NOT include the extracted body itself in your reply (to conserve the caller's context).
 - Write the extracted content in the language of the source PDF or the conversation. Keep the structural field names in the format below (## Meta, ## Extracted content) as written.
 
 ## Steps
 
-1. Read the PDF visually with the Read tool, `pages="<START>-<END>"` (max 20 pages per request; split into several requests if the range is wider).
-2. Transcribe each page's content as structured Markdown in the format below. Do not over-summarize; keep enough information density that the later phase can rebuild the chapter structure. Do not drop definitions, numbers, figures/tables, or key terms.
-3. Write the output to the given output path.
+1. Read the source: **visual mode** — the PDF with the Read tool, `pages="<START>-<END>"` (max 20 pages per request; split into several requests if the range is wider); **text-layer mode** — the given `extract/text-<START>-<END>.md` file (already `[pNN]`-anchored faithful text).
+2. Transcribe each page's content as structured Markdown in the format below. Do not over-summarize; keep enough information density that the later phase can rebuild the chapter structure. Do not drop definitions, numbers, figures/tables, or key terms. In text-layer mode, preserve code / commands / numeric output verbatim (that fidelity is the reason the mode was chosen).
+3. If assigned figures were provided, add each to the `## Figures` block (see format) — its `figures/…` path, page, and caption — so no harvested figure is lost.
+4. Write the output to the given output path.
 
 ## Output format
 
@@ -53,6 +57,10 @@ The caller provides the following. If any is missing, do not guess — report wh
 - Important definitions / facts / numbers: ...
 - Figures/tables: [pNN] caption and summary
 (repeat per page and heading. [pNN] is the actual PDF page number; also note the printed page number if present)
+
+## Figures
+(only if assigned figures were provided; one row per harvested figure so downstream reports can reference and explain it)
+- [pNN] `figures/fig-pNNN-K.ext` — <label>: <caption> — <one-line note on what it shows>
 ```
 
 ## Reply

@@ -19,6 +19,7 @@ The caller provides the following. If any is missing, report what is missing and
 
 - Absolute path to the input directory (the extract directory containing `chunk-*.md`)
 - Absolute output path (e.g. `<WORK_DIR>/structured/outline.md`)
+- Optional: absolute path to `ocr/figures.md` (present only when figure harvest ran). Use it to keep each figure reference attached to the section it belongs to.
 
 ## Constraints (strict)
 
@@ -34,6 +35,7 @@ The caller provides the following. If any is missing, report what is missing and
 3. Rebuild the logical structure: reorganize the scattered extracted content into chapter > section > subsection.
 4. Preserve page anchors [pNN] (PDF pages). Note printed page numbers too if known.
 5. Compress information, but do not drop definitions, important numbers, figures/tables, or key concepts. This is a cleaned-up structured outline, not a report.
+6. If `ocr/figures.md` was provided (or the chunks carry a `## Figures` block), keep each figure reference — its `figures/…` path, page, and caption — under the section whose pages contain it, so Phase 3 and the Finalize sweep know where each figure belongs.
 
 ## Output
 
