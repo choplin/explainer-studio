@@ -96,6 +96,7 @@ No subagent: a paper fits the orchestrator's context, and Phase 2 needs the sect
 - **Follow each item's writing discipline** (the bracketed guidance in the template). The Ochiai format's value is the sharpness of its six questions — a vague, adjective-laden answer wastes it. Concretely: item 1 must contain a one-sentence "X は Y する Z である" definition; item 2 must name the specific prior methods the paper compares against (never anonymous "既存手法"); item 4 must give numbers (`<baseline> 比 +N% on <benchmark>`), not "大幅に改善".
 - **Surface the paper's own thesis, not only per-item facts.** The six questions decompose the paper side by side, so its own overall verdict — the judgment that ties several results together (a superiority / asymmetry / trade-off conclusion, usually the Abstract's "we show / reveal / find that …" sentence) — has no dedicated item and is easily lost as a list of separate numbers. Extract that thesis in one sentence from the Abstract's own claim sentence and put it in the TL;DR (or a closing 総括 line); when several results are reported, keep the *relation* the paper draws between them (which is stronger, under what condition, at what cost), not just the individual values — that relation is the finding. *Why:* each item-answer can be correct yet the summary still omits the conclusion the paper leads with.
 - **Give every headline number its scope.** Write each key result with the conditions under which it holds: the method / definition / setting it is measured under, its population (all cases, or a named subset), and whether it is a bound / mean / median / quantile. *Why:* a scopeless number reads as a universal fact and drops the condition that is often the paper's actual point (e.g. that the result depends on which definition is used), or lets a subset average be misread as an all-cases average.
+- **Preserve the authors' hedges; don't harden them into fact.** Keep author modality — "can / may / suggests / we believe" — and present a design argument or hypothesis as such, not as a measured result (items 3–5 especially). *Why:* the overview is the most-read layer, so a hedged or design-level claim asserted here as established fact misleads exactly the readers who never open the detail reports.
 - **Key figure:** place the paper's single most explanatory figure — usually its Fig. 1 architecture/overview diagram, from `ocr/figures/` — right after the metadata block, with a one-line caption and its `[pNN]`.
 - Items 1–2 (何を提案 / 新規性) point to `background.md`; items 3–6 each point to their own detail report — only for reports in Step 0 scope.
 - Item 6 needs dblp-verified entries, which Phase 2 produces — leave it as `(Phase 2 完了後に確定)` for now and complete it at Finalize. If related-work is out of scope, instead pick 1–3 entries from the References section and verify them yourself with `bash <SKILL_DIR>/scripts/dblp_lookup.sh "<title> <first-author surname>"` before writing them (include the surname — title-only queries for generic titles miss the right paper).
@@ -184,7 +185,8 @@ BibTeX: [`../paper.bib`](../paper.bib)
 → 詳細: [experiments.md](experiments.md)
 
 ## 5. 議論はある?
-<Author-stated limitations and reader-inferred critique, kept clearly separate.>
+<Author-stated limitations and reader-inferred critique, kept clearly separate.
+ 著者のヘッジ（can/may/suggests・設計論証か実測か）を保存し、留保付き主張を確定事実として書かない。>
 
 → 詳細: [discussion.md](discussion.md)
 
@@ -216,6 +218,7 @@ BibTeX: [`../paper.bib`](../paper.bib)
 - [ ] The writing disciplines hold: item 1 has a one-sentence core definition; item 2 names concrete prior methods (no anonymous "既存手法"); item 4 gives numeric results, not adjectives only.
 - [ ] The TL;DR (or a 総括 line) states the paper's own thesis — the overall verdict it leads with in the Abstract — and, when several results are reported, the relation the paper draws between them (superiority / asymmetry / trade-off), not just parallel numbers.
 - [ ] Every headline number in the overview carries its scope: the method/definition/setting it holds under, its population (all cases or a named subset), and whether it is a bound/mean/median/quantile.
+- [ ] Overview claims preserve author modality: hedged or design-level claims (can / may / suggests / we believe) are not asserted as measured fact.
 - [ ] Every in-scope `reports/<perspective>.md` exists and carries `[pNN]` anchors.
 - [ ] Every URL/DOI in `related-work.md` and overview item 6 traces to dblp output or the paper itself; unmatched entries carry "(dblp未確認)" and no URL.
 - [ ] `<WORK_DIR>/paper.bib` exists with one BibTeX entry for the paper, either dblp-fetched or hand-built from printed metadata and marked `% not dblp-verified`; no venue/DOI/URL was invented, and overview links to it.
