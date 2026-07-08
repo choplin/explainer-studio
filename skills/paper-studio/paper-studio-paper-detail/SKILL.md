@@ -25,6 +25,7 @@ The caller provides the following. If any is missing, report what is missing and
 - **Assigned figures/tables**: the list of `ocr/figures/fig-NN.<ext>` / `ocr/figures/table-NN.<ext>` files whose page falls in this perspective's span. You MUST reference and explain **every one** of these in your report (see Work) — they are yours to cover so none is left unexplained across the report set.
 - **Output path**: absolute path, `<WORK_DIR>/reports/<perspective>.md`
 - **Report language** (defaults to the conversation language)
+- For `background` only: the paper's thesis sentence as written in the overview's TL;DR (the overall conclusion), so this report's stated conclusion stays consistent with the overview instead of being independently re-derived
 - For `related-work` only:
   - Absolute path to the bundled `dblp_lookup.sh` script
   - The `[pNN]` span of the References section
@@ -42,6 +43,7 @@ The caller provides the following. If any is missing, report what is missing and
 - Attach `[pNN]` (PDF page) anchors at key claims, definitions, tables, and figures.
 - Reference extracted figures with a relative path from `reports/`: `../ocr/figures/<file>` (OCR source only). Do not copy or re-encode image files.
 - **Explain every assigned figure/table.** For each `ocr/figures/*` file in your Assigned figures/tables list, embed it (`![...](../ocr/figures/<file>)`) at the point in the report where it belongs and explain what it shows and why it matters — never embed an image with no accompanying explanation, and never silently omit an assigned one. If an assigned figure has no natural home in your perspective's narrative, add a short "図表" subsection at the end of the report and cover it there with its `[pNN]`. If you believe a figure is genuinely irrelevant, still list it in that subsection with a one-line note rather than dropping it (the orchestrator guarantees no figure goes unexplained).
+- **Consult the material you were given before writing "不明" / "unknown" / "N/A" for a figure or table.** `ocr/figures.md` is the provided legend — it records each assigned file's label, page, and caption — and the image itself is readable from `ocr/figures/`. Read both before declaring any attribute of a figure/table (what it is, its number, what it plots) unknown. *Why:* writing "unknown" for a fact that was actually supplied is a false gap — it misrepresents the paper as less legible than it is and withholds information the reader was handed.
 
 ## Faithful restatement — self-check before writing Output
 
@@ -50,7 +52,7 @@ Summarizing is lossy, and a few specific loss modes silently corrupt the paper's
 - [ ] **Quantifiers and scope preserved.** Every restated claim keeps the paper's own qualifier — "for X% of applications", "among the N that have it", "at least", "up to", "on average". No subset or conditional claim was generalized into an all-cases claim (e.g. "up to 42% for 90% of apps" is not "at most 42%"). *Why:* dropping the quantifier turns a bounded, conditional finding into a false universal.
 - [ ] **Author modality preserved.** Hedges the authors use — "can", "may", "suggests", "we believe" — are kept, and no hedged or design-level claim (a proposal, or an argued-but-unmeasured mechanism) is restated as an established, measured result; where the paper argues rather than measures, the report says so. *Why:* asserting a hedged claim as fact fabricates a level of evidence the paper does not provide.
 - [ ] **Every number carries its scope.** Each figure states the method / definition / setting it holds under, its population (all cases or a named subset), and whether it is a bound / mean / median / quantile. *Why:* a scopeless number reads as a universal fact and drops the condition that is often the result's whole point.
-- [ ] **Table / bullet cells checked against the prose.** Each cell of a summarizing table or bullet list was re-read against the sentence it condenses, for meaning inversion or axis confusion; two orthogonal axes were not collapsed into one word ("frequent / dominant" is not "cheap / easy to handle"; "accurate" is not "simple to implement"). *Why:* compression to a single word is exactly where a correct sentence flips into a self-contradiction that a reader of the table alone cannot detect.
+- [ ] **Comparisons and relations checked against the source — including their direction.** Every restated comparison or relation (in prose, a table cell, or a bullet) was re-read against the sentence it condenses, for direction and for axis confusion: an ordering keeps the way it points ("A > B" is not "B > A"; "the second assumption holds more strongly than the first" must map first/second to the source's own enumeration order), and two orthogonal axes are not collapsed into one word ("frequent / dominant" is not "cheap / easy to handle"; "accurate" is not "simple to implement"). *Why:* a reversed comparison or a collapsed axis still reads fluently yet states the opposite of the paper — the most damaging error, because nothing local flags it; and simply deciding to state the relation (per the overview's thesis rule) does not make its direction right.
 - [ ] **Figure-estimated numbers marked.** Any number read off a plot or graph rather than stated in the text or a table is labeled as an eyeballed reading ("Fig. X からの目測") and not given the precision of a text-stated value. *Why:* estimation error in a number written as if exact becomes a factual discrepancy.
 
 ## Report templates by perspective
@@ -68,6 +70,8 @@ This report answers *why this paper exists*: what is proposed, and why it matter
 5. **なぜ重要か・インパクト** — the significance: what becomes possible, who benefits, and why the community should care. Keep author-claimed impact and your own inference clearly separated.
 
 Assigned figures are usually the paper's teaser / motivating-example figure — embed and explain it where it supports the motivation.
+
+If the caller supplied the paper's thesis (from the overview), the overall conclusion you state (in 背景・動機 / 提案の要旨 / なぜ重要か) must agree with it — same claim, same direction. This report and the overview are written independently and are never reconciled afterward, so a divergence here becomes two conflicting conclusions in the same deliverable. Deepen and support the thesis; do not silently contradict, weaken, or reverse it. (If the paper genuinely does not support the given thesis, say so explicitly rather than quietly stating the opposite.)
 
 ### `method` → 技術・手法の詳細
 
