@@ -5,6 +5,23 @@ Reference for maintainers of `scripts/mineru_ocr.sh` and
 are produced in Phase 1. The operational contract (what the rest of the skill
 relies on) is in `SKILL.md`; this file is the implementation detail behind it.
 
+## Goal
+
+Turn the paper PDF into one Markdown document (`paper.md`, plus its figure crops)
+that **preserves as much of the source's information as possible, faithfully and
+locally** — every word of the body text exactly as the authors typeset it, the
+math, the figures and the table cell values, the section structure, and the
+body↔footnote links. Downstream phases (the overview and the perspective
+reports) read from this rendering, so its fidelity to the source is what
+determines the quality of everything built on top.
+
+Maximal fidelity is the overriding objective. Where something cannot be captured
+perfectly, the rule is: **preserve the information rather than drop or distort
+it** — never silently lose content, and never invent a link or a value that
+isn't in the source. Every choice below is a means to that end; when a mechanism
+(which OCR backend, whether to keep a tag, how to mark a footnote) trades against
+fidelity, fidelity wins.
+
 ## Why text-layer-primary
 
 The PDFs this skill targets (CS conference/journal papers, ACM `acmart` /
