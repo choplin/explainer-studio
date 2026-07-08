@@ -1,0 +1,13 @@
+[project]
+name = "paper-studio-summarize-runtime"
+version = "0.0.0"
+description = "Runtime dependencies for the paper-studio-summarize skill: the MinerU OCR CLI, resolved in-repo via uv (no global/manual install). Run tools with `uv run --project <skill-dir> mineru …`."
+requires-python = ">=3.10"
+dependencies = [
+    "mineru[core]",
+]
+
+# Deps-only project: uv manages a project-local .venv but does not build/install
+# this directory itself, so no build backend is required.
+[tool.uv]
+package = false

@@ -20,10 +20,13 @@
 # pdftotext are both local), so no upload consent is needed (safe for
 # under-review / confidential manuscripts).
 #
-# Requires the `mineru` CLI (NOT installed by this script):
-#   uv tool install "mineru[core]"
-# The first run downloads model weights (several GB) automatically and is slow.
-# Also requires poppler's `pdftotext` (same package as `pdfinfo`).
+# MinerU is resolved PATH-first: an already-installed `mineru` is used as-is;
+# otherwise it is resolved in-repo via uv — declared in this skill's pyproject.toml
+# (pinned by uv.lock) and run as `uv run --project <skill> mineru …`, with no
+# manual/global install (the first `uv run` auto-syncs a project-local .venv).
+# Either way MinerU's first run downloads model weights (several GB), so it is
+# slow. Requires poppler's `pdftotext` plus a mineru source (`mineru` or `uv`) on
+# PATH — supplied by scripts/preflight.sh (PATH or the bundled flake).
 
 set -euo pipefail
 
@@ -37,20 +40,33 @@ OUT=$2
 
 [[ -f "$PDF" ]] || { echo "error: PDF not found: $PDF" >&2; exit 1; }
 
-if ! command -v mineru >/dev/null; then
-  cat >&2 <<'EOF'
-error: `mineru` is not installed — this skill requires it and does not fall back.
+SKILL_DIR="$(cd "$(dirname "$0")/.." && pwd)"
 
-Set it up once with uv:
+# This worker assumes its runtime env is already resolved — launch it through
+# scripts/preflight.sh, which provides poppler + (uv or mineru+python3) from PATH
+# or the bundled flake. Guard poppler anyway so a direct call fails with a pointer.
+command -v pdftotext >/dev/null || { echo "error: pdftotext not found (poppler) — launch via scripts/preflight.sh" >&2; exit 1; }
 
-    uv tool install "mineru[core]"
-
-Then re-run. The first run downloads model weights (several GB).
-EOF
-  exit 1
+# Resolve MinerU PATH-first: use an already-installed `mineru` if present (no
+# reason to ignore it), otherwise resolve it in-repo via uv, which auto-syncs a
+# project-local .venv from pyproject.toml / uv.lock on first use.
+if command -v mineru >/dev/null; then
+  MINERU=(mineru)
+elif command -v uv >/dev/null; then
+  MINERU=(uv run --project "$SKILL_DIR" mineru)
+else
+  echo "error: need 'mineru' or 'uv' on PATH — launch via scripts/preflight.sh" >&2; exit 1
 fi
-command -v python3 >/dev/null || { echo "error: python3 not found" >&2; exit 1; }
-command -v pdftotext >/dev/null || { echo "error: pdftotext not found (install poppler)" >&2; exit 1; }
+
+# The converter is stdlib-only, so any python3 runs it; prefer one on PATH, else
+# borrow uv's project interpreter.
+if command -v python3 >/dev/null; then
+  PY=(python3)
+elif command -v uv >/dev/null; then
+  PY=(uv run --project "$SKILL_DIR" python)
+else
+  echo "error: need 'python3' or 'uv' on PATH — launch via scripts/preflight.sh" >&2; exit 1
+fi
 
 # Choose the reading method from whether the PDF has a usable text layer. A
 # born-digital PDF (essentially every CS paper) is read in text mode so the body
@@ -70,8 +86,8 @@ fi
 TMP=$(mktemp -d "${TMPDIR:-/tmp}/paper-studio-mineru.XXXXXX")
 trap 'rm -rf "$TMP"' EXIT
 
-echo "running MinerU (-b pipeline -m $METHOD; first run downloads models and can take a while)..." >&2
-mineru -p "$PDF" -o "$TMP/out" -b pipeline -m "$METHOD"
+echo "running MinerU (-b pipeline -m $METHOD; first run downloads models — slow; +venv sync if resolved via uv)..." >&2
+"${MINERU[@]}" -p "$PDF" -o "$TMP/out" -b pipeline -m "$METHOD"
 
 MIDDLE=$(find "$TMP/out" -name '*_middle.json' -print | head -1)
 if [[ -z "$MIDDLE" ]]; then
@@ -80,5 +96,5 @@ if [[ -z "$MIDDLE" ]]; then
   exit 1
 fi
 
-python3 "$(cd "$(dirname "$0")" && pwd)/mineru_to_paper_md.py" \
+"${PY[@]}" "$SKILL_DIR/scripts/mineru_to_paper_md.py" \
   "$(dirname "$MIDDLE")" "$OUT" "$PDF"
