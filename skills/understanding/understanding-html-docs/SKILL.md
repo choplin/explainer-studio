@@ -39,10 +39,23 @@ directory):
 - **Self-contained and static-deployable.** The output is one or more HTML files
   that open with no server. `base.css`/`base.js` are local files with no network
   dependency — copy them next to the HTML, never hot-link them.
-- **Online is fine for the context layer.** A consuming skill may pull a heavy
-  third-party library it genuinely needs (e.g. a diff renderer, a diagram engine)
-  from a CDN. Keep that in the consumer's own markup; the base stays CDN-free so
-  the substrate always works offline.
+- **Base owns design; the consuming skill owns content.** This base is an
+  *opt-in component library* — it owns the visual language, the interaction kit,
+  and the wiring of any rendering engine a document needs (including a diagram
+  engine's palette hook); a consuming skill defines only what the document says
+  and what it means (e.g. a domain-specific risk axis). The full rationale — the
+  three-tier component model (foundation / pure-CSS UI + PE kit / heavy opt-in
+  components) and the promotion criterion — is recorded in the design ADR
+  `docs/2026-07-10-html-docs-component-library-design.md` (my-agent-skills repo).
+  *(Heavy renderers such as diff2html/mermaid still live in the consumer's markup
+  today; moving them into base opt-in components under `assets/components/` is
+  tracked as follow-up implementation.)*
+- **The substrate is offline; heavy components assume an online viewer.** The
+  foundation, color model, and PE kit (`base.css`/`base.js`) render with no
+  network — copy them next to the HTML, never hot-link them. A heavy component
+  that renders via a third-party engine (a diff renderer, a diagram engine) pulls
+  it version-pinned from a CDN by default (vendoring is the offline opt-in); only
+  that rendering needs the network. The base substrate itself stays CDN-free.
 - **Color carries one meaning.** The model is two disjoint layers — never blur
   them, and never introduce a third ad-hoc color; prefer prose over a new hue.
   - **Semantic** (meaning): callout variants (`note`/`tip`/`warn`/`danger`/`key`)
