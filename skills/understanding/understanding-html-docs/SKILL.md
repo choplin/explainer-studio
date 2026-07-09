@@ -125,6 +125,30 @@ Foundation is automatic from element selectors (`body`, `main`, `h1`–`h3`, `p`
 PE classes (`.progress`, `.theme-btn`, `.fab`, `.toc-backdrop`, `.toc-panel`) are
 injected/toggled by `base.js`; author markup does not use them directly.
 
+## Opt-in components (Tier 2)
+
+The foundation and the class catalog above are the always-present layers (they
+ship in `base.css`/`base.js` and cost nothing to include). A document that needs
+a heavy renderer — a diff viewer, a diagram engine — pulls in an **opt-in
+component** instead of re-deriving the integration. Each lives in its own bundle
+under `assets/components/<name>/` and is copied **only by a consumer that uses
+it**, so a document that renders no diffs never ships diff2html. See the design
+rationale for the tier model: `docs/2026-07-10-html-docs-component-library-design.md`.
+
+| Component | Renders | Third-party engine (CDN by default) |
+|-----------|---------|-------------------------------------|
+| `components/diff/` | git diffs (`pre.diff-source` + `div.diff-render` pairs, unified↔side-by-side) | diff2html v3 |
+| `components/diagram/` | mermaid diagrams (`pre.mermaid`) | mermaid v11 |
+
+Each bundle carries its own CSS/JS plus an **`include.md`** that is the source of
+truth for wiring it: the CDN tags (version-pinned; vendor locally for the offline
+opt-in), the markup contract, and the escaping/validity rules the engine needs.
+To use a component, follow its `include.md` — copy-mode (link/`src` the files) or
+inline-mode (paste them into `<style>`/`<script>`, keeping only the CDN engine
+external). These components own *how* their artifact renders; the consuming skill
+owns *what* it shows and what it means (e.g. a risk/change color axis). The base
+substrate stays offline; only a Tier 2 component's rendering needs the network.
+
 ## Gotchas
 
 - **Copy, don't reference.** The assets must be copied into each output so the

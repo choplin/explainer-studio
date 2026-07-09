@@ -3,15 +3,24 @@
   explain-diff template.
   Replace every {{PLACEHOLDER}} and the example blocks with generated content.
 
-  Design foundation comes from the understanding-html-docs skill: paste the full
-  contents of its assets/base.css into the <style id="html-docs-base"> element below,
-  verbatim (see SKILL.md "Generate the HTML"). The <style id="explain-diff">
-  block is explain-diff's own context layer (risk/change axes, chunk cards,
-  diff2html tweaks) — keep it. Keep the diff2html CDN links, the mermaid init,
-  and the two scripts at the bottom of <body>.
+  This document is assembled from the understanding-html-docs design system plus
+  explain-diff's own content layer. The design-system pieces are pasted in from
+  their source verbatim — they are NOT hand-authored here (edit the source or the
+  component instead, so the shared system does not drift):
+    <style id="html-docs-base">      <- understanding-html-docs/assets/base.css
+    <style id="diff-component">       <- assets/components/diff/diff.css       (opt-in: diffs)
+    <style id="diagram-component">    <- assets/components/diagram/diagram.css (opt-in: diagrams)
+    diff render <script>              <- assets/components/diff/diff.js
+    mermaid init <script type=module> <- assets/components/diagram/diagram.js
+  See each component's include.md (understanding-html-docs/assets/components/) and
+  SKILL.md "Generate the HTML". The <style id="explain-diff"> block is the ONLY
+  styling explain-diff authors itself — its risk/change semantic axes and its
+  chunk/review-plan components. The read-progress <script> at the bottom is
+  likewise explain-diff-specific and stays here.
 
-  Single-file by design: base.css is inlined (not linked) so the output stays
-  one self-contained file. Only diff2html and mermaid load from a CDN.
+  Single-file by design: every stylesheet/script is inlined so the output stays
+  one self-contained file. Only the diff2html and mermaid ENGINES load from a CDN
+  (vendor them for full offline — see the components' include.md).
   Component markup to copy: see the commented examples inside <main>.
 -->
 <html lang="{{LANG}}">
@@ -19,9 +28,13 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>{{TITLE}}</title>
+<!-- diff2html engine (opt-in diff component) — see components/diff/include.md.
+     Omit these two tags if the document has no diffs. -->
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/diff2html@3/bundles/css/diff2html.min.css">
 <script src="https://cdn.jsdelivr.net/npm/diff2html@3/bundles/js/diff2html-ui.min.js"></script>
 <style id="html-docs-base">/* {{BASE_CSS}}: paste the entire contents of understanding-html-docs/assets/base.css here, unmodified. */</style>
+<style id="diff-component">/* {{DIFF_CSS}}: paste understanding-html-docs/assets/components/diff/diff.css here, unmodified. Opt-in — omit (with the diff2html tags above) if the document has no diffs. */</style>
+<style id="diagram-component">/* {{DIAGRAM_CSS}}: paste understanding-html-docs/assets/components/diagram/diagram.css here, unmodified. Opt-in — omit if the document has no diagrams. */</style>
 <style id="explain-diff">
   /* explain-diff context layer over understanding-html-docs. Two axes layered on top
      of the base's semantic/categorical color model:
@@ -104,34 +117,20 @@
   article.chunk.reviewed { opacity: 0.5; transition: opacity 0.15s; }
   article.chunk.reviewed:hover, article.chunk.reviewed:focus-within { opacity: 1; }
 
-  /* --- diff rendering (diff2html) --- */
-  /* base.css styles all <table> cells (padding, borders, min-width) — that leaks
-     into diff2html's <table>, whose absolutely-positioned line-number cells
-     assume zero cell padding. Reset the layout bits; do NOT touch background
-     (it drives d2h-ins/d2h-del row colors). */
-  .d2h-diff-table { margin: 0; min-width: 0; }
-  .d2h-diff-table th, .d2h-diff-table td { border: 0; padding: 0; }
-  .diff-render { margin-top: 0.5rem; }
-  .d2h-wrapper { font-size: 0.8125rem; }
-  .d2h-file-header { font-size: 0.8125rem; }
-  .diff-format-toggle button { cursor: pointer; width: auto; display: inline-block; margin-right: 0.5rem; padding: 0.25rem 0.875rem; font-size: 0.8125rem; background: var(--card); color: var(--fg); border: 1px solid var(--line); border-radius: 999px; }
-  .diff-format-toggle button:hover { border-color: var(--accent); }
+  /* diff2html presentation tweaks live in the diff component
+     (components/diff/diff.css, pasted into <style id="diff-component"> above);
+     the pre.mermaid tweak lives in the diagram component
+     (components/diagram/diagram.css, pasted into <style id="diagram-component">). */
 
   /* --- review points --- */
   .review-point { border-left: 4px solid var(--accent); padding-left: 1rem; margin-bottom: 1.5rem; }
 
   details > summary { cursor: pointer; }
-  pre.mermaid { background: transparent; text-align: center; }
 </style>
-<script type="module">
-  import mermaid from "https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.esm.min.mjs";
-  // Resolve the theme the same way base.css does: an explicit .theme-* class
-  // wins, otherwise follow the OS.
-  const dark = document.documentElement.classList.contains("theme-dark")
-    || (!document.documentElement.classList.contains("theme-light")
-        && window.matchMedia("(prefers-color-scheme: dark)").matches);
-  mermaid.initialize({ startOnLoad: true, theme: dark ? "dark" : "neutral" });
-</script>
+<!-- mermaid init (opt-in diagram component). Paste understanding-html-docs/
+     assets/components/diagram/diagram.js here verbatim — it imports the mermaid
+     ENGINE from a CDN. Omit this whole block if the document has no diagrams. -->
+<script type="module">/* {{DIAGRAM_JS}}: paste components/diagram/diagram.js here, unmodified. */</script>
 </head>
 <body>
 <main class="container">
@@ -278,32 +277,10 @@ flowchart LR
 
 </main>
 
-<script>
-  // Renders every <pre class="diff-source"> + <div class="diff-render"> pair
-  // with diff2html. Keep as is.
-  document.addEventListener("DOMContentLoaded", () => {
-    const dark = document.documentElement.classList.contains("theme-dark")
-      || (!document.documentElement.classList.contains("theme-light")
-          && window.matchMedia("(prefers-color-scheme: dark)").matches);
-    const render = (format) => {
-      document.querySelectorAll(".diff-render").forEach((el) => {
-        const src = el.previousElementSibling;
-        if (!src || !src.classList.contains("diff-source")) return;
-        el.innerHTML = "";
-        new Diff2HtmlUI(el, src.textContent, {
-          drawFileList: false,
-          matching: "lines",
-          outputFormat: format,
-          highlight: true,
-          colorScheme: dark ? "dark" : "light",
-        }).draw();
-      });
-    };
-    render("line-by-line");
-    document.querySelectorAll("[data-diff-format]").forEach((btn) =>
-      btn.addEventListener("click", () => render(btn.dataset.diffFormat)));
-  });
-</script>
+<!-- diff render (opt-in diff component). Paste understanding-html-docs/assets/
+     components/diff/diff.js here verbatim. Omit this block (and the diff2html
+     tags in <head>) if the document has no diffs. -->
+<script>/* {{DIFF_JS}}: paste components/diff/diff.js here, unmodified. */</script>
 <script>
   // Read-progress: persist per-chunk "reviewed" state in localStorage and keep
   // the review-plan counter in sync. Keyed by pathname + chunk id so the same

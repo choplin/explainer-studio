@@ -78,32 +78,38 @@ with a rough time estimate. This is the first thing the reviewer sees.
 ### 3. Generate the HTML
 
 Copy `assets/template.html` (resolve relative to this skill's installed
-directory) and replace the placeholders. The document's design foundation is the
-shared `understanding-html-docs` skill; keep the output a single self-contained file
-by **inlining** that base rather than linking it:
+directory) and replace the placeholders. The document is assembled from the
+`understanding-html-docs` design system plus this skill's own content layer, and
+stays a single self-contained file by **inlining** each design-system piece from
+its source rather than linking it. Paste these in verbatim — never hand-tune them
+per document (edit the source or the component instead, so the shared system does
+not drift):
 
-- Read `assets/base.css` from the `understanding-html-docs` skill (resolve relative to
-  *its* installed directory) and paste its entire contents, unmodified, into the
-  `<style id="html-docs-base">` element. This is the typography, color model, and base
-  components; the `<style id="explain-diff">` block right after it is this skill's
-  own context layer (risk/change axes, chunk cards, diff2html tweaks) — keep it.
+- `<style id="html-docs-base">` ← the full contents of `assets/base.css` from the
+  `understanding-html-docs` skill (typography, color model, base components).
+- The **`diff` opt-in component** (`understanding-html-docs/assets/components/diff/`):
+  paste `diff.css` into `<style id="diff-component">` and `diff.js` into the diff
+  render `<script>`, and keep the two diff2html CDN tags in `<head>`. Follow
+  `components/diff/include.md` for the markup contract and the escaping /
+  valid-unified-diff rules. Omit all of this if the document has no diffs.
+- The **`diagram` opt-in component** (`understanding-html-docs/assets/components/diagram/`):
+  paste `diagram.css` into `<style id="diagram-component">` and `diagram.js` into
+  the mermaid init `<script type="module">`. Follow `components/diagram/include.md`
+  for the markup contract and the palette hook. Omit if the document has no diagrams.
+- The `<style id="explain-diff">` block is the **only** styling authored here —
+  this skill's risk/change semantic axes and chunk/review-plan components. Keep it.
 - Do **not** inline `base.js`: the walkthrough puts multiple `article.chunk`
   elements directly under `main`, which the base kit's `main article` assumption
   would mis-target. The base CSS's `color-scheme: light dark` already gives
-  automatic light/dark; this skill's own scripts (diff render, read-progress)
-  own the interactivity.
+  automatic light/dark; this skill's own read-progress script (kept in the
+  template) plus the diff/diagram components own the interactivity.
 
-Keep the diff2html CDN links and the mermaid init in `<head>`, and the two
-scripts at the bottom of `<body>`, unchanged. The template's commented
-`<article class="chunk">` / `.review-point` blocks show the exact component
-markup to repeat.
-
-Diff excerpts are not hand-styled: place each one as a **valid unified diff**
-(keeping the `diff --git` / `---` / `+++` file headers and intact `@@` hunks),
-HTML-escaped, inside `<pre class="diff-source" hidden>`, immediately followed by
-an empty `<div class="diff-render"></div>`. The template's script renders every
-such pair with diff2html (GitHub-style view, syntax highlighting, unified ↔
-side-by-side toggle) at load time.
+The template's commented `<article class="chunk">` / `.review-point` blocks show
+the exact component markup to repeat. For diff and diagram markup, follow the two
+components' `include.md` — e.g. each diff excerpt is a valid unified diff,
+HTML-escaped, in `<pre class="diff-source" hidden>` immediately followed by an
+empty `<div class="diff-render"></div>`, which the diff component renders at load
+time (GitHub-style view, syntax highlighting, unified ↔ side-by-side toggle).
 
 ### Color language
 
@@ -121,10 +127,12 @@ them, and do not invent other colors:
   `.ba-before`/`.ba-after` cards and the `col-before`/`col-after` table columns.
   Never encode before/after in a risk hue, or the two axes blur.
 
-The mermaid `classDef`s (`added`/`removed`/`changed`) reuse the risk palette by
-change role. The diff viewer's own red/green (removed/added) stays inside the
-collapsed diff and is not a third page-level system. When these two axes cannot
-express something, prefer prose over inventing a new color.
+The mermaid `classDef`s assign the diagram component's base-owned palette hook
+(see `components/diagram/include.md`) to change role — added=green, removed=red,
+changed=amber — so diagrams speak the same risk language. The diff viewer's own
+red/green (removed/added) stays inside the collapsed diff and is not a third
+page-level system. When these two axes cannot express something, prefer prose
+over inventing a new color.
 
 Section-by-section rules:
 
@@ -180,25 +188,23 @@ unmarked. Over-marking destroys the signal, so when in doubt, leave it unmarked.
 
 ## Gotchas
 
-- **HTML-escape all diff and code content** (`&` → `&amp;`, `<` → `&lt;`,
-  `>` → `&gt;`) inside `pre.diff-source` and inline code. Raw generics
-  (`List<Foo>`) or arrows in code silently swallow the rest of the document
-  when unescaped. The browser un-escapes `textContent` before diff2html parses
-  it, so escaping never corrupts the rendered diff.
-- **Keep every excerpt a parseable unified diff.** diff2html renders nothing
-  (or a broken view) on malformed input. When shortening an excerpt, drop
-  *whole hunks* — never delete lines inside a hunk, which invalidates the `@@`
-  line counts. Always retain the file headers so file names appear in the view.
+- **Diff and diagram rules live in their components.** HTML-escaping diff/code
+  content and keeping every excerpt a parseable unified diff are covered by
+  `understanding-html-docs/assets/components/diff/include.md`; the mermaid markup
+  and palette hook by `components/diagram/include.md`. Follow them — they are the
+  source of truth, not restated here. (Inline code in the prose still needs the
+  same `&`/`<`/`>` escaping to avoid swallowing the document.)
 - **Do not inline the full raw diff for large changes.** The document is an
   explanation, not a mirror of the diff — the PR itself remains the source of
   truth for exact content. Cap per-chunk excerpts and say what was omitted.
-- The document assumes an online viewer: diff2html and mermaid load from CDN.
-  base.css is inlined (not a CDN dependency), so the styling itself works
-  offline; only the diff/diagram rendering needs the network.
-- **Inline base.css verbatim.** Paste `understanding-html-docs/assets/base.css` into
-  `<style id="html-docs-base">` unchanged — do not hand-tune it per document (edit the
-  context layer or the base skill instead). A drifted copy diverges from the
-  shared design system across future regenerations.
+- **The substrate is offline; the diff/diagram engines are not.** base.css is
+  inlined (not a CDN dependency), so typography/color/layout work offline; only
+  the diff2html and mermaid rendering needs the network (vendor them per each
+  component's include.md for full offline).
+- **Inline the design-system pieces verbatim.** Paste `base.css` and each opt-in
+  component's `.css`/`.js` into their `<style>`/`<script>` slots unchanged — do
+  not hand-tune them per document (edit the base skill or the component instead).
+  A drifted copy diverges from the shared design system across future regenerations.
 
 ## Success criteria
 
@@ -220,6 +226,10 @@ Verify before reporting completion; fix and re-check on any No:
 - [ ] Every `pre.diff-source` starts with a `diff --git` (or `---`/`+++`) file
       header and each is immediately followed by an empty `div.diff-render`.
 - [ ] `<style id="html-docs-base">` holds the full, unmodified contents of
-      `understanding-html-docs/assets/base.css` (not the placeholder comment).
-- [ ] The file is a single self-contained HTML file (base.css inlined; only
-      diff2html and mermaid are external), and opens standalone in a browser.
+      `understanding-html-docs/assets/base.css`, and — when diffs/diagrams are
+      present — `<style id="diff-component">` / `<style id="diagram-component">`
+      and the diff-render / mermaid-init `<script>` slots hold the unmodified
+      component files (not the placeholder comments).
+- [ ] The file is a single self-contained HTML file (base.css and any used
+      component assets inlined; only the diff2html and mermaid engines are
+      external), and opens standalone in a browser.
