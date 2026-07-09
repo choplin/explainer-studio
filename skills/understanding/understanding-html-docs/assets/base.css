@@ -132,6 +132,47 @@ th { background: var(--card); }
 }
 .chip.accent { color: var(--accent); border-color: var(--accent); }
 
+/* --- kicker: an eyebrow/label above a heading; uses the categorical hue.
+   The negative bottom margin pulls the following heading up against it. --- */
+.kicker { color: var(--cat); font-size: .82rem; font-weight: 700; letter-spacing: .06em; margin: 1.2rem 0 -0.4rem; }
+
+/* --- lede: an introductory/standfirst paragraph, larger and muted. --- */
+.lede { font-size: 1.05rem; color: var(--muted); line-height: 2; }
+
+/* --- keypoints: a "key takeaways" box tinted by the categorical hue.
+   Author an <h2>/<h3> title plus a <ul> inside. --- */
+.keypoints {
+  background: var(--cat-soft); border: 1px solid var(--line); border-left: 4px solid var(--cat);
+  border-radius: 12px; padding: .4rem 1.1rem .7rem; margin: 1.4rem 0;
+}
+.keypoints h2 { font-size: .95rem; border: 0; margin: .7rem 0 .2rem; color: var(--cat); }
+.keypoints ul { margin: .3rem 0; padding-left: 1.2rem; }
+.keypoints li { margin: .3rem 0; }
+
+/* --- card / card-grid: a generic bordered content block, and a responsive grid
+   that lays a set of them out. Neutral containers — author any content inside;
+   add a `hue-N` for a categorical tint. --- */
+.card { background: var(--card); border: 1px solid var(--line); border-radius: 12px; padding: 1rem 1.1rem; }
+.card-grid { display: grid; gap: .8rem; margin: 1.2rem 0; grid-template-columns: repeat(auto-fit, minmax(14rem, 1fr)); }
+
+/* --- badge: a small FILLED status/count marker. Distinct from .chip (an
+   outlined muted pill): a badge is solid-filled for emphasis. Base = accent;
+   a consumer may add semantic-colored variants in its own stylesheet. --- */
+.badge {
+  display: inline-flex; align-items: center; gap: .25em; font-size: .72rem; font-weight: 600;
+  line-height: 1.4; color: #fff; background: var(--accent);
+  border-radius: 999px; padding: .05rem .5rem; white-space: nowrap;
+}
+
+/* --- aside: a quiet supplementary/tangential note. Lighter than a .callout
+   (no icon, no semantic hue) and not a quotation (blockquote) — supporting
+   context set slightly apart. Class-based so it never captures a bare <aside>
+   used for layout (e.g. a sidebar index). --- */
+.aside {
+  background: var(--card); border: 1px solid var(--line); border-radius: 8px;
+  padding: .5rem .9rem; margin: 1.2rem 0; font-size: .9rem; color: var(--muted);
+}
+
 /* ==========================================================================
    Progressive enhancement (base.js). Everything below is injected/toggled by
    JS; the page is fully readable without it. Keep these class names in sync

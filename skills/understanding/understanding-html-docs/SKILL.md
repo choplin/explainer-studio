@@ -28,7 +28,8 @@ directory):
 
 - **`base.css`** — the design system: foundation (reset, typography, layout,
   base elements, tables), the color model, callouts, pullquote, chips, and the
-  styles the PE kit toggles.
+  Tier 1 reading-UI components (kicker, lede, keypoints, card/card-grid, badge,
+  aside), plus the styles the PE kit toggles.
 - **`base.js`** — the progressive-enhancement kit: theme toggle (auto/light/dark),
   reading-progress bar, table of contents with scroll-spy, and back-to-top. All
   vanilla, no dependencies, no network. Every feature degrades to nothing if the
@@ -119,6 +120,12 @@ Foundation is automatic from element selectors (`body`, `main`, `h1`–`h3`, `p`
 | `.callout .label` | Bold colored lead-in inside a callout |
 | `.pullquote` | Emphatic single line; quote marks in the categorical hue |
 | `.chip` | Small muted label; `.chip.accent` for an accented one |
+| `.kicker` | Eyebrow/label above a heading, in the categorical hue |
+| `.lede` | Introductory standfirst paragraph (larger, muted) |
+| `.keypoints` | "Key takeaways" box (categorical hue); author an `h2`/`h3` + `ul` |
+| `.card` / `.card-grid` | Bordered content block, and a responsive grid of them |
+| `.badge` | Small filled status/count marker (accent); the filled counterpart to `.chip` |
+| `.aside` | Quiet supplementary/tangential note (no icon, no semantic hue) |
 | `.tablewrap` > `table` | Horizontally scrollable table wrapper |
 | `.hue-1` … `.hue-6` | Categorical hue (sets `--cat`/`--cat-soft`) |
 

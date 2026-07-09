@@ -14,15 +14,10 @@
 
 /* colored chapter rule at the top of the article, tinted by the page's hue */
 article { border-top: 3px solid var(--cat); padding-top: .6rem; }
-.kicker { color: var(--cat); font-size: .82rem; font-weight: 700; letter-spacing: .06em; margin: 1.2rem 0 -0.4rem; }
-.lede { font-size: 1.05rem; color: var(--muted); line-height: 2; }
-.keypoints {
-  background: var(--cat-soft); border: 1px solid var(--line); border-left: 4px solid var(--cat);
-  border-radius: 12px; padding: .4rem 1.1rem .7rem; margin: 1.4rem 0;
-}
-.keypoints h2 { font-size: .95rem; border: 0; margin: .7rem 0 .2rem; color: var(--cat); }
-.keypoints ul { margin: .3rem 0; padding-left: 1.2rem; }
-.keypoints li { margin: .3rem 0; }
+
+/* kicker, lede, and keypoints are Tier 1 UI components owned by base.css.
+   Authored here via those classes; the .hero .lede override below is the only
+   pdf-studio-specific tweak. */
 
 /* page anchor: the [pNN] link back to the source PDF, kept inline */
 .p {
