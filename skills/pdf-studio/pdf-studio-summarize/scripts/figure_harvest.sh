@@ -19,10 +19,11 @@
 # the command sandbox blocks (semaphore limit -> "Operation not permitted"). Run
 # this WITHOUT the sandbox. It is local-only, so that is safe.
 #
-# Requires the `mineru` CLI (NOT installed by this script) and poppler's
-# `pdfinfo`. If `mineru` is missing this exits non-zero with the setup command;
-# the caller should relay it and continue without figures (figure harvest is an
-# enhancement, not a hard dependency of the pipeline).
+# Launch through scripts/preflight.sh, which resolves the runtime env (poppler +
+# a MinerU source, from PATH or the bundled flake). MinerU is resolved PATH-first
+# here: an installed `mineru` is used as-is, else `uv run --project` provisions it
+# from pyproject.toml / uv.lock (no manual/global install; first run auto-syncs a
+# project-local .venv and downloads model weights, several GB — slow).
 
 set -euo pipefail
 
@@ -38,18 +39,32 @@ END=${4:-}
 
 [[ -f "$PDF" ]] || { echo "error: PDF not found: $PDF" >&2; exit 1; }
 
-if ! command -v mineru >/dev/null; then
-  cat >&2 <<'EOF'
-mineru not installed — skipping figure harvest (the pipeline continues without
-extracted figure crops). To enable it, install MinerU once:
+SKILL_DIR="$(cd "$(dirname "$0")/.." && pwd)"
 
-    uv tool install "mineru[core]"
+# This worker assumes its runtime env is already resolved — launch it through
+# scripts/preflight.sh. Guard poppler anyway so a direct call fails with a pointer.
+command -v pdftotext >/dev/null || { echo "error: pdftotext not found (poppler) — launch via scripts/preflight.sh" >&2; exit 1; }
 
-The first run then downloads model weights (several GB).
-EOF
-  exit 3
+# Resolve MinerU PATH-first: use an already-installed `mineru` if present,
+# otherwise resolve it in-repo via uv (auto-syncs a project-local .venv from
+# pyproject.toml / uv.lock on first use).
+if command -v mineru >/dev/null; then
+  MINERU=(mineru)
+elif command -v uv >/dev/null; then
+  MINERU=(uv run --project "$SKILL_DIR" mineru)
+else
+  echo "error: need 'mineru' or 'uv' on PATH — launch via scripts/preflight.sh" >&2; exit 1
 fi
-command -v python3 >/dev/null || { echo "error: python3 not found" >&2; exit 1; }
+
+# The converter is stdlib-only, so any python3 runs it; prefer one on PATH, else
+# borrow uv's project interpreter.
+if command -v python3 >/dev/null; then
+  PY=(python3)
+elif command -v uv >/dev/null; then
+  PY=(uv run --project "$SKILL_DIR" python)
+else
+  echo "error: need 'python3' or 'uv' on PATH — launch via scripts/preflight.sh" >&2; exit 1
+fi
 
 # Pick the reading method from the text layer (born-digital -> txt, scanned ->
 # ocr). This only affects MinerU's text recognition, not the crops, but keeps
@@ -65,8 +80,8 @@ RANGE=(-s "$((START - 1))")
 TMP=$(mktemp -d "${TMPDIR:-/tmp}/pdf-studio-mineru.XXXXXX")
 trap 'rm -rf "$TMP"' EXIT
 
-echo "running MinerU (-b pipeline -m $METHOD; first run downloads models)..." >&2
-mineru -p "$PDF" -o "$TMP/out" -b pipeline -m "$METHOD" "${RANGE[@]}"
+echo "running MinerU (-b pipeline -m $METHOD; first run downloads models — slow; +venv sync if resolved via uv)..." >&2
+"${MINERU[@]}" -p "$PDF" -o "$TMP/out" -b pipeline -m "$METHOD" "${RANGE[@]}"
 
 MIDDLE=$(find "$TMP/out" -name '*_middle.json' -print | head -1)
 if [[ -z "$MIDDLE" ]]; then
@@ -74,5 +89,5 @@ if [[ -z "$MIDDLE" ]]; then
   exit 1
 fi
 
-python3 "$(cd "$(dirname "$0")" && pwd)/mineru_figures.py" \
+"${PY[@]}" "$SKILL_DIR/scripts/mineru_figures.py" \
   "$(dirname "$MIDDLE")" "$OUT" "$START"

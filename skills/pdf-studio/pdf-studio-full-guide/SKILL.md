@@ -37,7 +37,7 @@ This is the one interactive gate. Because the full run can fan out to many worke
 3. **Audio length** — *default ~10 min each* ([[pdf-studio-audio-dialogue]]'s default). Accept a per-target length or a size (short / standard / deep).
 4. **Collect the source PDF into the work dir at the end?** — deferred to Finalize; [[pdf-studio-summarize]] normally asks this. Note it here so it is not asked again mid-run.
 5. **Text source** — *default: visual reading* (any PDF). Only if the born-digital probe passes ([[pdf-studio-summarize]]'s `text_layer.sh --probe`), offer the **text-layer** option (more faithful for code / commands / numbers / console output, born-digital ebooks only). This is [[pdf-studio-summarize]]'s Step 0 question, asked here so it is not asked again.
-6. **Figure harvest** — runs during Step 1 if `mineru` is available (crops diagrams/plots into `ocr/figures/`; a first run downloads models and runs unsandboxed). Default on; note it here and let the user skip it.
+6. **Figure harvest** — runs during Step 1 with its runtime resolved automatically by [[pdf-studio-summarize]]'s `preflight.sh` (poppler + MinerU from PATH/uv, else the bundled flake; crops diagrams/plots into `ocr/figures/`; a first run downloads models and runs unsandboxed). Default on; note it here and let the user skip it, and know it self-skips if the runtime is unresolvable.
 
 State the rough cost implication (e.g. "all 8 chapters + option C ≈ 8 deep-dive workers and 9 audio guides"). If the user names a target length or subset, honor it over the defaults.
 
