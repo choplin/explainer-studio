@@ -34,6 +34,7 @@ Use only when both exist: the source PDF, and a first-pass `outline.md` (or `rep
    - **Under Claude Code**, dispatch the `pdf-studio-pdf-detail` subagent so the reads stay out of this orchestrator's context (the subagent has no Bash tool).
    - **Otherwise**, apply the `pdf-studio-pdf-detail` skill inline.
    Pass in the call message only: the source (**visual mode** — the PDF absolute path and the resolved page range START–END, margins included; **text-layer mode** — the absolute path to `<WORK_DIR>/extract/text-<START>-<END>.md`, still noting the START–END range for anchors), the target section name/range, and the output path `<WORK_DIR>/reports/<section-slug>.md`. It returns only the file path and a one-line summary.
+5. **Coherence self-check — does it stand alone as a readable piece (no source re-read).** The worker wrote the report and returned only a one-line summary, so read the finished `<WORK_DIR>/reports/<section-slug>.md` back once and confirm it works as a self-contained read: top to bottom the explanation connects, every term or concept is introduced before it is used (nothing appears undefined), and a reader who opens only this file — without the overview or the source — can follow it. This is a light editorial pass on the produced report only: **do not re-read the source PDF** (the faithful re-read already happened in step 4) and do not reconcile against sibling reports. Fix small gaps inline (a one-line definition, a bridging sentence); if it already reads cleanly, leave it.
 
 ## Success criteria
 
@@ -42,3 +43,4 @@ Use only when both exist: the source PDF, and a first-pass `outline.md` (or `rep
 - [ ] The resolved page range fully contains the requested section (margins included; not cut off at an anchor).
 - [ ] `[pNN]` anchors are present so the detail remains traceable.
 - [ ] The output is a standalone file under `reports/` (a `<section>.md`, not `overview.md`), leaving the first-pass `reports/overview.md` untouched.
+- [ ] The report reads as a standalone piece: opening only that file, a reader can follow it (terms introduced before use, explanation connects) — a light coherence pass, not a source re-read.

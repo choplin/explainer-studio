@@ -113,7 +113,19 @@ Unlike Phases 1–2, this phase runs **inline** in the orchestrator. Its only in
 
 Figures aid the reports; they are not a checklist. Embed a harvested figure only where the prose actually discusses what it shows, and when you embed it, explain it (never a bare image). **Do not append a trailing figure list or force every crop into a report to "cover" it** — this is a book, not a paper, so referencing every figure is not required. Crops in `ocr/figures/` that no report naturally needs are fine to leave unreferenced. If you *do* want a figure that `figures.md` marks "⚠ Not extracted", render and crop its page first (`pdftoppm -f N -l N -singlefile -r 200 -png <pdf> <tmp>/pg`) before embedding it.
 
-### 2. Collect the source PDF (confirm first)
+### 2. Coherence self-check — does it read as one standalone piece (no source re-read)
+
+The overview is compressed from the stitched `outline.md`, and for large documents it is built by multi-level reduce (section → chapter → whole) — a path where a term's first-use definition or the granularity can silently drift between levels. Do one light editorial pass to catch that. This is **not** the paper-studio faithfulness sweep: **do not re-read the source PDF, and do not re-read the outline's body** — read only the finished `reports/overview.md`, using `outline.md` solely as a checklist of which sections should be present. It is a book, not a paper, so keep it light — fix what you find, don't manufacture work.
+
+Read the overview top to bottom as a first-time reader and check:
+- **Continuity** — the sections connect; there is no jump where the prose assumes a step the report never made.
+- **Terms defined before use** — every non-obvious term or concept is introduced where it first appears, not used cold and defined later (or never).
+- **Consistent granularity** — no section is a terse stub next to a deep one for no reason (a symptom of an uneven reduce).
+- **Self-contained** — a reader who opens only this file, without the source, can follow it.
+
+Fix issues inline (a one-line definition, a bridging sentence, a granularity trim). If it already reads cleanly, that is a valid outcome — note it and move on.
+
+### 3. Collect the source PDF (confirm first)
 
 To make the work dir a single self-contained folder, move the source PDF into it as `<WORK_DIR>/<name>.pdf` as the last step.
 
@@ -133,6 +145,7 @@ To make the work dir a single self-contained folder, move the source PDF into it
 - [ ] Every `extract/chunk-*.md` and `outline.md` carries `[pNN]` PDF-page anchors.
 - [ ] `outline.md` has no section duplicated across a former chunk boundary, and records where coverage stops.
 - [ ] `reports/overview.md` covers every top-level section present in `outline.md` (no section silently dropped).
+- [ ] `reports/overview.md` reads as one standalone piece: sections connect, non-obvious terms are defined at first use, and it is followable without the source (a light coherence pass, not a source-faithfulness sweep).
 - [ ] The body-start page was detected; front matter (TOC/preface) was not transcribed as content.
 - [ ] If the run was a partial page range, `reports/overview.md` states the covered range and the continuation point.
 - [ ] If the figure-harvest runtime resolved (via `preflight.sh` — PATH/uv/nix), `ocr/figures.md` exists and every figure a report embeds is explained in place (no bare image); unused crops may remain unreferenced (no exhaustive-coverage requirement). If the runtime was unresolvable, the manifest says figure harvest was skipped.
