@@ -11,10 +11,11 @@
 #
 # The heavier path (figure harvest) needs poppler (pdftotext/pdfinfo/pdftoppm)
 # plus a way to run MinerU and the stdlib converter. MinerU is resolved
-# PATH-first by that worker: an installed `mineru` is used as-is, else `uv`
-# provisions it from pyproject.toml / uv.lock. So the PATH is enough when poppler
-# is present AND either `uv` is there (it supplies both mineru and a python) OR
-# both `mineru` and `python3` are. Resolution order:
+# PATH-first by that worker: an installed `mineru` is used as-is, else
+# `uvx --from 'mineru[core]'` resolves it from PyPI into uv's shared tool cache.
+# So the PATH is enough when poppler is present AND either `uv` is there (it
+# supplies both mineru via uvx and a python via `uv run`) OR both `mineru` and
+# `python3` are. Resolution order:
 #   1. PATH already sufficient  -> exec the command directly;
 #   2. else, if a flake.lock is bundled and nix is available -> run inside `nix develop`;
 #   3. else -> fail with both setup options.

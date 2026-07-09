@@ -21,9 +21,11 @@
 #
 # Launch through scripts/preflight.sh, which resolves the runtime env (poppler +
 # a MinerU source, from PATH or the bundled flake). MinerU is resolved PATH-first
-# here: an installed `mineru` is used as-is, else `uv run --project` provisions it
-# from pyproject.toml / uv.lock (no manual/global install; first run auto-syncs a
-# project-local .venv and downloads model weights, several GB — slow).
+# here: an installed `mineru` is used as-is, else `uvx --from 'mineru[core]' mineru`
+# resolves it from PyPI into uv's shared tool cache (no manual/global install, no
+# per-skill lockfile; shared across skills that request the same spec; unpinned by
+# design — pin ad-hoc with `mineru[core]==<version>` if you need to; first run
+# syncs the tool env and downloads model weights, several GB — slow).
 
 set -euo pipefail
 
@@ -46,22 +48,22 @@ SKILL_DIR="$(cd "$(dirname "$0")/.." && pwd)"
 command -v pdftotext >/dev/null || { echo "error: pdftotext not found (poppler) — launch via scripts/preflight.sh" >&2; exit 1; }
 
 # Resolve MinerU PATH-first: use an already-installed `mineru` if present,
-# otherwise resolve it in-repo via uv (auto-syncs a project-local .venv from
-# pyproject.toml / uv.lock on first use).
+# otherwise run it ephemerally via uvx (resolves it from PyPI into uv's shared
+# tool cache on first use).
 if command -v mineru >/dev/null; then
   MINERU=(mineru)
 elif command -v uv >/dev/null; then
-  MINERU=(uv run --project "$SKILL_DIR" mineru)
+  MINERU=(uvx --from 'mineru[core]' mineru)
 else
   echo "error: need 'mineru' or 'uv' on PATH — launch via scripts/preflight.sh" >&2; exit 1
 fi
 
 # The converter is stdlib-only, so any python3 runs it; prefer one on PATH, else
-# borrow uv's project interpreter.
+# borrow an ephemeral interpreter from uv.
 if command -v python3 >/dev/null; then
   PY=(python3)
 elif command -v uv >/dev/null; then
-  PY=(uv run --project "$SKILL_DIR" python)
+  PY=(uv run python)
 else
   echo "error: need 'python3' or 'uv' on PATH — launch via scripts/preflight.sh" >&2; exit 1
 fi
@@ -80,7 +82,7 @@ RANGE=(-s "$((START - 1))")
 TMP=$(mktemp -d "${TMPDIR:-/tmp}/pdf-studio-mineru.XXXXXX")
 trap 'rm -rf "$TMP"' EXIT
 
-echo "running MinerU (-b pipeline -m $METHOD; first run downloads models — slow; +venv sync if resolved via uv)..." >&2
+echo "running MinerU (-b pipeline -m $METHOD; first run downloads models — slow; +tool-env sync if resolved via uvx)..." >&2
 "${MINERU[@]}" -p "$PDF" -o "$TMP/out" -b pipeline -m "$METHOD" "${RANGE[@]}"
 
 MIDDLE=$(find "$TMP/out" -name '*_middle.json' -print | head -1)

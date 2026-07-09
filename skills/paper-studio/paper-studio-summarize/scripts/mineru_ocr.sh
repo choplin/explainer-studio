@@ -21,12 +21,15 @@
 # under-review / confidential manuscripts).
 #
 # MinerU is resolved PATH-first: an already-installed `mineru` is used as-is;
-# otherwise it is resolved in-repo via uv — declared in this skill's pyproject.toml
-# (pinned by uv.lock) and run as `uv run --project <skill> mineru …`, with no
-# manual/global install (the first `uv run` auto-syncs a project-local .venv).
-# Either way MinerU's first run downloads model weights (several GB), so it is
-# slow. Requires poppler's `pdftotext` plus a mineru source (`mineru` or `uv`) on
-# PATH — supplied by scripts/preflight.sh (PATH or the bundled flake).
+# otherwise it is run ephemerally via `uvx --from 'mineru[core]' mineru`, which
+# resolves MinerU from PyPI into uv's shared tool cache (no manual/global install,
+# no per-skill pyproject/lockfile). The cache is keyed by the requirement spec, so
+# the environment is shared across skills that request the same spec. It is
+# unpinned by design (lightest convenient path); pin ad-hoc with
+# `mineru[core]==<version>` if you need reproducibility. Either way MinerU's first
+# run downloads model weights (several GB), so it is slow. Requires poppler's
+# `pdftotext` plus a mineru source (`mineru` or `uv`) on PATH — supplied by
+# scripts/preflight.sh (PATH or the bundled flake).
 
 set -euo pipefail
 
@@ -48,22 +51,22 @@ SKILL_DIR="$(cd "$(dirname "$0")/.." && pwd)"
 command -v pdftotext >/dev/null || { echo "error: pdftotext not found (poppler) — launch via scripts/preflight.sh" >&2; exit 1; }
 
 # Resolve MinerU PATH-first: use an already-installed `mineru` if present (no
-# reason to ignore it), otherwise resolve it in-repo via uv, which auto-syncs a
-# project-local .venv from pyproject.toml / uv.lock on first use.
+# reason to ignore it), otherwise run it ephemerally via uvx, which resolves it
+# from PyPI into uv's shared tool cache on first use.
 if command -v mineru >/dev/null; then
   MINERU=(mineru)
 elif command -v uv >/dev/null; then
-  MINERU=(uv run --project "$SKILL_DIR" mineru)
+  MINERU=(uvx --from 'mineru[core]' mineru)
 else
   echo "error: need 'mineru' or 'uv' on PATH — launch via scripts/preflight.sh" >&2; exit 1
 fi
 
 # The converter is stdlib-only, so any python3 runs it; prefer one on PATH, else
-# borrow uv's project interpreter.
+# borrow an ephemeral interpreter from uv.
 if command -v python3 >/dev/null; then
   PY=(python3)
 elif command -v uv >/dev/null; then
-  PY=(uv run --project "$SKILL_DIR" python)
+  PY=(uv run python)
 else
   echo "error: need 'python3' or 'uv' on PATH — launch via scripts/preflight.sh" >&2; exit 1
 fi
@@ -86,7 +89,7 @@ fi
 TMP=$(mktemp -d "${TMPDIR:-/tmp}/paper-studio-mineru.XXXXXX")
 trap 'rm -rf "$TMP"' EXIT
 
-echo "running MinerU (-b pipeline -m $METHOD; first run downloads models — slow; +venv sync if resolved via uv)..." >&2
+echo "running MinerU (-b pipeline -m $METHOD; first run downloads models — slow; +tool-env sync if resolved via uvx)..." >&2
 "${MINERU[@]}" -p "$PDF" -o "$TMP/out" -b pipeline -m "$METHOD"
 
 MIDDLE=$(find "$TMP/out" -name '*_middle.json' -print | head -1)
