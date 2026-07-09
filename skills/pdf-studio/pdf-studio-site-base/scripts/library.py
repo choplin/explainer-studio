@@ -24,8 +24,9 @@ Subcommands:
   public                        print the deploy root (<root>/public)
   init --project NAME [--title T] [--force]
                                 create the library and an empty index
-  add --slug S --title T [--desc D] --from DIR
+  add --slug S --title T [--desc D] --from DIR [--force]
                                 copy DIR into public/<S>/, record it, rebuild index
+                                (refuses to replace an existing slug without --force)
 """
 
 import argparse
@@ -257,6 +258,12 @@ def cmd_add(args):
         sys.exit("error: --from %s has no index.html (point it at a generate-site site/ dir)" % src)
 
     dest = public_dir() / args.slug
+    existing = dest.exists() or any(b["slug"] == args.slug for b in meta.get("books", []))
+    if existing and not args.force:
+        sys.exit(
+            "error: a book with slug %r is already in the library; re-adding replaces its "
+            "published files and index card in place. Pass --force to confirm the replace." % args.slug
+        )
     if dest.exists():
         shutil.rmtree(dest)
     shutil.copytree(src, dest)
@@ -302,6 +309,7 @@ def main():
     pa.add_argument("--title", required=True)
     pa.add_argument("--desc")
     pa.add_argument("--from", dest="src", required=True)
+    pa.add_argument("--force", action="store_true")
 
     args = ap.parse_args()
     if args.cmd == "path":

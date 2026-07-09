@@ -1,7 +1,7 @@
 ---
 name: pdf-studio-deploy-site
 description: This skill should be used when the user wants to publish an already-generated pdf-studio book site (a <WORK_DIR>/site/ dir) to the internet — adding it as a subpath to the shared Cloudflare Pages library set up by pdf-studio-initialize-site, then deploying so it is reachable (Access-protected) from a phone. Triggers on "サイトをデプロイして", "この本を公開して", "ホストして", "ネットで読めるようにして", "deploy the site", "publish this book", "put it online". Should NOT trigger for the one-time hosting setup (use pdf-studio-initialize-site first), for building the site (use pdf-studio-generate-site), for producing reports (use pdf-studio-summarize / pdf-studio-deep-dive), or for the audio guide (use pdf-studio-audio-dialogue / pdf-studio-audio-narrate).
-version: 0.2.0
+version: 0.3.0
 user-invocable: true
 ---
 
@@ -28,7 +28,7 @@ The inputs are a built `<WORK_DIR>/site/` and an already-initialized library. If
 Run wrangler **without the command sandbox** (`dangerouslyDisableSandbox: true`) — it needs the network. The `library.py` steps are local-only and need no special handling.
 
 1. **Decide the book's slug and card text.**
-   - `<slug>`: the URL subpath, lowercase `a-z0-9-`, derived from the work dir name. For a Japanese name, propose a romanized slug and confirm it. Reusing an existing slug **updates** that book in place (intended for re-deploying a regenerated site).
+   - `<slug>`: the URL subpath, lowercase `a-z0-9-`, derived from the work dir name. For a Japanese name, propose a romanized slug and confirm it. Reusing an existing slug **replaces** that already-published book in place — so `library.py add` refuses an existing slug unless `--force`. Check `library.py status` first; if the slug is already listed, confirm with the user that they mean to replace the published book before re-running with `--force`.
    - `<title>`: the book's display title (from `reports/overview.md`'s heading).
    - `<desc>`: one line for the library index card — compose a short blurb from the overview's opening (not a copied sentence).
 2. **Add the book to the library** (copies `site/` into `public/<slug>/`, records it, and rebuilds the library index):
@@ -36,6 +36,7 @@ Run wrangler **without the command sandbox** (`dangerouslyDisableSandbox: true`)
    python3 pdf-studio-site-base/scripts/library.py \
      add --slug <slug> --title "<title>" --desc "<desc>" --from "<WORK_DIR>/site"
    ```
+   Append `--force` **only** when deliberately replacing an existing slug, after the user confirmed the replace in step 1; without it, `add` stops rather than silently overwriting a published book.
 3. **Deploy the whole library** to the recorded project:
    ```sh
    PROJECT=$(python3 pdf-studio-site-base/scripts/library.py project)
@@ -49,12 +50,12 @@ Run wrangler **without the command sandbox** (`dangerouslyDisableSandbox: true`)
 - **`wrangler` needs the network — run it without the command sandbox** (`dangerouslyDisableSandbox: true`). Under the sandbox it fails with TLS/connection errors that look like auth problems.
 - **Deploy always targets the whole `public/`, never one book.** `wrangler pages deploy` replaces the project's entire content with the given directory, so deploying a single book's `site/` would wipe every other book. Always deploy the library root from `library.py public`. `library.py add` is what puts the book into that root first.
 - **Access is already handled by [[pdf-studio-initialize-site]].** It covers the whole project, so a new subpath is protected automatically — no per-book Access step. If `curl` unexpectedly returns 200, Access was never enabled; point the user to initialize-site step 4.
-- **Regenerate, then redeploy.** [[pdf-studio-generate-site]] rewrites `<WORK_DIR>/site/` in place; this skill copies whatever is there now. Re-run [[pdf-studio-generate-site]] before redeploying a changed book (same slug updates it in place).
+- **Regenerate, then redeploy.** [[pdf-studio-generate-site]] rebuilds `<WORK_DIR>/site/` from source; this skill copies whatever is there now. Re-run [[pdf-studio-generate-site]] before redeploying a changed book (same slug replaces it in place — gated behind a user-confirmed `--force`).
 - **Pages limits: 25 MiB per file, 20,000 files across the whole library.** [[pdf-studio-audio-narrate]]'s 64 kbps m4a (~5 MB/10 min) is fine; a hand-added WAV can exceed 25 MiB and the deploy will reject it — re-encode it.
 
 ## Success criteria
 
-- [ ] `library.py add` reported the book at `public/<slug>/`, and `library.py status` lists it once (a re-deploy updates in place, no duplicate slug).
+- [ ] `library.py add` reported the book at `public/<slug>/`, and `library.py status` lists it once (replacing an existing slug went through a user-confirmed `--force`; no duplicate slug).
 - [ ] `wrangler pages deploy` targeted the library root (`library.py public`), not the book's own `site/`, so previously deployed books are still present.
 - [ ] `curl -sI` against the book URL returned a 302 Access redirect (or 200 only if the user chose to keep the site public), and the state was reported.
 - [ ] The book URL `https://<project>.pages.dev/<slug>/` was reported to the user.

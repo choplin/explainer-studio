@@ -1,7 +1,7 @@
 ---
 name: pdf-studio-summarize
 description: This skill should be used when the user wants to turn a large PDF (a book, manual, or long document — roughly 30+ pages) into a Markdown report, digest, or summary. Triggers on "PDFをレポートにして", "この本を要約して/レポート化して", "turn this PDF into a markdown report", "generate a digest of this document", "read this whole PDF and summarize it". Should NOT trigger for short PDFs under ~30 pages (read them directly with the Read tool), for academic conference/journal papers or preprints regardless of length (use paper-studio-summarize), for raw text extraction without synthesis, or for deep-diving one already-digested section (use pdf-studio-deep-dive).
-version: 0.1.0
+version: 0.2.0
 user-invocable: true
 ---
 
@@ -31,6 +31,7 @@ Convert a large PDF into a Markdown report through three phases that progressive
 
 One interactive gate before any work; do not re-prompt between phases (when this skill is run from [[pdf-studio-full-guide]], that skill's Step 0 asks these instead). Ask:
 
+0. **Existing work dir** — if `<WORK_DIR>/` already holds a prior run's outputs (`extract/`, `structured/`, `reports/`), say so and confirm before overwriting them: regenerate in place (overwrite), or use a different work-dir name to keep the old one. No prompt when the work dir is new.
 1. **Text source** — *default: visual reading* (works on any PDF). Only if the born-digital probe passed, offer the **text-layer** option: more faithful for code/commands/numbers/console output, born-digital ebooks only. Accept the user's choice.
 2. **Figure harvest** — mention it will run if `mineru` is available (a first run downloads models and takes a while, and it runs unsandboxed and locally); nothing to decide unless the user wants to skip it.
 

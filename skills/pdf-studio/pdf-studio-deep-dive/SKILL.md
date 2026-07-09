@@ -1,7 +1,7 @@
 ---
 name: pdf-studio-deep-dive
 description: This skill should be used when a PDF has already been digested by pdf-studio-summarize (an outline.md with page anchors exists) and the user now wants a DEEPER, more detailed report on one specific part. Triggers on "1.3節をもっと詳しく", "第2章を深掘りして", "p50-60の詳細レポートが欲しい", "expand the section on X", "drill into chapter 2", "give me the full detail of that part". It resolves the location to source pages via the outline's [pNN] anchors, re-reads only those pages, and writes a standalone detailed report. Should NOT trigger for a first full-document pass (use pdf-studio-summarize) or when no outline / source PDF exists yet.
-version: 0.1.0
+version: 0.2.0
 user-invocable: true
 ---
 
@@ -21,6 +21,7 @@ Use only when both exist: the source PDF, and a first-pass `outline.md` (or `rep
 - **Anchors are PDF page numbers, not printed page numbers.** Resolve the requested location to `pNN` PDF pages before reading. If the user gives a printed page number, convert it using the `## Page offset` field recorded in `outline.md`.
 - **Re-read the source, do not just re-summarize the outline.** The whole point is to recover detail the overview compressed away. Reading only `outline.md` again produces no new information.
 - **Add margin pages.** A section rarely starts and ends exactly on the anchored pages. Read a few pages before the first anchor and after the last so the section is captured whole.
+- **Don't silently overwrite an existing report.** If `<WORK_DIR>/reports/<section-slug>.md` already exists (a prior deep-dive, possibly hand-edited), confirm before replacing it — overwrite, keep it, or write under a different slug.
 
 ## Procedure
 

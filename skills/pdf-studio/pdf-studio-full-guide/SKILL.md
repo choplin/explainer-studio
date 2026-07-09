@@ -1,7 +1,7 @@
 ---
 name: pdf-studio-full-guide
 description: This skill should be used when the user wants to run the WHOLE pdf-studio pipeline end-to-end on one PDF in a single request — from summary, through a detailed report per chapter, to a two-host dialogue script, to synthesized audio. Triggers on "この本を全部やって", "一冊まるごと音声ガイドまで", "summaryから音声まで一気に", "全ステップ実行して", "run the whole pipeline / do everything for this PDF / from summary to audio". It chains pdf-studio-summarize → pdf-studio-deep-dive (per chapter) → pdf-studio-audio-dialogue → pdf-studio-audio-narrate. Should NOT trigger for a single phase (use those sub-skills directly), or for a PDF already partway through the pipeline where only remaining steps are wanted (invoke the remaining sub-skills).
-version: 0.1.0
+version: 0.2.0
 user-invocable: true
 ---
 
@@ -28,6 +28,7 @@ This skill is **only orchestration**: it decides scope, order, and what to run a
 
 This is the one interactive gate. Because the full run can fan out to many workers and long audio synthesis, confirm the scope **once** here, then run the rest without stopping between phases (unless something fails). Ask the user, offering these defaults:
 
+0. **Existing work dir** — if `<WORK_DIR>/` already holds a prior run's outputs (`reports/`, `dialogue/`, `audio/`, …), say so and confirm before overwriting them: regenerate in place, or use a different work-dir name to keep the old one. No prompt when the work dir is new. (This one confirmation covers the whole run — the sub-skills below don't re-ask per file.)
 1. **Chapters to detail** — *default: all top-level chapters.* Accept a subset ("2章と4章だけ") or "none" (overview only). The chapter list is not known yet; if the user wants a subset by name, resolve it after [[pdf-studio-summarize]] produces `outline.md` and re-confirm the matched chapters.
 2. **Audio scope** — which reports become an audio guide:
    - **A** — overview only (one broad guide).

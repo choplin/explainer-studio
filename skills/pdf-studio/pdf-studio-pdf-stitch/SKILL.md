@@ -1,7 +1,7 @@
 ---
 name: pdf-studio-pdf-stitch
 description: Internal Phase 2 procedure for the pdf-studio-summarize skill — read all Phase 1 extraction chunks, join sections split across chunk boundaries, dedupe, and rebuild the chapter→section hierarchy into a structured outline.md. Applied once (single pass) by the summarize orchestrator (dispatched to a pdf-studio-pdf-stitch subagent under Claude Code, or applied inline otherwise). NOT a user-facing skill and NOT triggered directly by user requests.
-version: 0.1.0
+version: 0.2.0
 user-invocable: false
 ---
 
@@ -39,7 +39,7 @@ The caller provides the following. If any is missing, report what is missing and
 
 ## Output
 
-Write to the given output path. Near the top, place a `## Page offset` field recording the correspondence between printed and PDF page numbers (e.g. "printed page N = PDF page N + 27", or "none detected"). At the end, place a `## Boundary notes` field (what was joined, and where coverage is cut off).
+Write to the given output path — unconditionally, without prompting about an existing file (this is an orchestrator-dispatched worker; the parent [[pdf-studio-summarize]] / [[pdf-studio-full-guide]] handles overwrite confirmation at the work-dir level). Near the top, place a `## Page offset` field recording the correspondence between printed and PDF page numbers (e.g. "printed page N = PDF page N + 27", or "none detected"). At the end, place a `## Boundary notes` field (what was joined, and where coverage is cut off).
 
 ## Reply
 

@@ -1,7 +1,7 @@
 ---
 name: pdf-studio-pdf-extract
 description: Internal Phase 1 procedure for the pdf-studio-summarize skill — read one page range of a PDF visually and write structured extraction material (not a finished report) to a file. Applied once per chunk, in parallel, by the summarize orchestrator (dispatched to a pdf-studio-pdf-extract subagent under Claude Code, or applied inline otherwise). NOT a user-facing skill and NOT triggered directly by user requests.
-version: 0.1.0
+version: 0.2.0
 user-invocable: false
 ---
 
@@ -38,7 +38,7 @@ The caller provides the following. If any is missing, do not guess — report wh
 1. Read the source: **visual mode** — the PDF with the Read tool, `pages="<START>-<END>"` (max 20 pages per request; split into several requests if the range is wider); **text-layer mode** — the given `extract/text-<START>-<END>.md` file (already `[pNN]`-anchored faithful text).
 2. Transcribe each page's content as structured Markdown in the format below. Do not over-summarize; keep enough information density that the later phase can rebuild the chapter structure. Do not drop definitions, numbers, figures/tables, or key terms. In text-layer mode, preserve code / commands / numeric output verbatim (that fidelity is the reason the mode was chosen).
 3. If assigned figures were provided, add each to the `## Figures` block (see format) — its `figures/…` path, page, and caption — so no harvested figure is lost.
-4. Write the output to the given output path.
+4. Write the output to the given output path. This is an orchestrator-dispatched worker: write unconditionally and do **not** prompt about an existing file — overwrite confirmation is handled once by the parent skill ([[pdf-studio-summarize]] / [[pdf-studio-full-guide]]) at the work-dir level.
 
 ## Output format
 

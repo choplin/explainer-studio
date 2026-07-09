@@ -1,7 +1,7 @@
 ---
 name: pdf-studio-audio-dialogue
 description: This skill should be used when the user wants a NotebookLM-style audio guide / audio overview / two-host podcast of a document — the FIRST step: writing the two-speaker dialogue script (台本). Triggers on "音声ガイドを作って", "この本の音声概要が欲しい", "ポッドキャスト風の対話にして", "NotebookLMみたいな音声を作りたい", "make an audio guide / audio overview", "turn this report into a two-host dialogue script". Works on any Markdown, especially pdf-studio reports. Should NOT trigger for the audio synthesis step itself (use pdf-studio-audio-narrate), or for producing the source report (use pdf-studio-summarize / pdf-studio-deep-dive).
-version: 0.1.0
+version: 0.2.0
 user-invocable: true
 ---
 
@@ -26,7 +26,7 @@ Write the script under a `dialogue/` directory, kept separate from the synthesiz
 - If the source is inside a pdf-studio work dir (`<dir>/<name>/`), write to `<WORK_DIR>/dialogue/<slug>.txt`.
 - Otherwise write `dialogue/<slug>.txt` next to the source Markdown.
 
-`<slug>` names the source: `overview` for `reports/overview.md`, the section slug for a deep-dive report (e.g. `chapter-2`), otherwise the source basename. Create the `dialogue/` directory if missing. The dialogue script is the editable text artifact; keeping it apart from generated `audio/` (which is disposable and re-synthesizable) makes it easy to review and edit before narration.
+`<slug>` names the source: `overview` for `reports/overview.md`, the section slug for a deep-dive report (e.g. `chapter-2`), otherwise the source basename. Create the `dialogue/` directory if missing. The dialogue script is the editable text artifact; keeping it apart from generated `audio/` (which is disposable and re-synthesizable) makes it easy to review and edit before narration. Because the script is meant to be hand-edited, **don't silently overwrite one**: if `dialogue/<slug>.txt` already exists, confirm before replacing it — overwrite, keep it, or write under a different slug.
 
 ## Dialogue script format
 

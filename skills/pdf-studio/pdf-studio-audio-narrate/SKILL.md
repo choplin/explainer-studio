@@ -1,7 +1,7 @@
 ---
 name: pdf-studio-audio-narrate
 description: This skill should be used to synthesize an existing two-speaker dialogue script (台本, in the A:/B: line format) into a spoken audio file — the SECOND step of the audio-guide flow, after pdf-studio-audio-dialogue writes the script. Triggers on "台本を音声にして", "この対話を読み上げて / 音声化して", "音声ファイルを作って", "narrate this dialogue", "turn the script into audio", "synthesize the audio". Uses a local VOICEVOX ENGINE (offline, no API key) and encodes AAC/m4a with ffmpeg. Should NOT trigger for writing the dialogue script (use pdf-studio-audio-dialogue).
-version: 0.1.0
+version: 0.2.0
 user-invocable: true
 ---
 
@@ -39,7 +39,7 @@ pdf-studio-audio-narrate/dialogue-to-audio.sh <script.txt> [output.m4a] [--play]
 ```
 
 - If the output path is omitted, it defaults to the script path with an `.m4a` extension. The output format follows the extension you pass: `.m4a` encodes AAC (requires `ffmpeg`), any other extension writes WAV. Prerequisites (`python3`, `curl`, and `ffmpeg` for m4a) are checked up front, before the engine starts, so a missing tool fails fast.
-- Write the audio into an `audio/` directory that sits beside the script's `dialogue/` directory: the script `<WORK_DIR>/dialogue/<slug>.txt` → audio `<WORK_DIR>/audio/<slug>.m4a`. Create `audio/` if missing. This keeps the editable script (`dialogue/`) separate from the disposable, re-synthesizable audio (`audio/`).
+- Write the audio into an `audio/` directory that sits beside the script's `dialogue/` directory: the script `<WORK_DIR>/dialogue/<slug>.txt` → audio `<WORK_DIR>/audio/<slug>.m4a`. Create `audio/` if missing. This keeps the editable script (`dialogue/`) separate from the disposable, re-synthesizable audio (`audio/`). Audio is re-synthesizable, but still don't silently clobber a file that's already there: if the target `<slug>.m4a` already exists, confirm before overwriting it.
 - `--play` synthesizes and then plays the result with `afplay` (macOS).
 
 > **Run without the command sandbox.** The script talks to a local VOICEVOX ENGINE over `localhost` (and spawns it when one isn't already running), which a command sandbox blocks. Invoke it with `dangerouslyDisableSandbox: true`. (The `ffmpeg` m4a encoding itself is self-contained and would run fine under a sandbox; it's the engine networking that needs it off.)

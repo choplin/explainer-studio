@@ -1,7 +1,7 @@
 ---
 name: pdf-studio-pdf-detail
 description: Internal procedure for the pdf-studio-deep-dive skill — re-read a resolved page span of an already-digested PDF visually and write a thorough, standalone detail report for just that span, with [pNN] anchors. Applied by the deep-dive orchestrator (dispatched to a pdf-studio-pdf-detail subagent under Claude Code, or applied inline otherwise), and by pdf-studio-full-guide once per in-scope chapter. NOT a user-facing skill and NOT triggered directly by user requests.
-version: 0.1.0
+version: 0.2.0
 user-invocable: false
 ---
 
@@ -38,7 +38,7 @@ The caller provides the following. If any is missing, report what is missing and
 
 ## Output
 
-Write to the given output path.
+Write to the given output path — unconditionally, without prompting about an existing file. This is an orchestrator-dispatched worker; the parent skill ([[pdf-studio-deep-dive]] / [[pdf-studio-full-guide]]) handles overwrite confirmation before dispatching.
 
 ## Reply
 
