@@ -17,6 +17,7 @@ Convert a large PDF into a Markdown report through three phases that progressive
 - **Keep page anchors `[pNN]` in every artifact.** They make the report traceable to the source and are what lets [[pdf-studio-deep-dive]] zoom back into the original PDF later. `pNN` is always the **PDF** page number; record any printed-page↔PDF offset in the outline's `## Page offset` field (see Phase 2) so [[pdf-studio-deep-dive]] can convert printed page numbers.
 - **Figure harvest (MinerU) is an optional enhancement with a clean fallback, not a hard dependency.** Phase 0 runs `figure_harvest.sh` through `scripts/preflight.sh` to crop genuine figures (diagrams / plots / photos — not tables or console output) into `ocr/figures/`. The runtime is resolved automatically — `preflight.sh` uses poppler + a MinerU source from PATH, else the bundled `flake.nix` dev shell (`nix`); MinerU itself is used from PATH if installed, else resolved by `uvx --from 'mineru[core]' mineru` into uv's shared tool cache (no per-skill lockfile, no manual/global install). **Do not install anything by hand.** If the runtime cannot be resolved at all (no poppler+uv/mineru on PATH and no nix), `preflight.sh` fails with the setup options — **relay them and continue the pipeline without figure crops** (the reports still describe figures in prose, as before). **MinerU 3.x starts a local service and uses multiprocessing that the command sandbox blocks** (`Operation not permitted` on a semaphore), and its first `uvx` resolve / model download need network — so **run Phase 0 with the sandbox disabled**. It is fully local (nothing is uploaded); the first run downloads model weights (several GB) plus a tool-env sync when resolved via uvx, and is slow — warn about that.
 - **The text-layer option is opt-in and only for born-digital PDFs.** By default the body is read visually (robust on scans/captures). A purchased ebook carries a real text layer, and `pdftotext -layout` reproduces its code listings, commands, numbers, and console/box-drawing tables far more faithfully than visual OCR — but a scanned/captured PDF has no text layer, so this must never be forced. Gate it: only offer the option when `text_layer.sh --probe <pdf> <body-start>` reports born-digital, and only use it when the user opts in.
+- **Text-layer mode cannot read values that live only inside a raster figure.** `pdftotext` reproduces the text stream faithfully (code, commands, numbers, console/box-drawing tables), but a value that exists only as pixels inside a diagram — a bit array drawn in a figure, a node's key in an illustrated tree, numbers baked into a chart image — is not in the text layer, so text-layer mode drops it (visual mode reads it). This is a deliberate trade-off, not a bug: pair text-layer with figure harvest (Phase 0) so the embedded crop carries those in-image values, and treat in-figure values as the known blind spot of the text path.
 
 ## Prerequisites
 
@@ -80,7 +81,7 @@ Split the body into chunks and extract each chunk **in parallel**. Each chunk is
 Pass in the call message only the per-chunk inputs:
 - The source to read: **visual mode** — the PDF absolute path and the page range (START–END); **text-layer mode** — the absolute path to `extract/text-<START>-<END>.md` (still note the START–END range for anchors).
 - The output path `extract/chunk-<START>-<END>.md`.
-- **Assigned figures (if Phase 0 ran):** the rows of `ocr/figures.md` whose `[pNN]` page falls in this chunk's range, so the worker records each figure (by its `figures/…` relative path, page, and caption) in the material — no harvested figure is left unmentioned.
+- **Assigned figures (if Phase 0 ran):** the rows of `ocr/figures.md` whose `[pNN]` page falls in this chunk's range, so the worker catalogs each figure (by its `figures/…` relative path, page, and caption) in the material — a menu the report phase can draw from, not a mandate to use every figure.
 
 Give absolute paths.
 
@@ -102,15 +103,15 @@ Unlike Phases 1–2, this phase runs **inline** in the orchestrator. Its only in
 
 - Open with a "Coverage" note and a 3–5 line executive summary; end with an "Uncovered / continued" note if this was a partial run.
 - Compose it as headings + concise explanatory prose (not a flat bullet list), preserving the chapter/section hierarchy and `[pNN]` anchors.
-- **If figures were harvested,** embed the most explanatory ones inline where the prose discusses them, as `![caption](../ocr/figures/fig-pNNN-K.ext)` with a one-line caption and `[pNN]` (relative path from `reports/`). Do not embed a figure without explaining it. Figures whose section is out of the overview's depth are placed by the Finalize sweep.
+- **If figures were harvested,** embed the ones the summary naturally needs, inline where the prose discusses them, as `![caption](../ocr/figures/fig-pNNN-K.ext)` with a one-line caption and `[pNN]` (relative path from `reports/`). Do not embed a figure without explaining it. You need not use every figure — this is a book, not a paper, so leave crops the overview does not call for unreferenced rather than forcing them in.
 - Write the body in the language of the source or the conversation.
 - For very large outlines, build the report in levels (section → chapter → whole) so each reduce step stays manageable.
 
 ## Finalize
 
-### 1. Figure coverage sweep (only if Phase 0 produced `ocr/figures/`)
+### 1. Figures — use what the summary needs, no exhaustive sweep (only if Phase 0 produced `ocr/figures/`)
 
-Guarantee no harvested figure is orphaned. List `ocr/figures/`; for each file confirm at least one report under `reports/` references it by its relative path. Any figure not yet referenced — its section fell outside the overview's depth, or was missed — is added, with a one-line explanation and its `[pNN]` (page from `ocr/figures.md`), to the report covering its section, else to `overview.md`. After this, **every file in `ocr/figures/` is referenced-and-explained by some report**, never embedded bare. If `figures.md` has a "⚠ Not extracted" section, recover each row by rendering its page (`pdftoppm -f N -l N -singlefile -r 200 -png <pdf> <tmp>/pg`), cropping the figure, saving it to the intended path, and moving the row into the main table — or drop it as a phantom and note that.
+Figures aid the reports; they are not a checklist. Embed a harvested figure only where the prose actually discusses what it shows, and when you embed it, explain it (never a bare image). **Do not append a trailing figure list or force every crop into a report to "cover" it** — this is a book, not a paper, so referencing every figure is not required. Crops in `ocr/figures/` that no report naturally needs are fine to leave unreferenced. If you *do* want a figure that `figures.md` marks "⚠ Not extracted", render and crop its page first (`pdftoppm -f N -l N -singlefile -r 200 -png <pdf> <tmp>/pg`) before embedding it.
 
 ### 2. Collect the source PDF (confirm first)
 
@@ -134,7 +135,7 @@ To make the work dir a single self-contained folder, move the source PDF into it
 - [ ] `reports/overview.md` covers every top-level section present in `outline.md` (no section silently dropped).
 - [ ] The body-start page was detected; front matter (TOC/preface) was not transcribed as content.
 - [ ] If the run was a partial page range, `reports/overview.md` states the covered range and the continuation point.
-- [ ] If the figure-harvest runtime resolved (via `preflight.sh` — PATH/uv/nix), `ocr/figures.md` exists and **every file in `ocr/figures/` is referenced-and-explained by some report** (no orphan crop); its "⚠ Not extracted" rows, if any, were worked off. If the runtime was unresolvable, the manifest says figure harvest was skipped.
+- [ ] If the figure-harvest runtime resolved (via `preflight.sh` — PATH/uv/nix), `ocr/figures.md` exists and every figure a report embeds is explained in place (no bare image); unused crops may remain unreferenced (no exhaustive-coverage requirement). If the runtime was unresolvable, the manifest says figure harvest was skipped.
 - [ ] If the text-layer option was chosen, each chunk was read from `extract/text-*.md` (not visually), and it was offered only after the born-digital probe passed.
 
 ## Phase workers

@@ -53,6 +53,7 @@ Follow **[[pdf-studio-summarize]]** in full (Phase 1 extract → Phase 2 stitch 
 Read `<WORK_DIR>/structured/outline.md`, enumerate the **top-level chapters** and their `[pNN]` anchors, and intersect with the Step 0 chapter scope. For each in-scope chapter, run **[[pdf-studio-deep-dive]]** to produce `<WORK_DIR>/reports/<chapter-slug>.md`:
 
 - Resolve each chapter's page span from its anchors (with [[pdf-studio-deep-dive]]'s ~2-page margins) and apply the `pdf-studio-pdf-detail` procedure per chapter. Chapters are independent — **run them in parallel** (under Claude Code, multiple `pdf-studio-pdf-detail` Agent calls in one message; otherwise apply the skill per chapter), as many at a time as is reasonable.
+- **If text-layer was chosen in Step 0**, run each chapter's detail worker in text-layer mode exactly as [[pdf-studio-deep-dive]]'s Procedure does: materialize the chapter span's faithful text with [[pdf-studio-summarize]]'s `text_layer.sh` (through `preflight.sh`) into `<WORK_DIR>/extract/text-<START>-<END>.md` and pass that file to the worker instead of a page range. The probe already passed in Step 0, so do not re-probe or re-ask.
 - **Context hygiene (same rule as [[pdf-studio-summarize]]):** each deep-dive writes its report to a file and returns only a short status. Never read PDF pages or the full chapter reports into this orchestrator's context.
 - If the chapter scope was "none", skip this step.
 
