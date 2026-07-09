@@ -1,7 +1,7 @@
 ---
 name: pdf-studio-generate-site
 description: This skill should be used when the user wants pdf-studio reports turned into a real website — authored web pages (not converted Markdown) browsable from a smartphone, built as a static site under a work dir's site/ from its reports/, with the audio/ guides playable in-page. Triggers on "レポートをWebサイトにして", "HTMLにして", "サイトを作って", "スマホで読めるようにして", "generate a site from the reports", "make a website from the reports". Should NOT trigger for deploying/hosting the built site (use pdf-studio-deploy-site), for producing the reports (use pdf-studio-summarize / pdf-studio-deep-dive), or for the audio guide (use pdf-studio-audio-dialogue / pdf-studio-audio-narrate).
-version: 0.4.0
+version: 0.5.0
 user-invocable: true
 ---
 
@@ -9,7 +9,7 @@ user-invocable: true
 
 Turn a pdf-studio work dir into a **reading-guide website** under `<WORK_DIR>/site/`: a landing page with chapter cards, and one authored page per report with the matching audio guide playable in-page. This skill only *builds* the site; putting it on the internet is [[pdf-studio-deploy-site]]'s job — keeping the two apart lets the generated site be reviewed before it goes public.
 
-The pages are **authored, not converted**: the `pdf-studio-site-page` procedure rewrites each report for web reading (lede, key-points box, scannable sections) against a bundled design system. Rendering the Markdown 1:1 into HTML is explicitly NOT the deliverable. The output is a **self-contained static site** (no server-side, no CDN/external references) — but it ships a bundled progressive-enhancement kit (`assets/base.js` from understanding-html-docs: reading-progress bar, table of contents with scroll-spy, light/dark theme toggle, back-to-top; plus `assets/pdf-studio.js`: the index filter) as progressive enhancement: every page stays fully readable if JS is disabled.
+The pages are **authored, not converted**: the `pdf-studio-site-page` procedure rewrites each report for web reading (lede, key-points box, scannable sections) against a bundled design system. Rendering the Markdown 1:1 into HTML is explicitly NOT the deliverable. The output is a **no-server static site** (openable by double-click, no build step) that bundles its design system locally (`assets/base.js` from understanding-html-docs: reading-progress bar, table of contents with scroll-spy, light/dark theme toggle, back-to-top; plus `assets/pdf-studio.js`: the index filter) as progressive enhancement, so every page stays fully readable if JS is disabled. Bundling the substrate is for **portability and durability** (the artifact doesn't rot on external dependencies), **not** a ban on external references: a page may pull in web fonts, remote images, report-embedded links, or heavy third-party libraries (a diff renderer, a diagram engine) from a CDN where it needs them — exactly as [[understanding-html-docs]] allows for the context layer.
 
 The design system is layered: the **base substrate** (`base.css` / `base.js`) is owned by the **[[understanding-html-docs]]** skill — pdf-studio consumes it as a copy-mode base — and the **pdf-studio context layer** (`pdf-studio.css` / `pdf-studio.js`) is owned by **`pdf-studio-site-base`** (the library index uses the same two layers). This skill's own `assets/` holds only the templates `page.html` and `index.html`. If either `understanding-html-docs` or `pdf-studio-site-base` is not installed, stop and say so rather than guessing an asset path.
 
@@ -20,7 +20,7 @@ The input is a pdf-studio work dir (`<dir>/<name>/`) with at least one report un
 ## Phase 1 — Scaffold
 
 1. Inventory `reports/*.md` and `audio/*` (`.m4a`, also `.mp3`/`.wav` for hand-added files). Fix the page order now: `overview` first, the rest naturally sorted (`chapter-2` before `chapter-10`) — prev/next links depend on this order. Assign each page a **chapter hue** by its position in that order, cycling `hue-1`..`hue-6` (position 1 → `hue-1`, … 7 → `hue-1` again). The same hue is used for the page and for its index card, so color = chapter identity across the whole site.
-2. Create `<WORK_DIR>/site/assets/` and `site/audio/`; copy the **four asset files** into `site/assets/` — the base substrate `understanding-html-docs/assets/base.css` and `.../base.js`, and the pdf-studio context layer `pdf-studio-site-base/assets/pdf-studio.css` and `.../pdf-studio.js` — plus the audio files into `site/audio/`. Copy each verbatim; never edit them per site. `site/` is disposable — regenerating overwrites it; never hand-edit it (edit `reports/` and regenerate instead).
+2. **Clear any existing `site/` first** (`rm -rf <WORK_DIR>/site`), then create `<WORK_DIR>/site/assets/` and `site/audio/`. This makes every run a clean rebuild: reports, audio, or assets no longer produced (renamed/removed chapters, stale narration, old asset files) leave no orphan behind — which matters because a later [[pdf-studio-deploy-site]] run publishes whatever is on disk. The clear is safe because everything under `site/` is reproducible from `reports/` and `audio/`; hand-added audio lives in the **source** `audio/` (not `site/`), so it is never touched. Then copy the **four asset files** into `site/assets/` — the base substrate `understanding-html-docs/assets/base.css` and `.../base.js`, and the pdf-studio context layer `pdf-studio-site-base/assets/pdf-studio.css` and `.../pdf-studio.js` — plus the audio files into `site/audio/`. Copy each verbatim; never edit them per site. `site/` is disposable — regenerating clears and rebuilds it; never hand-edit it (edit `reports/` and regenerate instead).
 
 ## Phase 2 — Author pages (parallel)
 
@@ -37,7 +37,7 @@ Pass only the per-page inputs, all absolute paths:
 - matching audio file name under `site/audio/` (or "none")
 - prev/next hrefs + labels from the Phase 1 order (or "none" at the ends)
 
-Each returns only the output path, the page title, and a 2–3 line card summary. Do not read the finished pages back — trust the replies. (Optionally estimate reading time from the report's length — e.g. `wc -w` at ~500 Japanese chars/min — to put a ⏱ chip on the card in Phase 3.)
+Each returns only the output path, the page title, and a 2–3 line card summary. Do not read the finished pages back — trust the replies. (Optionally estimate reading time from the report's length — e.g. `wc -m` (character count, not `wc -w`: Japanese isn't space-delimited so word counts are meaningless) at ~500 Japanese chars/min — to put a ⏱ chip on the card in Phase 3.)
 
 ## Phase 3 — Landing page (orchestrator, inline)
 
@@ -50,7 +50,7 @@ After building `site/`, tell the user the site is ready under `<WORK_DIR>/site/`
 ## Gotchas
 
 - **Restructuring is the deliverable.** A page whose heading sequence mirrors the source Markdown is a conversion, not an authored page — re-author it with the instruction to restructure (the `pdf-studio-site-page` procedure states the same rule).
-- **`site/` is disposable and rebuilt in place.** Regenerating overwrites it; never hand-edit `site/` — edit the source `reports/` and regenerate. A later [[pdf-studio-deploy-site]] run publishes whatever is on disk, so regenerate before redeploying.
+- **`site/` is disposable and rebuilt from scratch.** Each run clears `site/` and regenerates, so files no longer produced (renamed/removed chapters, stale audio, superseded assets) don't linger as orphans; never hand-edit `site/` — edit the source `reports/` and regenerate. A later [[pdf-studio-deploy-site]] run publishes whatever is on disk, so a stale overwrite-only build would leak orphans — regenerate (clean) before redeploying.
 
 ## Success criteria
 
@@ -58,5 +58,5 @@ After building `site/`, tell the user the site is ready under `<WORK_DIR>/site/`
 - [ ] Each page carries a `lede` and a `keypoints` box, and no unrendered Markdown artifacts (verify: `grep -n '\*\*\|^#\{1,3\} ' site/*.html` → only hits inside `<pre>` blocks, if any).
 - [ ] Every page `<body>` has a `hue-N` class and its index card carries the same `hue-N` (color = chapter identity); callout variants, if used, match their meaning.
 - [ ] Reports with a matching audio slug have an in-page `<audio>` player; unmatched audio is listed on the index; every referenced audio file exists in `site/audio/`.
-- [ ] The site is self-contained: `grep -o 'src="[^"]*"\|href="[^"]*"' site/*.html` shows only relative paths (plus links the reports themselves contained). All four of `site/assets/base.css`, `site/assets/base.js`, `site/assets/pdf-studio.css`, `site/assets/pdf-studio.js` exist, and every page's `<head>` keeps the theme-boot inline script (key `html-docs-theme`) and the `assets/base.js` + `assets/pdf-studio.js` references.
+- [ ] The design system is bundled locally: all four of `site/assets/base.css`, `site/assets/base.js`, `site/assets/pdf-studio.css`, `site/assets/pdf-studio.js` exist, and every page's `<head>` keeps the theme-boot inline script (key `html-docs-theme`) and the `assets/base.js` + `assets/pdf-studio.js` references. (External references — web fonts, CDN libraries, remote images, report-embedded links — are allowed where a page needs them; they are not checked.)
 - [ ] The user was told the site is built under `<WORK_DIR>/site/` and pointed to [[pdf-studio-deploy-site]] for putting it online.
