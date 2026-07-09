@@ -7,17 +7,18 @@ The sibling of [`pdf-studio`](../pdf-studio): where pdf-studio scales a **book**
 ## How it works
 
 ```
-Phase 1 (orchestrator, inline)               Phase 2 (paper-detail, parallel)
-read the paper via local MinerU OCR     →    reports/background.md    背景と問題設定
-biblio metadata + section map [pNN]          reports/method.md        技術・手法の詳細
-write reports/overview.md                    reports/experiments.md   実験設定と結果
-                                             reports/discussion.md    議論・限界・今後
-                                             reports/related-work.md  位置づけ + 次に読むべき論文
-                                                                      (dblp-verified bibliography)
+Phase 1 (orchestrator, inline)          Phase 2 (paper-detail, parallel)     Finalize
+read the paper via local MinerU OCR  →  reports/background.md   背景・問題  →  consistency & faithfulness
+biblio metadata + section map [pNN]     reports/method.md       手法             sweep over the whole set
+write spine.md (confirmed facts)        reports/experiments.md  実験             (paper-studio-consistency-
+write reports/overview.md               reports/discussion.md   議論             sweep) → targeted fixes
+  (spine handed to every perspective)   reports/related-work.md 位置づけ+次読
+                                          (dblp-verified bibliography)
 ```
 
-- **Phase 1** — the orchestrator reads the paper itself (papers fit in context; no extract/stitch workers needed), captures bibliographic metadata and the section structure with `[pNN]` page anchors, and writes `reports/overview.md` in the Ochiai format: six questions — what is proposed / what is novel / what is the technical core / how was it validated / what is discussed / what to read next — each linking into its detail report.
-- **Phase 2** — one perspective report per in-scope perspective, **in parallel**, re-reading just the relevant sections (from the OCR Markdown) and writing a standalone detail report.
+- **Phase 1** — the orchestrator reads the paper itself (papers fit in context; no extract/stitch workers needed), captures bibliographic metadata and the section structure with `[pNN]` page anchors, materializes `spine.md` (the paper's confirmed facts — thesis + direction, running-example map, headline numbers with scope, figure-verified facts), and writes `reports/overview.md` in the Ochiai format: six questions — what is proposed / what is novel / what is the technical core / how was it validated / what is discussed / what to read next — each linking into its detail report.
+- **Phase 2** — one perspective report per in-scope perspective, **in parallel**, re-reading just the relevant sections (from the OCR Markdown) and writing a standalone detail report. Each perspective is handed `spine.md` and takes the shared facts from it rather than re-deriving them, so the isolated reports do not diverge.
+- **Finalize** — a single consistency & faithfulness sweep reads the **whole report set at once** (the one thing the isolated per-report passes structurally cannot do) and checks it for (1) cross-report contradictions and (2) faithfulness to the source's logical structure, verifying against `spine.md` and the paper. Its findings drive targeted, source-anchored fixes (a bounded loop, not full regeneration). Under Claude Code the sweep runs in an isolated subagent so only its findings return to the orchestrator.
 - Scope is confirmed **once up front** (which detail reports to produce — default all five), then the pipeline runs without further prompts.
 
 ### MinerU OCR (mandatory, local)
@@ -34,10 +35,11 @@ OCR materializes `ocr/paper.md` (full text as Markdown with LaTeX math, one `[pN
 
 | Skill | Role |
 |-------|------|
-| `paper-studio-summarize` | The whole pipeline: scope confirmation → Phase 1 (inline OCR read + overview) → Phase 2 (parallel perspective reports) → finalize. Triggers on "この論文をまとめて", "落合フォーマットで読んで", "summarize this paper". |
-| `paper-studio-paper-detail` | Internal Phase 2 logic: writes ONE perspective detail report (background / method / experiments / discussion / related-work). Applied once per perspective; not invoked directly. |
+| `paper-studio-summarize` | The whole pipeline: scope confirmation → Phase 1 (inline OCR read + spine + overview) → Phase 2 (parallel perspective reports) → Finalize (consistency sweep + fixes). Triggers on "この論文をまとめて", "落合フォーマットで読んで", "summarize this paper". |
+| `paper-studio-paper-detail` | Internal Phase 2 logic: writes ONE perspective detail report (background / method / experiments / discussion / related-work), taking shared facts from `spine.md`. Applied once per perspective; not invoked directly. |
+| `paper-studio-consistency-sweep` | Internal Finalize logic: reads the whole report set + `spine.md` + the source, returns a findings list of cross-report contradictions and source-faithfulness / logical-structure drift (it never edits reports). Applied once at Finalize; not invoked directly. |
 
-The per-perspective report templates and the strict bibliographic constraints live in `paper-studio-paper-detail`, so the orchestrator passes only the perspective and its inputs. Under Claude Code it is wrapped by a thin subagent (`opts/claude/agents/paper-studio-paper-detail`) so each report is written in an isolated, parallel context; on any other agent the same skill is applied inline. This graceful fallback is written into the orchestrator.
+The per-perspective report templates and the strict bibliographic constraints live in `paper-studio-paper-detail`; the whole-set check criteria live in `paper-studio-consistency-sweep`. The orchestrator passes each only its inputs. Under Claude Code each is wrapped by a thin subagent (`opts/claude/agents/paper-studio-paper-detail` for the parallel perspective writers, `opts/claude/agents/paper-studio-consistency-sweep` for the Finalize sweep) so it runs in an isolated context; on any other agent the same skill is applied inline. This graceful fallback is written into the orchestrator.
 
 ### Bundled scripts (in `paper-studio-summarize/scripts/`)
 
@@ -61,6 +63,7 @@ The work dir is named with a `{year}-{venue}-{short-title}` citation slug (e.g. 
 <slug>/                        # work dir (citation slug)
 ├── <slug>.pdf                 # source PDF, collected in at the end (on confirmation)
 ├── paper.bib                  # dblp canonical BibTeX (or printed-metadata fallback)
+├── spine.md                   # Phase 1 confirmed facts — shared source for perspectives + sweep oracle
 ├── ocr/                       # MinerU OCR output (always produced)
 │   ├── paper.md               # full text as Markdown (LaTeX math), [pNN] anchors
 │   ├── figures.md             # metadata index: label / file / page / caption
