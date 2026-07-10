@@ -226,6 +226,25 @@ th { background: var(--card); }
 }
 .toc-panel a.active { color: var(--cat); border-left-color: var(--cat); background: var(--cat-soft); font-weight: 600; }
 
+/* --- wide viewport: TOC as a persistent sidebar index ---------------------
+   On wide screens the same TOC nav (built and scroll-spied by base.js) is laid
+   out as a persistent sidebar column in the left gutter, beside the centered
+   article; the overlay affordances (☰ FAB, backdrop) are hidden. Only layout
+   branches here — no TOC/scroll-spy logic is duplicated. The 76rem breakpoint
+   is the width at which a 14rem sidebar + 1rem gap fits in the gutter to the
+   left of the 45rem `main`; below it, the overlay panel + FAB stay. */
+@media (min-width: 76rem) {
+  .toc-btn, .toc-backdrop { display: none; }
+  .toc-panel {
+    left: max(1rem, calc((100vw - 45rem) / 2 - 15rem)); right: auto; bottom: auto;
+    top: 3.4rem; width: 14rem; max-height: calc(100vh - 4.6rem);
+    background: var(--card); border: 1px solid var(--line); border-left: 3px solid var(--cat);
+    border-radius: 12px; padding: .6rem .85rem 1rem;
+    transform: none; transition: none;
+  }
+  .toc-panel h2 { margin-top: .3rem; }
+}
+
 @media (prefers-reduced-motion: reduce) {
   .progress > i, .fab button, .toc-backdrop, .toc-panel { transition: none; }
   html { scroll-behavior: auto; }

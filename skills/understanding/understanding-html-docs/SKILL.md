@@ -33,7 +33,10 @@ directory):
 - **`base.js`** — the progressive-enhancement kit: theme toggle (auto/light/dark),
   reading-progress bar, table of contents with scroll-spy, and back-to-top. All
   vanilla, no dependencies, no network. Every feature degrades to nothing if the
-  script never loads.
+  script never loads. The TOC is **responsive**: a bottom-sliding overlay panel
+  (☰ FAB) on narrow screens, and a **persistent sidebar index** in the left
+  gutter beside the article on wide screens (≥ 76rem) — same nav and scroll-spy,
+  only the layout branches (in `base.css`, no logic duplicated).
 
 ## Principles
 
@@ -130,7 +133,10 @@ Foundation is automatic from element selectors (`body`, `main`, `h1`–`h3`, `p`
 | `.hue-1` … `.hue-6` | Categorical hue (sets `--cat`/`--cat-soft`) |
 
 PE classes (`.progress`, `.theme-btn`, `.fab`, `.toc-backdrop`, `.toc-panel`) are
-injected/toggled by `base.js`; author markup does not use them directly.
+injected/toggled by `base.js`; author markup does not use them directly. On wide
+viewports (≥ 76rem) a `base.css` media query re-lays the same `.toc-panel` as a
+persistent left sidebar and hides the `.toc-btn`/`.toc-backdrop` overlay
+affordances — a pure-CSS presentation branch over the JS-built nav.
 
 ## Opt-in components (Tier 2)
 
