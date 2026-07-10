@@ -97,21 +97,29 @@ th { background: var(--card); }
    variant class (tip/warn/danger/key) to change meaning + color + icon. --- */
 .callout {
   --c: var(--note); --c-soft: var(--note-soft);
+  /* icon: a monochrome line glyph, masked so it inherits the semantic hue (--c).
+     No emoji — those render inconsistently across platforms and read off-register
+     against the system. The SVG's own stroke color is irrelevant (alpha-masked);
+     --c does the coloring, so icon hue always matches the callout's meaning. */
+  --icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='12' cy='12' r='9'/%3E%3Cpath d='M12 11v5'/%3E%3Cpath d='M12 8h.01'/%3E%3C/svg%3E");
   position: relative; background: var(--c-soft); border: 1px solid var(--line);
   border-left: 4px solid var(--c); border-radius: 8px;
   padding: .6rem 1rem .6rem 2.7rem; margin: 1.2rem 0; font-size: .95rem;
 }
 .callout::before {
-  content: "ℹ️"; position: absolute; left: .85rem; top: .6rem; font-size: 1rem; line-height: 1.4;
+  content: ""; position: absolute; left: .8rem; top: .72rem;
+  width: 1.1rem; height: 1.1rem; background: var(--c);
+  -webkit-mask: var(--icon) no-repeat center / contain;
+          mask: var(--icon) no-repeat center / contain;
 }
-.callout.tip    { --c: var(--tip);  --c-soft: var(--tip-soft);  }
-.callout.warn   { --c: var(--warn); --c-soft: var(--warn-soft); }
-.callout.danger { --c: var(--bad);  --c-soft: var(--bad-soft);  }
-.callout.key    { --c: var(--key);  --c-soft: var(--key-soft);  }
-.callout.tip::before    { content: "💡"; }
-.callout.warn::before   { content: "⚠️"; }
-.callout.danger::before { content: "🚫"; }
-.callout.key::before    { content: "🔑"; }
+.callout.tip    { --c: var(--tip);  --c-soft: var(--tip-soft);
+  --icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M9 18h6'/%3E%3Cpath d='M10 21h4'/%3E%3Cpath d='M12 3a6 6 0 0 0-4 10c.7.7 1 1.4 1 2h6c0-.6.3-1.3 1-2a6 6 0 0 0-4-10z'/%3E%3C/svg%3E"); }
+.callout.warn   { --c: var(--warn); --c-soft: var(--warn-soft);
+  --icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M12 3 2 20h20z'/%3E%3Cpath d='M12 10v4'/%3E%3Cpath d='M12 17h.01'/%3E%3C/svg%3E"); }
+.callout.danger { --c: var(--bad);  --c-soft: var(--bad-soft);
+  --icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='12' cy='12' r='9'/%3E%3Cpath d='M6 6 18 18'/%3E%3C/svg%3E"); }
+.callout.key    { --c: var(--key);  --c-soft: var(--key-soft);
+  --icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='8.5' cy='8.5' r='4.5'/%3E%3Cpath d='M11.7 11.7 20 20'/%3E%3Cpath d='M16 15l2 2'/%3E%3C/svg%3E"); }
 /* optional bold lead-in inside a callout, colored to match */
 .callout .label { color: var(--c); font-weight: 700; }
 
