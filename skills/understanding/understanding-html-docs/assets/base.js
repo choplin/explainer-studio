@@ -108,6 +108,31 @@
     var list = document.createElement("ol");
     panel.appendChild(list);
 
+    // Fast, distance-independent smooth scroll for nav clicks. Native smooth
+    // scroll slows down over long jumps; this keeps every jump ~280ms and locks
+    // the scroll-spy for the duration so the active marker doesn't chase through
+    // the sections it passes. Falls back to an instant jump for reduced motion.
+    var reduceMotion = window.matchMedia ? window.matchMedia("(prefers-reduced-motion: reduce)").matches : false;
+    var headerEl = document.querySelector("header.site");
+    var spyLock = false, scrollAnim = 0;
+    function gotoHeading(h) {
+      var offset = (headerEl ? headerEl.getBoundingClientRect().height : 0) + 8;
+      var targetY = Math.max(0, h.getBoundingClientRect().top + window.scrollY - offset);
+      if (reduceMotion) { window.scrollTo(0, targetY); return; }
+      var startY = window.scrollY, dist = targetY - startY;
+      if (Math.abs(dist) < 2) return;
+      var t0 = null, dur = 280, id = ++scrollAnim;
+      spyLock = true;
+      requestAnimationFrame(function step(ts) {
+        if (id !== scrollAnim) return;          // superseded by a newer nav click
+        if (t0 === null) t0 = ts;
+        var p = Math.min(1, (ts - t0) / dur);
+        window.scrollTo(0, startY + dist * (1 - Math.pow(1 - p, 3)));  // easeOutCubic
+        if (p < 1) requestAnimationFrame(step);
+        else spyLock = false;
+      });
+    }
+
     var links = [];
     headings.forEach(function (h, i) {
       if (!h.id) h.id = "sec-" + i;
@@ -119,7 +144,10 @@
       a.addEventListener("click", function (e) {
         e.preventDefault();
         closeToc();
-        h.scrollIntoView({ behavior: "smooth", block: "start" });
+        // Pin the indicator to the target up front, then fast-smooth-scroll to
+        // it; the spy is locked during the animation so the marker never chases.
+        links.forEach(function (l) { l.a.classList.toggle("active", l.a === a); });
+        gotoHeading(h);
         history.replaceState(null, "", "#" + h.id);
       });
       li.appendChild(a);
@@ -147,6 +175,7 @@
     var spyTicking = false;
     function spy() {
       spyTicking = false;
+      if (spyLock) return;                      // held while a nav jump animates
       var pos = window.scrollY + 100;
       var current = links[0];
       for (var i = 0; i < links.length; i++) {
