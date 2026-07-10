@@ -30,7 +30,7 @@
   --accent: light-dark(#2563eb, #7aa2ff);
   --accent-soft: light-dark(#eff6ff, #1d2536);
   --card: light-dark(#f8fafc, #1e2127);
-  --code: light-dark(#f3f4f6, #23262d);
+  --code: light-dark(#dde1e8, #23262d);   /* code-block (pre) surface; inline code uses its own bordered chip */
 
   /* semantic (meaning) — keep hue↔meaning fixed across every document */
   --note: light-dark(#2563eb, #7aa2ff); --note-soft: light-dark(#eff6ff, #1d2536);
@@ -76,9 +76,15 @@ h3 { font-size: 1.05rem; margin: 1.6rem 0 .4rem; scroll-margin-top: 3.4rem; }
 p { margin: .7rem 0; }
 hr { border: 0; border-top: 1px solid var(--line); margin: 2rem 0; }
 blockquote { margin: 1rem 0; padding: .1rem 1rem; border-left: 3px solid var(--line); color: var(--muted); }
-code { background: var(--code); border-radius: 4px; padding: .1em .35em; font-size: .88em; }
+/* explicit monospace stack: don't leave code/pre to the platform's default
+   `monospace` keyword, which is often an indistinct face — so inline code reads
+   clearly as code, not just a tinted chip in the body sans-serif. */
+code, pre { font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, "Liberation Mono", monospace; }
+/* inline code: a light chip delineated by a hairline border (border darker than
+   the fill, so the edge reads on white without a heavy background). */
+code { background: light-dark(#eef1f6, #23262d); border: 1px solid light-dark(#c3cad3, #30343b); border-radius: 4px; padding: .1em .35em; font-size: .88em; }
 pre { background: var(--code); border-radius: 8px; padding: .8rem 1rem; overflow-x: auto; }
-pre code { background: none; padding: 0; }
+pre code { background: none; padding: 0; border: 0; }
 /* highlighter-pen underline: a color band under the lower part of the glyphs,
    not a full background — keeps the text on the page surface and readable. */
 mark {
