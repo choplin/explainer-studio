@@ -1,7 +1,7 @@
 ---
 name: pdf-studio-summarize
 description: This skill should be used when the user wants to turn a large PDF (a book, manual, or long document — roughly 30+ pages) into a Markdown report, digest, or summary. Triggers on "PDFをレポートにして", "この本を要約して/レポート化して", "turn this PDF into a markdown report", "generate a digest of this document", "read this whole PDF and summarize it". Should NOT trigger for short PDFs under ~30 pages (read them directly with the Read tool), for academic conference/journal papers or preprints regardless of length (use paper-studio-summarize), for raw text extraction without synthesis, or for deep-diving one already-digested section (use pdf-studio-deep-dive).
-version: 0.2.0
+version: 0.1.0
 user-invocable: true
 ---
 
@@ -12,9 +12,10 @@ Convert a large PDF into a Markdown report through three phases that progressive
 ## Gotchas (read before starting)
 
 - **The Read tool's PDF vision requires system `poppler`.** The Read tool rasterizes PDF pages with `pdftoppm` (part of poppler). If extraction reports `pdftoppm failed:` (often with an empty message), poppler is missing or broken. Fix by installing it — macOS: `brew install poppler`; Debian/Ubuntu: `apt-get install poppler-utils` — then retry. Do NOT remove poppler to "clean up": it silently breaks all PDF reading.
-- **Front matter is often long and offset from printed page numbers.** Covers, TOC, preface, and blank/divider pages can run 20–30 PDF pages before the body starts, and printed page numbers lag PDF page numbers by that offset. Detect where the body begins before chunking — read the first ~10–15 PDF pages and take, as body-start, the first page whose content matches the first numbered chapter heading (or the first real TOC entry). Do not spend extraction budget transcribing the table of contents.
+- **Front matter is often long and offset from printed page numbers.** Covers, TOC, preface, and blank/divider pages can run 20–30 PDF pages before the body starts, and printed page numbers lag PDF page numbers by that offset. Detect where the body begins before chunking — read the first ~10–15 PDF pages and take, as body-start, the first page whose content matches the first numbered chapter heading (or the first real TOC entry). Do not spend extraction budget transcribing the table of contents *as content* — but if the front matter has a printed TOC, capturing its heading list once (as **structure**, not prose) is worthwhile: hand it to Phase 2 as an optional cross-check that the spine missed no heading. Capturing the TOC as structure and transcribing it as content are different things; the first is cheap and useful, the second is waste.
 - **Extraction/stitch workers left unconstrained will work around obstacles in undesirable ways.** Observed failures: a worker ran `brew install poppler` on its own; another shelled out to `pdftotext`; another bypassed a blocked Write with Bash. The Phase 1/2 procedures (in `pdf-studio-pdf-extract` / `pdf-studio-pdf-stitch`) carry the explicit constraints (no installs, Read tool only, report errors instead of working around them); apply them as written.
-- **Keep page anchors `[pNN]` in every artifact.** They make the report traceable to the source and are what lets [[pdf-studio-deep-dive]] zoom back into the original PDF later. `pNN` is always the **PDF** page number; record any printed-page↔PDF offset in the outline's `## Page offset` field (see Phase 2) so [[pdf-studio-deep-dive]] can convert printed page numbers.
+- **Keep page anchors `[pNN]` in every artifact.** They make the report traceable to the source and are what lets [[pdf-studio-deep-dive]] zoom back into the original PDF later. `pNN` is always the **PDF** page number; record any printed-page↔PDF offset in the spine/outline's `## Page offset` field (see Phase 2) so [[pdf-studio-deep-dive]] can convert printed page numbers.
+- **Headings and their anchors come from the spine `toc.md`, not re-derived per phase.** Phase 2 builds `structured/toc.md` — the canonical structure (each heading's source-form title verbatim + the `[pNN]` it first appears on) — by merging the chunks' heading streams. The outline, the overview, and [[pdf-studio-deep-dive]] all take their headings and anchors from the spine instead of re-inventing them. Re-deriving structure from prose in each phase is exactly what caused heading drift and off-by-one anchors; the spine removes that failure mode by construction.
 - **Figure harvest (MinerU) is an optional enhancement with a clean fallback, not a hard dependency.** Phase 0 runs `figure_harvest.sh` through `scripts/preflight.sh` to crop genuine figures (diagrams / plots / photos — not tables or console output) into `ocr/figures/`. The runtime is resolved automatically — `preflight.sh` uses poppler + a MinerU source from PATH, else the bundled `flake.nix` dev shell (`nix`); MinerU itself is used from PATH if installed, else resolved by `uvx --from 'mineru[core]' mineru` into uv's shared tool cache (no per-skill lockfile, no manual/global install). **Do not install anything by hand.** If the runtime cannot be resolved at all (no poppler+uv/mineru on PATH and no nix), `preflight.sh` fails with the setup options — **relay them and continue the pipeline without figure crops** (the reports still describe figures in prose, as before). **MinerU 3.x starts a local service and uses multiprocessing that the command sandbox blocks** (`Operation not permitted` on a semaphore), and its first `uvx` resolve / model download need network — so **run Phase 0 with the sandbox disabled**. It is fully local (nothing is uploaded); the first run downloads model weights (several GB) plus a tool-env sync when resolved via uvx, and is slow — warn about that.
 - **The text-layer option is opt-in and only for born-digital PDFs.** By default the body is read visually (robust on scans/captures). A purchased ebook carries a real text layer, and `pdftotext -layout` reproduces its code listings, commands, numbers, and console/box-drawing tables far more faithfully than visual OCR — but a scanned/captured PDF has no text layer, so this must never be forced. Gate it: only offer the option when `text_layer.sh --probe <pdf> <body-start>` reports born-digital, and only use it when the user opts in.
 - **Text-layer mode cannot read values that live only inside a raster figure.** `pdftotext` reproduces the text stream faithfully (code, commands, numbers, console/box-drawing tables), but a value that exists only as pixels inside a diagram — a bit array drawn in a figure, a node's key in an illustrated tree, numbers baked into a chart image — is not in the text layer, so text-layer mode drops it (visual mode reads it). This is a deliberate trade-off, not a bug: pair text-layer with figure harvest (Phase 0) so the embedded crop carries those in-image values, and treat in-figure values as the known blind spot of the text path.
@@ -51,7 +52,8 @@ For a source PDF at `<dir>/<name>.pdf`, everything is written under `<dir>/<name
 │   ├── text-030-049.md   # (text-layer mode only) faithful text the worker reads
 │   └── chunk-050-069.md
 ├── structured/
-│   └── outline.md        # Phase 2: stitched, deduped, re-structured outline
+│   ├── toc.md            # Phase 2: canonical structural spine (headings + [pNN] anchors, verbatim)
+│   └── outline.md        # Phase 2: stitched, deduped outline, assembled against toc.md
 └── reports/
     └── overview.md       # Phase 3: overview report
 ```
@@ -87,19 +89,21 @@ Give absolute paths.
 
 ## Phase 2 — Stitch & structure (single pass)
 
-Apply the **`pdf-studio-pdf-stitch`** skill once, reading all `extract/chunk-*.md` files and rebuilding the document's logic:
+Apply the **`pdf-studio-pdf-stitch`** skill once, reading all `extract/chunk-*.md` files and rebuilding the document's logic into **two** artifacts — the spine first, then the outline:
 
-- Join sections split across chunk boundaries; dedupe repeated descriptions; reconcile translation/heading variance.
-- Rebuild the chapter → section → subsection hierarchy into `structured/outline.md`, preserving `[pNN]` anchors.
+- **Build `structured/toc.md` (the canonical spine)** by merging the chunks' `## Headings` streams: dedupe boundary repeats, keep each heading's source-form title verbatim, and take its `[pNN]` from the stream (never a blank page). If you captured a printed TOC, hand it over as a completeness cross-check.
+- **Assemble `structured/outline.md` against the spine:** its heading tree is `toc.md`'s (same titles/anchors), with the boundary-joined, deduped content filled under each. Do not invent a second structure.
 - Preserve the figure references the chunks recorded (from `ocr/figures.md`) against their sections, so the outline knows which figure belongs where.
-- Record a boundary note: what was joined, and where coverage stops mid-section (if the run was a partial slice).
-- Record the printed-page↔PDF-page offset in a `## Page offset` field near the top of `outline.md` (e.g. "printed page N = PDF page N + 27", or "none detected") so [[pdf-studio-deep-dive]] can convert printed page numbers to PDF pages.
+- Record a boundary note: what was joined, where coverage stops mid-section (if partial), and any TOC↔heading cross-check discrepancy.
+- Record the printed-page↔PDF-page offset in a `## Page offset` field near the top of both files (e.g. "printed page N = PDF page N + 27", or "none detected") so [[pdf-studio-deep-dive]] can convert printed page numbers to PDF pages.
 
-**Under Claude Code**, dispatch a single `pdf-studio-pdf-stitch` subagent; **otherwise** apply the skill inline. Pass the `extract/` directory absolute path, the output path `structured/outline.md`, and — if Phase 0 ran — the `ocr/figures.md` absolute path so it can keep figure references against their sections. It returns only the reconstructed heading list and one line on boundary decisions.
+**Under Claude Code**, dispatch a single `pdf-studio-pdf-stitch` subagent; **otherwise** apply the skill inline. Pass the `extract/` directory absolute path, the output path `structured/outline.md` (the spine `toc.md` is written beside it), any captured printed TOC, and — if Phase 0 ran — the `ocr/figures.md` absolute path so it can keep figure references against their sections. It returns only the spine heading count and one line on boundary decisions.
 
 ## Phase 3 — Overview report (orchestrator, inline)
 
 Unlike Phases 1–2, this phase runs **inline** in the orchestrator. Its only input is `structured/outline.md` — already the compressed artifact — so reading it into the orchestrator does not bloat context, and an isolated worker would only have to hand the finished report back anyway. The orchestrator reads `structured/outline.md` and writes `reports/overview.md` itself: an executive summary plus a consistent-granularity walkthrough of the structure, keeping key definitions, figures, and `[pNN]` anchors. This report is intentionally the compressed, overview view — detail on demand is the job of [[pdf-studio-deep-dive]].
+
+- **Take headings and their `[pNN]` from the spine `structured/toc.md`, not by re-reading or re-inventing them.** The overview's section headings are the spine's headings (translated for display if the report language differs, but carrying the spine's anchor). This is what keeps the overview's anchors identical to the outline's and lets the Finalize containment check pass.
 
 - Open with a "Coverage" note and a 3–5 line executive summary; end with an "Uncovered / continued" note if this was a partial run.
 - Compose it as headings + concise explanatory prose (not a flat bullet list), preserving the chapter/section hierarchy and `[pNN]` anchors.
@@ -113,7 +117,16 @@ Unlike Phases 1–2, this phase runs **inline** in the orchestrator. Its only in
 
 Figures aid the reports; they are not a checklist. Embed a harvested figure only where the prose actually discusses what it shows, and when you embed it, explain it (never a bare image). **Do not append a trailing figure list or force every crop into a report to "cover" it** — this is a book, not a paper, so referencing every figure is not required. Crops in `ocr/figures/` that no report naturally needs are fine to leave unreferenced. If you *do* want a figure that `figures.md` marks "⚠ Not extracted", render and crop its page first (`pdftoppm -f N -l N -singlefile -r 200 -png <pdf> <tmp>/pg`) before embedding it.
 
-### 2. Coherence self-check — does it read as one standalone piece (no source re-read)
+### 2. Anchor containment against the spine — a structural check, not a source re-read
+
+A cheap, deterministic guard that the overview's anchors did not drift from the canonical structure. Read only `structured/toc.md` and `reports/overview.md` (both small; **do not re-read the source PDF or the outline body**). Confirm:
+
+- Every section heading in `overview.md` corresponds to a spine heading (by source-form title, or its translation) — the overview introduces no heading the spine does not have.
+- Each such heading carries the **same `[pNN]`** the spine records for it.
+
+Any mismatch is an anchor that drifted while writing the overview — fix it to the spine's anchor (the spine is authoritative). This is the mechanical anchor check reduced to a containment test: because headings and anchors are sourced from the spine, there is no fuzzy source-matching to do here, and a heading the check cannot locate in the spine is itself the finding. If the spine and overview agree, done.
+
+### 3. Coherence self-check — does it read as one standalone piece (no source re-read)
 
 The overview is compressed from the stitched `outline.md`, and for large documents it is built by multi-level reduce (section → chapter → whole) — a path where a term's first-use definition or the granularity can silently drift between levels. Do one light editorial pass to catch that. This is **not** the paper-studio faithfulness sweep: **do not re-read the source PDF, and do not re-read the outline's body** — read only the finished `reports/overview.md`, using `outline.md` solely as a checklist of which sections should be present. It is a book, not a paper, so keep it light — fix what you find, don't manufacture work.
 
@@ -125,7 +138,7 @@ Read the overview top to bottom as a first-time reader and check:
 
 Fix issues inline (a one-line definition, a bridging sentence, a granularity trim). If it already reads cleanly, that is a valid outcome — note it and move on.
 
-### 3. Collect the source PDF (confirm first)
+### 4. Collect the source PDF (confirm first)
 
 To make the work dir a single self-contained folder, move the source PDF into it as `<WORK_DIR>/<name>.pdf` as the last step.
 
@@ -143,8 +156,9 @@ To make the work dir a single self-contained folder, move the source PDF into it
 ## Success criteria (verify the deliverable, not the steps)
 
 - [ ] Every `extract/chunk-*.md` and `outline.md` carries `[pNN]` PDF-page anchors.
-- [ ] `outline.md` has no section duplicated across a former chunk boundary, and records where coverage stops.
-- [ ] `reports/overview.md` covers every top-level section present in `outline.md` (no section silently dropped).
+- [ ] `structured/toc.md` exists: one row per heading with a source-form (verbatim) title and its `[pNN]`, built by merging the chunks' heading streams (not re-derived from prose); no heading is anchored to a blank/divider page.
+- [ ] `outline.md`'s heading tree matches `toc.md` (same headings, same anchors) and has no section duplicated across a former chunk boundary; it records where coverage stops.
+- [ ] `reports/overview.md` covers every top-level section present in `toc.md` (no section silently dropped), and each heading it carries maps to a spine heading with the same `[pNN]` (the Finalize containment check passed).
 - [ ] `reports/overview.md` reads as one standalone piece: sections connect, non-obvious terms are defined at first use, and it is followable without the source (a light coherence pass, not a source-faithfulness sweep).
 - [ ] The body-start page was detected; front matter (TOC/preface) was not transcribed as content.
 - [ ] If the run was a partial page range, `reports/overview.md` states the covered range and the continuation point.

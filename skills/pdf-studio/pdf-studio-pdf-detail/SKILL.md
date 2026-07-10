@@ -1,7 +1,7 @@
 ---
 name: pdf-studio-pdf-detail
 description: Internal procedure for the pdf-studio-deep-dive skill — re-read a resolved page span of an already-digested PDF (visually, or from a faithful text layer) and write a thorough, standalone detail report for just that span, with [pNN] anchors. Applied by the deep-dive orchestrator (dispatched to a pdf-studio-pdf-detail subagent under Claude Code, or applied inline otherwise), and by pdf-studio-full-guide once per in-scope chapter. NOT a user-facing skill and NOT triggered directly by user requests.
-version: 0.2.0
+version: 0.1.0
 user-invocable: false
 ---
 
@@ -20,8 +20,8 @@ The caller provides the following. If any is missing, report what is missing and
 - The source to re-read, in one of two modes:
   - **Visual mode (default):** the absolute path to the target PDF, read over the page range below.
   - **Text-layer mode:** the absolute path to a pre-extracted text file that already holds the resolved span as faithful `[pNN]`-anchored text. Read that file instead of the PDF; the page range is still given for context and anchors.
-- Page range to re-read (PDF page numbers, START–END; resolved from the outline's [pNN] anchors with margin pages added on each side)
-- Target section name or range
+- Page range to re-read (PDF page numbers, START–END; resolved from the spine's [pNN] anchors with margin pages added on each side)
+- Target section: its **spine heading** (source-form title) and the **spine `[pNN]`** for that heading, if the caller resolved from `toc.md`; else a plain section name or range. Use the spine heading + anchor for the report's header when given — do not re-guess the section's starting page.
 - Absolute output path (e.g. `<WORK_DIR>/reports/<section-slug>.md`)
 
 ## Constraints (strict)
@@ -39,7 +39,7 @@ The caller provides the following. If any is missing, report what is missing and
 
 - Read the given source (the PDF page range visually, or the provided text-layer file) and write a detailed report of that part. Not an overview — capture full definitions, step-by-step procedures, every figure/table, concrete examples, and caveats. In text-layer mode, preserve code / commands / numeric output verbatim (that fidelity is why the mode was chosen); values that live only inside a raster figure are absent from the text layer — do not invent them.
 - Attach [pNN] (PDF page) anchors at key points.
-- State the target section name and page range at the top.
+- State the target section name and page range at the top. When the caller gave a spine heading + `[pNN]`, use them for the header (title = spine source-form title or its translation; the header's page anchor = the spine `[pNN]`). Trim blank/divider pages from the stated range's endpoints — a range never starts or ends on a near-empty page (those were margin/padding pages, not section content).
 
 ## Output
 
