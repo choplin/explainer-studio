@@ -38,7 +38,7 @@
   --warn: light-dark(#b45309, #fbbf24); --warn-soft: light-dark(#fffbeb, #271f0e);
   --bad:  light-dark(#b91c1c, #f87171); --bad-soft:  light-dark(#fef2f2, #2a1414);
   --key:  light-dark(#7c3aed, #c4b5fd); --key-soft:  light-dark(#f5f3ff, #201a2e);
-  --mark: light-dark(#ffe08a, #b8912f);   /* highlighter-pen band color */
+  --mark: light-dark(#ffe08a, #8a6a12);   /* highlighter-pen band color (dark: deep so white text stays legible on the band) */
 
   /* categorical (wayfinding) — defaults to the global accent until a hue-N sets it */
   --cat: var(--accent); --cat-soft: var(--accent-soft);
@@ -48,12 +48,12 @@
 
 /* categorical hues — cycle hue-1..hue-6 (set on <body>, a section, or a card).
    Each light-dark() pair is legible on its own surface. */
-.hue-1 { --cat: light-dark(#2563eb, #7aa2ff); --cat-soft: light-dark(#eff6ff, #16203a); }
-.hue-2 { --cat: light-dark(#0d9488, #2dd4bf); --cat-soft: light-dark(#effcf9, #0c2420); }
-.hue-3 { --cat: light-dark(#7c3aed, #c4b5fd); --cat-soft: light-dark(#f5f3ff, #1c1730); }
-.hue-4 { --cat: light-dark(#c2410c, #fb923c); --cat-soft: light-dark(#fff5ec, #2a1a0e); }
-.hue-5 { --cat: light-dark(#be123c, #fb7185); --cat-soft: light-dark(#fff1f3, #2a1218); }
-.hue-6 { --cat: light-dark(#4d7c0f, #a3e635); --cat-soft: light-dark(#f6fdea, #1a2410); }
+.hue-1 { --cat: light-dark(#2563eb, #7aa2ff); --cat-soft: light-dark(#dbeafe, #16203a); }
+.hue-2 { --cat: light-dark(#0d9488, #2dd4bf); --cat-soft: light-dark(#ccfbf1, #0c2420); }
+.hue-3 { --cat: light-dark(#7c3aed, #c4b5fd); --cat-soft: light-dark(#ede9fe, #1c1730); }
+.hue-4 { --cat: light-dark(#c2410c, #fb923c); --cat-soft: light-dark(#ffedd5, #2a1a0e); }
+.hue-5 { --cat: light-dark(#be123c, #fb7185); --cat-soft: light-dark(#ffe4e6, #2a1218); }
+.hue-6 { --cat: light-dark(#4d7c0f, #a3e635); --cat-soft: light-dark(#ecfccb, #1a2410); }
 
 /* --- foundation --- */
 * { box-sizing: border-box; }
