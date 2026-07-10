@@ -30,7 +30,7 @@
   --accent: light-dark(#2563eb, #7aa2ff);
   --accent-soft: light-dark(#eff6ff, #1d2536);
   --card: light-dark(#f8fafc, #1e2127);
-  --code: light-dark(#dde1e8, #23262d);   /* code-block (pre) surface; inline code uses its own bordered chip */
+  --code: light-dark(#f6f8fa, #23262d);   /* code-block (pre) surface — GitHub-style panel; inline code uses its own bordered chip */
 
   /* semantic (meaning) — keep hue↔meaning fixed across every document */
   --note: light-dark(#2563eb, #7aa2ff); --note-soft: light-dark(#eff6ff, #1d2536);
@@ -83,7 +83,7 @@ code, pre { font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consola
 /* inline code: a light chip delineated by a hairline border (border darker than
    the fill, so the edge reads on white without a heavy background). */
 code { background: light-dark(#eef1f6, #23262d); border: 1px solid light-dark(#c3cad3, #30343b); border-radius: 4px; padding: .1em .35em; font-size: .88em; }
-pre { background: var(--code); border-radius: 8px; padding: .8rem 1rem; overflow-x: auto; }
+pre { background: var(--code); border: 1px solid light-dark(#d0d7de, #30343b); border-radius: 8px; padding: .8rem 1rem; overflow-x: auto; }
 pre code { background: none; padding: 0; border: 0; }
 /* highlighter-pen underline: a color band under the lower part of the glyphs,
    not a full background — keeps the text on the page surface and readable. */
