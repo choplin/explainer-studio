@@ -16,6 +16,32 @@
         </script>
         <link rel="stylesheet" href="assets/base.css" />
         <script src="assets/base.js" defer></script>
+        <!-- Tier 2 opt-in components (demoed in §9). Each engine loads from a
+             CDN; only those blocks need the network — the base stays offline. -->
+        <!-- highlight (highlight.js): CDN bundle first, then the glue -->
+        <script
+            src="https://cdn.jsdelivr.net/npm/@highlightjs/cdn-assets@11/highlight.min.js"
+            defer
+        ></script>
+        <link
+            rel="stylesheet"
+            href="assets/components/highlight/highlight.css"
+        />
+        <script src="assets/components/highlight/highlight.js" defer></script>
+        <!-- diff (diff2html) -->
+        <link
+            rel="stylesheet"
+            href="https://cdn.jsdelivr.net/npm/diff2html@3/bundles/css/diff2html.min.css"
+        />
+        <script src="https://cdn.jsdelivr.net/npm/diff2html@3/bundles/js/diff2html-ui.min.js"></script>
+        <link rel="stylesheet" href="assets/components/diff/diff.css" />
+        <script src="assets/components/diff/diff.js" defer></script>
+        <!-- diagram (mermaid) -->
+        <link rel="stylesheet" href="assets/components/diagram/diagram.css" />
+        <script
+            type="module"
+            src="assets/components/diagram/diagram.js"
+        ></script>
         <style>
             /* showcase-only helpers (not part of the design system) — small swatch grid
      to display the color tokens. Kept in this file so base.css stays clean. */
@@ -100,7 +126,12 @@
                         <li>カテゴリカル（道標）レイヤー</li>
                     </ol>
                     <h3>1.2 コードブロック</h3>
-                    <pre><code>&lt;link rel="stylesheet" href="assets/base.css"&gt;
+                    <p>
+                        base 単体のプレーンなコードブロック（ハイライトなし）。
+                        シンタックスハイライトは Tier 2 の
+                        <code>highlight</code> コンポーネントで、§9 でデモします。
+                    </p>
+                    <pre><code class="nohighlight">&lt;link rel="stylesheet" href="assets/base.css"&gt;
 &lt;script src="assets/base.js" defer&gt;&lt;/script&gt;</code></pre>
                     <hr />
                 </section>
@@ -447,10 +478,10 @@
                         </li>
                     </ul>
                     <div class="aside">
-                        Tier 2 の重量コンポーネント（diff / diagram）は CDN
-                        のレンダリングエンジンに依存し、 base
-                        基盤の「オフラインで完結する」原則を保つため本ページには載せていません。
-                        使い方は各
+                        Tier 2 の opt-in コンポーネント（highlight / diff /
+                        diagram）は §9 で実際にデモしています。各エンジンは CDN
+                        から読み込まれ、そのブロックだけがネットワークを使います（base
+                        基盤自体はオフラインで完結）。使い方は各
                         <code>assets/components/&lt;name&gt;/include.md</code>
                         を参照。
                     </div>
@@ -461,12 +492,100 @@
                     </p>
                     <p style="min-height: 40vh"></p>
                 </section>
+
+                <!-- ============================================================= -->
+                <section>
+                    <h2>9. Tier 2 opt-in コンポーネント</h2>
+                    <p>
+                        base 基盤（オフライン）に対し、重量レンダラは opt-in の
+                        Tier 2 コンポーネントとして
+                        <code>assets/components/&lt;name&gt;/</code>
+                        に分離し、使う文書だけがコピーします。エンジンは既定で
+                        CDN から読み込みます（このページのデモも同様）。
+                    </p>
+                    <div class="callout warn">
+                        <span class="label">閲覧方法</span> — このデモは ES
+                        モジュール（diagram）と CDN を使うため、<code
+                            class="nohighlight"
+                            >file://</code
+                        >
+                        で直接開くとブラウザが module を読み込めず diagram
+                        が描画されません。ローカルサーバ経由で開いてください（例:
+                        <code class="nohighlight"
+                            >python3 -m http.server</code
+                        >
+                        →
+                        <code class="nohighlight"
+                            >http://localhost:8000/showcase.html</code
+                        >）。
+                    </div>
+
+                    <h3>9.1 highlight — シンタックスハイライト（highlight.js）</h3>
+                    <p>
+                        <code>&lt;pre&gt;&lt;code class="language-*"&gt;</code>
+                        を highlight.js で着色。配色は
+                        <code>highlight.css</code> の
+                        <code>light-dark()</code> テーマでテーマ追従します。
+                    </p>
+                    <pre><code class="language-typescript">// two-layer color model — semantic vs categorical
+type Layer = "semantic" | "categorical";
+interface Token { name: string; light: string; dark: string; }
+
+function resolve(tokens: Token[], dark = false): Map&lt;string, string&gt; {
+  return new Map(tokens.map((t) =&gt; [t.name, dark ? t.dark : t.light]));
+}
+
+const marks: Token[] = [
+  { name: "--mark", light: "#ffe08a", dark: "#8a6a12" },
+];
+console.log(resolve(marks, /* dark */ true));</code></pre>
+
+                    <h3>9.2 diff — git diff の描画（diff2html）</h3>
+                    <p>
+                        <code>pre.diff-source</code>（有効な unified diff）＋直後の
+                        <code>div.diff-render</code>
+                        のペアを描画。下のボタンで表示形式を切り替え。
+                    </p>
+                    <p class="diff-format-toggle" role="group">
+                        <button type="button" data-diff-format="line-by-line">
+                            Unified
+                        </button>
+                        <button type="button" data-diff-format="side-by-side">
+                            Side by side
+                        </button>
+                    </p>
+                    <pre class="diff-source" hidden>diff --git a/assets/base.css b/assets/base.css
+--- a/assets/base.css
++++ b/assets/base.css
+@@ -38,3 +38,3 @@
+   --key:  light-dark(#7c3aed, #c4b5fd); --key-soft:  light-dark(#f5f3ff, #201a2e);
+-  --mark: light-dark(#ffe08a, #b8912f);   /* highlighter-pen band color */
++  --mark: light-dark(#ffe08a, #8a6a12);   /* dark: deep so white text stays legible */
+   --cat: var(--accent); --cat-soft: var(--accent-soft);</pre>
+                    <div class="diff-render"></div>
+
+                    <h3>9.3 diagram — 図の描画（mermaid）</h3>
+                    <p>
+                        <code>pre.mermaid</code> に mermaid ソースを書く。classDef
+                        のストロークは base 推奨のセマンティック系ミッドトーン。
+                    </p>
+                    <pre class="mermaid">
+flowchart LR
+  A["base.css / base.js（オフライン土台）"] --> B["Tier 2 opt-in"]:::changed
+  B --> C["highlight"]:::added
+  B --> D["diff"]:::added
+  B --> E["diagram"]:::added
+  classDef added   stroke:#3ca370,stroke-width:2px;
+  classDef changed stroke:#e8a13c,stroke-width:2px;
+</pre>
+                </section>
             </article>
         </main>
 
         <footer>
-            understanding-html-docs デザインシステム ショーケース ・
-            目視確認用（base.css / base.js のみ、外部依存なし）
+            understanding-html-docs デザインシステム ショーケース ・ 目視確認用。
+            base.css / base.js はオフライン土台。§9 の Tier 2 デモのみ各エンジンを
+            CDN から読み込みます。
         </footer>
     </body>
 </html>

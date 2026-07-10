@@ -12,4 +12,13 @@ import mermaid from "https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.esm.mi
 const dark = document.documentElement.classList.contains("theme-dark")
   || (!document.documentElement.classList.contains("theme-light")
       && window.matchMedia("(prefers-color-scheme: dark)").matches);
-mermaid.initialize({ startOnLoad: true, theme: dark ? "dark" : "neutral" });
+// Drive mermaid explicitly rather than via startOnLoad: with an ESM `import`
+// the auto-run can miss the load event (this is mermaid's own recommended ESM
+// pattern). The deferred module runs after parsing, so call run() once the DOM
+// is ready and every <pre class="mermaid"> exists.
+mermaid.initialize({ startOnLoad: false, theme: dark ? "dark" : "neutral" });
+if (document.readyState === "loading") {
+  document.addEventListener("DOMContentLoaded", function () { mermaid.run(); });
+} else {
+  mermaid.run();
+}

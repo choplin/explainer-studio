@@ -150,6 +150,7 @@ rationale for the tier model: `docs/2026-07-10-html-docs-component-library-desig
 
 | Component | Renders | Third-party engine (CDN by default) |
 |-----------|---------|-------------------------------------|
+| `components/highlight/` | syntax-highlighted code blocks (`pre code`, auto-detected or `language-xxx`) | highlight.js v11 |
 | `components/diff/` | git diffs (`pre.diff-source` + `div.diff-render` pairs, unified↔side-by-side) | diff2html v3 |
 | `components/diagram/` | mermaid diagrams (`pre.mermaid`) | mermaid v11 |
 
