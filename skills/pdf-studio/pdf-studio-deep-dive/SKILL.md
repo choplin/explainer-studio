@@ -1,7 +1,6 @@
 ---
 name: pdf-studio-deep-dive
 description: This skill should be used when a PDF has already been digested by pdf-studio-summarize (an outline.md with page anchors exists) and the user now wants a DEEPER, more detailed report on one specific part. Triggers on "1.3節をもっと詳しく", "第2章を深掘りして", "p50-60の詳細レポートが欲しい", "expand the section on X", "drill into chapter 2", "give me the full detail of that part". It resolves the location to source pages via the spine's (toc.md) [pNN] anchors, re-reads only those pages, and writes a standalone detailed report. Should NOT trigger for a first full-document pass (use pdf-studio-summarize) or when no outline / source PDF exists yet.
-version: 0.1.0
 user-invocable: true
 ---
 

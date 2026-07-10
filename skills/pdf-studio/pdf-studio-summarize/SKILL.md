@@ -1,7 +1,6 @@
 ---
 name: pdf-studio-summarize
 description: This skill should be used when the user wants to turn a large PDF (a book, manual, or long document — roughly 30+ pages) into a Markdown report, digest, or summary. Triggers on "PDFをレポートにして", "この本を要約して/レポート化して", "turn this PDF into a markdown report", "generate a digest of this document", "read this whole PDF and summarize it". Should NOT trigger for short PDFs under ~30 pages (read them directly with the Read tool), for academic conference/journal papers or preprints regardless of length (use paper-studio-summarize), for raw text extraction without synthesis, or for deep-diving one already-digested section (use pdf-studio-deep-dive).
-version: 0.1.0
 user-invocable: true
 ---
 

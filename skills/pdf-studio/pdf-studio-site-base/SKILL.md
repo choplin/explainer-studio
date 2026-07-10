@@ -1,7 +1,6 @@
 ---
 name: pdf-studio-site-base
 description: Shared resources for the pdf-studio site skills — the persistent Cloudflare Pages "library" manager (`scripts/library.py`) and the pdf-studio site context layer (`assets/pdf-studio.css` + `assets/pdf-studio.js`), which layers on top of the understanding-html-docs base design system. pdf-studio-initialize-site and pdf-studio-deploy-site delegate here to run library.py; pdf-studio-generate-site delegates here for the context assets its report pages share with the library index. Use this skill when another pdf-studio skill asks to run the library manager or copy the context assets. Not typically invoked on its own.
-version: 0.2.0
 user-invocable: false
 ---
 

@@ -1,7 +1,6 @@
 ---
 name: pdf-studio-audio-narrate
 description: This skill should be used to synthesize an existing two-speaker dialogue script (台本, in the A:/B: line format) into a spoken audio file — the SECOND step of the audio-guide flow, after pdf-studio-audio-dialogue writes the script. Triggers on "台本を音声にして", "この対話を読み上げて / 音声化して", "音声ファイルを作って", "narrate this dialogue", "turn the script into audio", "synthesize the audio". Uses a local VOICEVOX ENGINE (offline, no API key) and encodes AAC/m4a with ffmpeg. Should NOT trigger for writing the dialogue script (use pdf-studio-audio-dialogue).
-version: 0.2.0
 user-invocable: true
 ---
 

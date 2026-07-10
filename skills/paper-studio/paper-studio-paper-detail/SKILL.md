@@ -1,7 +1,6 @@
 ---
 name: paper-studio-paper-detail
 description: Internal Phase 2 procedure for the paper-studio-summarize skill — write ONE perspective-specific detail report (background / method / experiments / discussion / related-work) for an academic paper already digested in Phase 1, reading either the OCR Markdown or a resolved PDF page span. Applied once per in-scope perspective, in parallel, by the summarize orchestrator (dispatched to a paper-studio-paper-detail subagent under Claude Code, or applied inline otherwise). NOT a user-facing skill and NOT triggered directly by user requests.
-version: 0.2.0
 user-invocable: false
 ---
 

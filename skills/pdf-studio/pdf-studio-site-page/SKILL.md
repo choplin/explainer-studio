@@ -1,7 +1,6 @@
 ---
 name: pdf-studio-site-page
 description: Internal procedure for the pdf-studio-generate-site skill — read one report Markdown and author a restructured, web-native HTML page from the provided template — an editorial rewrite for browsing, NOT a 1:1 Markdown-to-HTML conversion. Applied once per report, in parallel, by the generate-site orchestrator (dispatched to a pdf-studio-site-page subagent under Claude Code, or applied inline otherwise). NOT a user-facing skill and NOT triggered directly by user requests.
-version: 0.3.0
 user-invocable: false
 ---
 
