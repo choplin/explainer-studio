@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>understanding-html-docs — デザインシステム ショーケース</title>
+<!-- no-flash theme boot: must match base.js THEME_KEY ('html-docs-theme') -->
+<script>try{var t=localStorage.getItem('html-docs-theme');if(t==='dark')document.documentElement.classList.add('theme-dark');else if(t==='light')document.documentElement.classList.add('theme-light');}catch(e){}</script>
+<link rel="stylesheet" href="assets/base.css">
+<script src="assets/base.js" defer></script>
+<style>
+  /* showcase-only helpers (not part of the design system) — small swatch grid
+     to display the color tokens. Kept in this file so base.css stays clean. */
+  .swatch { border: 1px solid var(--line); border-radius: 10px; padding: .7rem .8rem; font-size: .82rem; }
+  .swatch .name { font-weight: 600; }
+  .swatch .val { color: var(--muted); font-size: .74rem; font-family: ui-monospace, monospace; }
+  .swatch .bar { height: 1.6rem; border-radius: 6px; margin: .4rem 0 .5rem; }
+</style>
+</head>
+<body>
+<header class="site">
+  <a href="#top">understanding-html-docs / ショーケース</a>
+  <!-- theme button (auto→light→dark) is mounted here by base.js -->
+</header>
+
+<main>
+<article id="top">
+  <p class="kicker">DESIGN SYSTEM</p>
+  <h1>understanding-html-docs デザインシステム ショーケース</h1>
+  <p class="lede">
+    このページは base スキル（<code>understanding-html-docs</code>）が提供する
+    デザインシステムと進行的強化（PE）キットの全コンポーネントを一望するための
+    目視確認用ページです。右上のテーマボタンで <strong>自動 / ライト / ダーク</strong>
+    を切り替え、各コンポーネントが両テーマで成立しているかを確認できます。
+  </p>
+
+  <div class="callout">
+    <span class="label">確認の観点</span> — 特に
+    <strong>ダークの <code>&lt;mark&gt;</code> ハイライト帯</strong>（白文字とのコントラスト）と、
+    <strong>ライトの <code>--cat-soft</code> 背景塗り</strong>（白地での視認性）を両テーマで見比べてください。
+    どちらも直近で調整したトークンです。
+  </div>
+
+  <!-- ============================================================= -->
+  <section class="hue-1">
+  <h2>1. タイポグラフィと基本要素</h2>
+  <p>
+    段落は自動で <code>body</code> / <code>p</code> のスタイルが当たります。
+    リンクはグローバルアクセント固定で <a href="#top">このように</a> 表示され、
+    インラインの <code>code</code> は地色と別のコードトーンになります。
+    重要語は <mark>この蛍光ペン下線帯（&lt;mark&gt;）</mark> で強調でき、
+    <mark>ダークテーマでは白文字が帯に乗っても読める濃さ</mark>になっているのが要確認点です。
+  </p>
+  <h3>1.1 見出しと引用</h3>
+  <blockquote>
+    引用（blockquote）は左罫線とミュート文字で本文から一段引きます。
+    出典や補足の直接引用に使います。
+  </blockquote>
+  <p>順序なしリストと順序付きリスト:</p>
+  <ul>
+    <li>foundation は要素セレクタで自動適用される</li>
+    <li>名前付きコンポーネントはクラスで opt-in する</li>
+  </ul>
+  <ol>
+    <li>セマンティック（意味）レイヤー</li>
+    <li>カテゴリカル（道標）レイヤー</li>
+  </ol>
+  <h3>1.2 コードブロック</h3>
+  <pre><code>&lt;link rel="stylesheet" href="assets/base.css"&gt;
+&lt;script src="assets/base.js" defer&gt;&lt;/script&gt;</code></pre>
+  <hr>
+  </section>
+
+  <!-- ============================================================= -->
+  <section class="hue-2">
+  <h2>2. テーブル</h2>
+  <p><code>.tablewrap</code> でくるむと、狭い画面で横スクロールできます。</p>
+  <div class="tablewrap">
+    <table>
+      <thead>
+        <tr><th>コンポーネント</th><th>役割</th><th>色レイヤー</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>callout</td><td>意味付きメッセージ箱</td><td>セマンティック</td></tr>
+        <tr><td>keypoints</td><td>要点ボックス</td><td>カテゴリカル</td></tr>
+        <tr><td>chip / badge</td><td>ラベル / 状態マーカー</td><td>アクセント</td></tr>
+      </tbody>
+    </table>
+  </div>
+  </section>
+
+  <!-- ============================================================= -->
+  <section class="hue-3">
+  <h2>3. Callout（セマンティック・メッセージ箱）</h2>
+  <p>基底クラス <code>.callout</code> は note（情報）。バリアントで意味・色・アイコンが変わります。</p>
+  <div class="callout"><span class="label">Note</span> — 一般的な補足情報。基底の青。</div>
+  <div class="callout tip"><span class="label">Tip</span> — 役立つヒント。緑。</div>
+  <div class="callout warn"><span class="label">Warn</span> — 注意喚起。橙。</div>
+  <div class="callout danger"><span class="label">Danger</span> — 危険・破壊的操作。赤。</div>
+  <div class="callout key"><span class="label">Key</span> — 重要な要点。紫。</div>
+  </section>
+
+  <!-- ============================================================= -->
+  <section class="hue-4">
+  <h2>4. 強調ブロック</h2>
+  <p class="kicker">KICKER</p>
+  <h3>4.1 プルクオート・キッカー・リード</h3>
+  <p class="pullquote">プルクオートは一行を強く見せ、引用符をカテゴリカル色で描く。</p>
+  <p class="lede">リード（lede）は導入段落を少し大きくミュートで見せ、本文への入口を作る。</p>
+  <div class="aside">
+    aside はアイコンもセマンティック色も持たない静かな補足。脚注的な文脈を本文からわずかに離して置く。
+  </div>
+  </section>
+
+  <!-- ============================================================= -->
+  <section class="hue-5">
+  <h2>5. チップとバッジ</h2>
+  <p>
+    <span class="chip">muted chip</span>
+    <span class="chip accent">accent chip</span>
+    <span class="badge">NEW</span>
+    <span class="badge">3</span>
+  </p>
+  <p><code>.chip</code> は輪郭のミュートなピル、<code>.badge</code> はその塗り版（強調）。</p>
+  </section>
+
+  <!-- ============================================================= -->
+  <section class="hue-6">
+  <h2>6. Keypoints と Card</h2>
+  <div class="keypoints">
+    <h3>この節のポイント</h3>
+    <ul>
+      <li>keypoints はカテゴリカル色 <code>--cat</code> / <code>--cat-soft</code> で色付く</li>
+      <li>ライトテーマでも背景の塗りとして成立する濃度になっているかを確認</li>
+      <li>左 4px 罫線＋薄塗り背景で「要点」を面として示す</li>
+    </ul>
+  </div>
+  <div class="card-grid">
+    <div class="card"><strong>Card</strong><p>枠付きの汎用ブロック。中身は任意。</p></div>
+    <div class="card hue-1"><strong>Card（hue-1）</strong><p>hue-N を付けるとカテゴリ色が乗る。</p></div>
+    <div class="card hue-3"><strong>Card（hue-3）</strong><p>グリッドは自動で折り返す。</p></div>
+  </div>
+  </section>
+
+  <!-- ============================================================= -->
+  <section>
+  <h2>7. カラーモデル（2レイヤー）</h2>
+  <p>色は必ず一つの意味を運ぶ。<strong>セマンティック（意味）</strong>と<strong>カテゴリカル（道標）</strong>は交わらない。</p>
+
+  <h3>7.1 セマンティック（意味 = 固定）</h3>
+  <div class="card-grid">
+    <div class="swatch"><div class="bar" style="background:var(--note-soft);border:1px solid var(--note)"></div><span class="name" style="color:var(--note)">note</span><div class="val">--note / --note-soft</div></div>
+    <div class="swatch"><div class="bar" style="background:var(--tip-soft);border:1px solid var(--tip)"></div><span class="name" style="color:var(--tip)">tip</span><div class="val">--tip / --tip-soft</div></div>
+    <div class="swatch"><div class="bar" style="background:var(--warn-soft);border:1px solid var(--warn)"></div><span class="name" style="color:var(--warn)">warn</span><div class="val">--warn / --warn-soft</div></div>
+    <div class="swatch"><div class="bar" style="background:var(--bad-soft);border:1px solid var(--bad)"></div><span class="name" style="color:var(--bad)">danger</span><div class="val">--bad / --bad-soft</div></div>
+    <div class="swatch"><div class="bar" style="background:var(--key-soft);border:1px solid var(--key)"></div><span class="name" style="color:var(--key)">key</span><div class="val">--key / --key-soft</div></div>
+    <div class="swatch"><div class="bar" style="background:linear-gradient(transparent 56%, var(--mark) 56%)"></div><span class="name">mark</span><div class="val">--mark（帯）</div></div>
+  </div>
+
+  <h3>7.2 カテゴリカル（道標 = 循環）</h3>
+  <p>各 <code>hue-N</code> の <code>--cat-soft</code> 背景に <code>--cat</code> 罫線。ライトで塗りとして成立しているか確認。</p>
+  <div class="card-grid">
+    <div class="hue-1"><div class="swatch" style="background:var(--cat-soft);border-left:4px solid var(--cat)"><span class="name" style="color:var(--cat)">hue-1</span><div class="val">--cat-soft 背景</div></div></div>
+    <div class="hue-2"><div class="swatch" style="background:var(--cat-soft);border-left:4px solid var(--cat)"><span class="name" style="color:var(--cat)">hue-2</span><div class="val">--cat-soft 背景</div></div></div>
+    <div class="hue-3"><div class="swatch" style="background:var(--cat-soft);border-left:4px solid var(--cat)"><span class="name" style="color:var(--cat)">hue-3</span><div class="val">--cat-soft 背景</div></div></div>
+    <div class="hue-4"><div class="swatch" style="background:var(--cat-soft);border-left:4px solid var(--cat)"><span class="name" style="color:var(--cat)">hue-4</span><div class="val">--cat-soft 背景</div></div></div>
+    <div class="hue-5"><div class="swatch" style="background:var(--cat-soft);border-left:4px solid var(--cat)"><span class="name" style="color:var(--cat)">hue-5</span><div class="val">--cat-soft 背景</div></div></div>
+    <div class="hue-6"><div class="swatch" style="background:var(--cat-soft);border-left:4px solid var(--cat)"><span class="name" style="color:var(--cat)">hue-6</span><div class="val">--cat-soft 背景</div></div></div>
+  </div>
+  </section>
+
+  <!-- ============================================================= -->
+  <section>
+  <h2>8. 進行的強化（PE キット / base.js）</h2>
+  <p>以下は <code>base.js</code> が読み込まれた時だけ乗る層。読み込まれなくてもページは読める。</p>
+  <ul>
+    <li><strong>テーマ切替</strong> — 右上ボタンで 自動→ライト→ダーク（localStorage 保存）</li>
+    <li><strong>読書プログレスバー</strong> — 画面最上部。スクロールで進捗を表示</li>
+    <li><strong>目次（TOC）</strong> — 狭い画面は ☰ FAB のオーバーレイ、広い画面（≥76rem）は左サイドバー常設。scroll-spy でカレント節を <code>--cat</code> で強調</li>
+    <li><strong>先頭へ戻る</strong> — 500px 以上スクロールで右下に出現</li>
+  </ul>
+  <div class="aside">
+    Tier 2 の重量コンポーネント（diff / diagram）は CDN のレンダリングエンジンに依存し、
+    base 基盤の「オフラインで完結する」原則を保つため本ページには載せていません。
+    使い方は各 <code>assets/components/&lt;name&gt;/include.md</code> を参照。
+  </div>
+  <h3>8.1 スクロール確認用のダミー節</h3>
+  <p>TOC の scroll-spy と読書プログレスを試すための余白。上下にスクロールしてカレント節のハイライトが追随するか確認してください。</p>
+  <p style="min-height:40vh"></p>
+  </section>
+</article>
+</main>
+
+<footer>
+  understanding-html-docs デザインシステム ショーケース ・ 目視確認用（base.css / base.js のみ、外部依存なし）
+</footer>
+</body>
+</html>
