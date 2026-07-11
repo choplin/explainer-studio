@@ -105,7 +105,7 @@ Unlike Phases 1–2, this phase runs **inline** in the orchestrator. Its only in
 - **Take headings and their `[pNN]` from the spine `structured/toc.md`, not by re-reading or re-inventing them.** The overview's section headings are the spine's headings (translated for display if the report language differs, but carrying the spine's anchor). This is what keeps the overview's anchors identical to the outline's and lets the Finalize containment check pass.
 
 - Open with a "Coverage" note and a 3–5 line executive summary; end with an "Uncovered / continued" note if this was a partial run.
-- Compose it as headings + concise explanatory prose (not a flat bullet list), preserving the chapter/section hierarchy and `[pNN]` anchors.
+- **Accuracy first: never let compression flip a fact.** When you reword or compress, a proper noun's classifying attribute (column- vs row-oriented, sync vs async, leader vs follower, …) must survive unchanged — re-check each against `outline.md`. Compose the overview as headings + concise explanatory prose (not a flat bullet list), preserving the chapter/section hierarchy and `[pNN]` anchors.
 - **If figures were harvested,** embed the ones the summary naturally needs, inline where the prose discusses them, as `![caption](../ocr/figures/fig-pNNN-K.ext)` with a one-line caption and `[pNN]` (relative path from `reports/`). Do not embed a figure without explaining it. You need not use every figure — this is a book, not a paper, so leave crops the overview does not call for unreferenced rather than forcing them in.
 - Write the body in the language of the source or the conversation.
 - For very large outlines, build the report in levels (section → chapter → whole) so each reduce step stays manageable.
@@ -114,7 +114,7 @@ Unlike Phases 1–2, this phase runs **inline** in the orchestrator. Its only in
 
 ### 1. Figures — use what the summary needs, no exhaustive sweep (only if Phase 0 produced `ocr/figures/`)
 
-Figures aid the reports; they are not a checklist. Embed a harvested figure only where the prose actually discusses what it shows, and when you embed it, explain it (never a bare image). **Do not append a trailing figure list or force every crop into a report to "cover" it** — this is a book, not a paper, so referencing every figure is not required. Crops in `ocr/figures/` that no report naturally needs are fine to leave unreferenced. If you *do* want a figure that `figures.md` marks "⚠ Not extracted", render and crop its page first (`pdftoppm -f N -l N -singlefile -r 200 -png <pdf> <tmp>/pg`) before embedding it.
+Figures aid the reports; they are not a checklist. Embed a harvested figure only where the prose actually discusses what it shows, and when you embed it, explain it (never a bare image). **Do not force every crop into the report to "cover" it** — this is a book, not a paper, so referencing every figure is not required. But do not make an omission invisible either: when the span had harvested figures you chose not to embed, **list them once at the end by ID with a one-line reason** — a transparency inventory, not a padded gallery — so a dropped figure is visible rather than silently gone. If you *do* want a figure that `figures.md` marks "⚠ Not extracted", render and crop its page first (`pdftoppm -f N -l N -singlefile -r 200 -png <pdf> <tmp>/pg`) before embedding it.
 
 ### 2. Anchor containment against the spine — a structural check, not a source re-read
 
@@ -127,7 +127,7 @@ Any mismatch is an anchor that drifted while writing the overview — fix it to 
 
 ### 3. Coherence self-check — does it read as one standalone piece (no source re-read)
 
-The overview is compressed from the stitched `outline.md`, and for large documents it is built by multi-level reduce (section → chapter → whole) — a path where a term's first-use definition or the granularity can silently drift between levels. Do one light editorial pass to catch that. This is **not** the paper-studio faithfulness sweep: **do not re-read the source PDF, and do not re-read the outline's body** — read only the finished `reports/overview.md`, using `outline.md` solely as a checklist of which sections should be present. It is a book, not a paper, so keep it light — fix what you find, don't manufacture work.
+The overview is compressed from the stitched `outline.md`, and for large documents it is built by multi-level reduce (section → chapter → whole) — a path where a term's first-use definition or the granularity can silently drift between levels, and a proper noun's classifying attribute (column- vs row-oriented, etc.) can flip during rewording. Do one light editorial pass to catch that. This is **not** the paper-studio faithfulness sweep: **do not re-read the source PDF, and do not re-read the outline's body** — read only the finished `reports/overview.md`, using `outline.md` solely as a checklist of which sections should be present. It is a book, not a paper, so keep it light — fix what you find, don't manufacture work.
 
 Read the overview top to bottom as a first-time reader and check:
 - **Continuity** — the sections connect; there is no jump where the prose assumes a step the report never made.

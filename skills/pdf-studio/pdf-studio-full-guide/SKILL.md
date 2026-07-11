@@ -53,6 +53,8 @@ Read `<WORK_DIR>/structured/toc.md` (the canonical spine; fall back to `outline.
 
 - Resolve each chapter's page span from its anchors (with [[pdf-studio-deep-dive]]'s ~2-page margins) and apply the `pdf-studio-pdf-detail` procedure per chapter. Chapters are independent — **run them in parallel** (under Claude Code, multiple `pdf-studio-pdf-detail` Agent calls in one message; otherwise apply the skill per chapter), as many at a time as is reasonable.
 - **If text-layer was chosen in Step 0**, run each chapter's detail worker in text-layer mode exactly as [[pdf-studio-deep-dive]]'s Procedure does: materialize the chapter span's faithful text with [[pdf-studio-summarize]]'s `text_layer.sh` (through `preflight.sh`) into `<WORK_DIR>/extract/text-<START>-<END>.md` and pass that file to the worker instead of a page range. The probe already passed in Step 0, so do not re-probe or re-ask.
+- **Pass each worker its span's figure crops.** From `<WORK_DIR>/ocr/figures.md`, hand each chapter worker the rows whose page falls in its span, with the crop file paths, so it can read and describe in-figure content. This matters most in text-layer mode, where the crops are the worker's only view of values baked into diagrams (the text layer drops them) — without them, readable figure content is silently lost. If figure harvest was skipped, tell the worker none are available.
+- **Fix the register up front so the reports read as one set.** Instruct every parallel worker to write in one uniform register — for Japanese, である調（常体） — so chapters do not drift between plain and polite forms. (The `pdf-studio-pdf-detail` procedure fixes this too; state it here because the workers run in parallel and independently, and register drift between them is otherwise invisible until Finalize.)
 - **Context hygiene (same rule as [[pdf-studio-summarize]]):** each deep-dive writes its report to a file and returns only a short status. Never read PDF pages or the full chapter reports into this orchestrator's context.
 - If the chapter scope was "none", skip this step.
 
@@ -74,6 +76,7 @@ For each dialogue script from Step 3, run **[[pdf-studio-audio-narrate]]** to sy
 
 ## Finalize
 
+- **Cross-chapter consistency sweep (accuracy guard).** After all chapter reports are written, read the finished `reports/*.md` and check for: (a) a proper noun's classifying attribute stated inconsistently across chapters — e.g. a system called column-oriented in one chapter and row-oriented in another; at most one is right, so re-read the offending source span to settle it; and (b) register drift — a chapter in ですます調 when the set is である調. Fix what you find. This is a light editorial pass over the reports only — do not re-run the reading phases. It is the book-pipeline analogue of paper-studio's consistency sweep, and the net that catches per-chapter faithfulness/style errors the individual workers can't see across each other.
 - If the user said yes in Step 0, collect the source PDF into the work dir as `<WORK_DIR>/<name>.pdf` (per [[pdf-studio-summarize]]'s finalize). Otherwise leave it in place.
 - Print a short manifest of everything produced: `overview.md`, each `reports/<chapter>.md`, each `dialogue/<slug>.txt`, each `audio/<slug>.m4a` — grouped by phase, with the work dir path.
 
@@ -89,6 +92,7 @@ For each dialogue script from Step 3, run **[[pdf-studio-audio-narrate]]** to sy
 - [ ] Scope (chapters, audio A/B/C or none, length, PDF-move) was confirmed with the user **before** any work started.
 - [ ] `structured/toc.md` (the canonical spine) exists, and `reports/overview.md` covers every top-level section in it.
 - [ ] `reports/<chapter>.md` exists for every in-scope chapter (none silently dropped).
+- [ ] Each chapter worker was handed its span's figure crops (when `ocr/figures.md` exists) and a fixed register directive; the cross-chapter consistency sweep ran and no proper noun's classifying attribute or report register is inconsistent across chapters.
 - [ ] For the selected audio scope, a `dialogue/<slug>.txt` exists for each target, in the `A:`/`B:` format, faithful to its source report.
 - [ ] For each dialogue script (when VOICEVOX + ffmpeg are available), a non-empty `audio/<slug>.m4a` was produced and its path + duration reported; otherwise audio was skipped with a clear note.
 - [ ] A final manifest of all artifacts (with the work dir path) was shown to the user.
