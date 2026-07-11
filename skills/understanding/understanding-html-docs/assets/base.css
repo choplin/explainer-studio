@@ -52,9 +52,9 @@
 .hue-1 { --cat: light-dark(#2563eb, #7aa2ff); --cat-soft: light-dark(#dbeafe, #16203a); }
 .hue-2 { --cat: light-dark(#0d9488, #2dd4bf); --cat-soft: light-dark(#ccfbf1, #0c2420); }
 .hue-3 { --cat: light-dark(#7c3aed, #c4b5fd); --cat-soft: light-dark(#ede9fe, #1c1730); }
-.hue-4 { --cat: light-dark(#c2410c, #fb923c); --cat-soft: light-dark(#ffedd5, #2a1a0e); }
+.hue-4 { --cat: light-dark(#c2410c, #fb923c); --cat-soft: light-dark(#f7e6df, #2a1a0e); }
 .hue-5 { --cat: light-dark(#be123c, #fb7185); --cat-soft: light-dark(#ffe4e6, #2a1218); }
-.hue-6 { --cat: light-dark(#4d7c0f, #a3e635); --cat-soft: light-dark(#ecfccb, #1a2410); }
+.hue-6 { --cat: light-dark(#4d7c0f, #a3e635); --cat-soft: light-dark(#e8eee0, #1a2410); }
 
 /* --- foundation --- */
 * { box-sizing: border-box; }
