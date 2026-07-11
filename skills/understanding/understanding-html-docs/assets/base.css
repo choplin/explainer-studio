@@ -275,11 +275,17 @@ th { background: var(--card); }
   }
   .toc-panel li.sub a { padding-left: 1.7rem; }
   /* Quiet index: show only the active section's sub-entries. base.js toggles
-     `.reveal` on the h3 links in the active h2 group; the rest stay hidden so
-     the sidebar isn't a wall of every subsection at once. (Sidebar-only — the
-     mobile overlay keeps all subs visible.) */
-  .toc-panel li.sub { display: none; }
-  .toc-panel li.sub.reveal { display: block; }
+     `.reveal` on the h3 links in the active h2 group; the rest collapse so the
+     sidebar isn't a wall of every subsection at once. (Sidebar-only — the
+     mobile overlay keeps all subs visible.) Entries slide open/closed via
+     max-height + opacity (overflow clipped on the li, so the link's padding
+     collapses too) instead of popping. The 5rem cap clears the tallest wrapped
+     entry; real entries are shorter, so the li tracks its own content height. */
+  .toc-panel li.sub {
+    overflow: hidden; max-height: 0; opacity: 0;
+    transition: max-height .2s ease, opacity .2s ease;
+  }
+  .toc-panel li.sub.reveal { max-height: 5rem; opacity: 1; }
   /* Scrollbar stays quiet until pointed at: reserve the gutter but keep the
      thumb transparent when idle, tint it on hover. Reserving width (rather than
      toggling scrollbar-width on hover) avoids a reflow when the bar appears. */
@@ -291,6 +297,6 @@ th { background: var(--card); }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .progress > i, .fab button, .toc-backdrop, .toc-panel { transition: none; }
+  .progress > i, .fab button, .toc-backdrop, .toc-panel, .toc-panel li.sub { transition: none; }
   html { scroll-behavior: auto; }
 }
