@@ -63,7 +63,7 @@ body {
   font-family: -apple-system, BlinkMacSystemFont, "Hiragino Sans", "Noto Sans JP", sans-serif;
   line-height: 1.9; -webkit-text-size-adjust: 100%;
 }
-main { max-width: 45rem; margin: 0 auto; padding: 1rem 1.25rem 4rem; }
+main { max-width: 48rem; margin: 0 auto; padding: 1rem 1.25rem 4rem; }
 header.site {
   position: sticky; top: 0; z-index: 10; background: var(--bg);
   border-bottom: 1px solid var(--line); padding: .6rem 1.25rem; font-size: .9rem;
@@ -92,7 +92,7 @@ mark {
   background: linear-gradient(transparent 56%, var(--mark) 56%);
   color: inherit; padding: 0 .05em;
 }
-footer { max-width: 45rem; margin: 0 auto; padding: 0 1.25rem 2rem; color: var(--muted); font-size: .8rem; }
+footer { max-width: 48rem; margin: 0 auto; padding: 0 1.25rem 2rem; color: var(--muted); font-size: .8rem; }
 
 /* --- tables --- */
 .tablewrap { overflow-x: auto; margin: 1rem 0; }
@@ -249,17 +249,17 @@ th { background: var(--card); }
    On wide screens the same TOC nav (built and scroll-spied by base.js) is laid
    out as a persistent sidebar column in the left gutter, beside the centered
    article; the overlay affordances (☰ FAB, backdrop) are hidden. Only layout
-   branches here — no TOC/scroll-spy logic is duplicated. The 76rem breakpoint
+   branches here — no TOC/scroll-spy logic is duplicated. The 79rem breakpoint
    is the width at which a 14rem sidebar + 1rem gap fits in the gutter to the
-   left of the 45rem `main`; below it, the overlay panel + FAB stay. */
-@media (min-width: 76rem) {
+   left of the 48rem `main`; below it, the overlay panel + FAB stay. */
+@media (min-width: 79rem) {
   .toc-btn, .toc-backdrop { display: none; }
   /* A quiet index column in the gutter — NOT a card. One hairline rail runs
      down the whole list; the active entry colors and bolds its own segment of
      that rail. A rail cue, never a nested filled box (which reads as box-in-box
      against the article's real cards). */
   .toc-panel {
-    left: max(1rem, calc((100vw - 45rem) / 2 - 15rem)); right: auto; bottom: auto;
+    left: max(1rem, calc((100vw - 48rem) / 2 - 15rem)); right: auto; bottom: auto;
     top: 3.4rem; width: 14rem; max-height: calc(100vh - 4.6rem);
     background: none; border: 0; border-radius: 0;
     padding: .4rem 0 1rem; transform: none; transition: none;
