@@ -271,8 +271,45 @@
                 <section>
                     <h2>7. カラーモデル（2レイヤー）</h2>
                     <p>
-                        色は必ず一つの意味を運ぶ。<strong>セマンティック（意味）</strong>と<strong>カテゴリカル（道標）</strong>は交わらない。
+                        色は必ず一つの意味を運ぶ。<strong>セマンティック（意味）</strong>と<strong>カテゴリカル（道標）</strong>は交わらない。どちらも下の<strong>プリミティブ・パレット</strong>（生ランプ）から引く単一の出所を持つ。
                     </p>
+
+                    <h3>7.0 プリミティブ・パレット（下地）</h3>
+                    <p>
+                        全色はこの生ランプに由来する。<strong>コンポーネントからは直接使わない</strong> — 下のセマンティック／カテゴリカル層が参照する単一の出所。再テーマ化はこのランプだけを編集する。
+                    </p>
+                    <div class="val" style="margin: 0.6rem 0 0.3rem">
+                        ニュートラル・ランプ <code>--n-0 … --n-950</code>
+                    </div>
+                    <div style="display: flex; border: 1px solid var(--edge); border-radius: 8px; overflow: hidden; margin-bottom: 1.1rem">
+                        <div style="flex: 1; height: 2.6rem; background: var(--n-0)"></div>
+                        <div style="flex: 1; height: 2.6rem; background: var(--n-50)"></div>
+                        <div style="flex: 1; height: 2.6rem; background: var(--n-100)"></div>
+                        <div style="flex: 1; height: 2.6rem; background: var(--n-200)"></div>
+                        <div style="flex: 1; height: 2.6rem; background: var(--n-300)"></div>
+                        <div style="flex: 1; height: 2.6rem; background: var(--n-400)"></div>
+                        <div style="flex: 1; height: 2.6rem; background: var(--n-500)"></div>
+                        <div style="flex: 1; height: 2.6rem; background: var(--n-650)"></div>
+                        <div style="flex: 1; height: 2.6rem; background: var(--n-700)"></div>
+                        <div style="flex: 1; height: 2.6rem; background: var(--n-800)"></div>
+                        <div style="flex: 1; height: 2.6rem; background: var(--n-850)"></div>
+                        <div style="flex: 1; height: 2.6rem; background: var(--n-900)"></div>
+                        <div style="flex: 1; height: 2.6rem; background: var(--n-950)"></div>
+                    </div>
+                    <div class="val" style="margin: 0.6rem 0 0.3rem">
+                        クロマ・ランプ（各色 <code>strong</code> / <code>bright</code>）
+                    </div>
+                    <div class="card-grid">
+                        <div class="swatch"><div class="bar" style="background: linear-gradient(90deg, var(--blue-strong) 50%, var(--blue-bright) 50%)"></div><span class="name" style="color: var(--blue-strong)">blue</span><div class="val">--blue-strong / -bright</div></div>
+                        <div class="swatch"><div class="bar" style="background: linear-gradient(90deg, var(--green-strong) 50%, var(--green-bright) 50%)"></div><span class="name" style="color: var(--green-strong)">green</span><div class="val">--green-strong / -bright</div></div>
+                        <div class="swatch"><div class="bar" style="background: linear-gradient(90deg, var(--amber-strong) 50%, var(--amber-bright) 50%)"></div><span class="name" style="color: var(--amber-strong)">amber</span><div class="val">--amber-strong / -bright</div></div>
+                        <div class="swatch"><div class="bar" style="background: linear-gradient(90deg, var(--red-strong) 50%, var(--red-bright) 50%)"></div><span class="name" style="color: var(--red-strong)">red</span><div class="val">--red-strong / -bright</div></div>
+                        <div class="swatch"><div class="bar" style="background: linear-gradient(90deg, var(--violet-strong) 50%, var(--violet-bright) 50%)"></div><span class="name" style="color: var(--violet-strong)">violet</span><div class="val">--violet-strong / -bright</div></div>
+                        <div class="swatch"><div class="bar" style="background: linear-gradient(90deg, var(--teal-strong) 50%, var(--teal-bright) 50%)"></div><span class="name" style="color: var(--teal-strong)">teal</span><div class="val">--teal-strong / -bright</div></div>
+                        <div class="swatch"><div class="bar" style="background: linear-gradient(90deg, var(--orange-strong) 50%, var(--orange-bright) 50%)"></div><span class="name" style="color: var(--orange-strong)">orange</span><div class="val">--orange-strong / -bright</div></div>
+                        <div class="swatch"><div class="bar" style="background: linear-gradient(90deg, var(--rose-strong) 50%, var(--rose-bright) 50%)"></div><span class="name" style="color: var(--rose-strong)">rose</span><div class="val">--rose-strong / -bright</div></div>
+                        <div class="swatch"><div class="bar" style="background: linear-gradient(90deg, var(--lime-strong) 50%, var(--lime-bright) 50%)"></div><span class="name" style="color: var(--lime-strong)">lime</span><div class="val">--lime-strong / -bright</div></div>
+                    </div>
 
                     <h3>7.1 セマンティック（意味 = 固定）</h3>
                     <div class="card-grid">
