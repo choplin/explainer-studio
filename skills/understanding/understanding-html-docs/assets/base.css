@@ -280,6 +280,14 @@ th { background: var(--card); }
      mobile overlay keeps all subs visible.) */
   .toc-panel li.sub { display: none; }
   .toc-panel li.sub.reveal { display: block; }
+  /* Scrollbar stays quiet until pointed at: reserve the gutter but keep the
+     thumb transparent when idle, tint it on hover. Reserving width (rather than
+     toggling scrollbar-width on hover) avoids a reflow when the bar appears. */
+  .toc-panel { scrollbar-width: thin; scrollbar-color: transparent transparent; }
+  .toc-panel:hover { scrollbar-color: var(--line) transparent; }
+  .toc-panel::-webkit-scrollbar { width: 8px; }
+  .toc-panel::-webkit-scrollbar-thumb { background: transparent; border-radius: 4px; }
+  .toc-panel:hover::-webkit-scrollbar-thumb { background: var(--line); }
 }
 
 @media (prefers-reduced-motion: reduce) {
