@@ -23,29 +23,72 @@
 :root {
   color-scheme: light dark;                 /* auto: follow the OS */
 
-  --bg: light-dark(#ffffff, #16181d);
-  --fg: light-dark(#1c1e21, #e5e7eb);
-  --muted: light-dark(#6b7280, #9ca3af);
-  --accent: light-dark(#2563eb, #7aa2ff);
-  --accent-soft: light-dark(#eff6ff, #1d2536);
-  --card: light-dark(#f8fafc, #1e2127);
-  --code: light-dark(#f6f8fa, #23262d);   /* code-block (pre) surface — GitHub-style panel; inline code uses its own bordered chip */
-  /* Two border tiers. --line is a hairline SEPARATOR (rules under/between
-     content: heading underlines, hr, blockquote, the sidebar rail) — kept
-     intentionally faint. --edge is the visible OUTLINE of a filled/bordered
-     SHAPE (card, chip, table cell, aside, keypoints, buttons); --line is too
-     close to the surface to read as a shape edge, especially on near-white
-     light surfaces, so outlined shapes use --edge instead. */
-  --line: light-dark(#e5e7eb, #30343b);
-  --edge: light-dark(#cbd5e1, #3a3f47);
+  /* ============================================================
+     PRIMITIVE PALETTE — the raw color ramps. Theme-agnostic; NEVER used
+     directly in component rules — only the SEMANTIC tokens below reference
+     them. Re-theme the whole document by editing this block alone.
+     ============================================================ */
+
+  /* neutral ramp: white -> near-black (surfaces, text, borders) */
+  --n-0:#ffffff; --n-50:#f8fafc; --n-100:#eef1f6; --n-200:#e5e7eb;
+  --n-300:#cbd5e1; --n-400:#9ca3af; --n-500:#6b7280;
+  --n-650:#3a3f47; --n-700:#30343b; --n-800:#23262d; --n-850:#1e2127;
+  --n-900:#1c1e21; --n-950:#16181d;
+
+  /* chromatic ramp: each hue has a STRONG step (reads on light surfaces: text,
+     icons, borders) and a BRIGHT step (the same role on dark surfaces). These
+     carry meaning and are kept fixed; soft fills below are derived from them. */
+  --blue-strong:#2563eb;   --blue-bright:#7aa2ff;
+  --green-strong:#15803d;  --green-bright:#4ade80;
+  --amber-strong:#b45309;  --amber-bright:#fbbf24;
+  --red-strong:#b91c1c;    --red-bright:#f87171;
+  --violet-strong:#7c3aed; --violet-bright:#c4b5fd;
+  --teal-strong:#0d9488;   --teal-bright:#2dd4bf;
+  --orange-strong:#c2410c; --orange-bright:#fb923c;
+  --rose-strong:#be123c;   --rose-bright:#fb7185;
+  --lime-strong:#4d7c0f;   --lime-bright:#a3e635;
+  --mark-band:#ffe08a; --mark-band-dark:#8a6a12;
+
+  /* soft fills — ONE recipe for every tint (semantic callout or categorical
+     box): tint the theme's identity step toward the page (strong->white in
+     light, bright->darkest-neutral in dark). Uniform amounts => harmonized. */
+  --blue-soft:   light-dark(color-mix(in srgb, var(--blue-strong)   12%, #fff), color-mix(in srgb, var(--blue-bright)   16%, var(--n-950)));
+  --green-soft:  light-dark(color-mix(in srgb, var(--green-strong)  12%, #fff), color-mix(in srgb, var(--green-bright)  16%, var(--n-950)));
+  --amber-soft:  light-dark(color-mix(in srgb, var(--amber-strong)  12%, #fff), color-mix(in srgb, var(--amber-bright)  16%, var(--n-950)));
+  --red-soft:    light-dark(color-mix(in srgb, var(--red-strong)    12%, #fff), color-mix(in srgb, var(--red-bright)    16%, var(--n-950)));
+  --violet-soft: light-dark(color-mix(in srgb, var(--violet-strong) 12%, #fff), color-mix(in srgb, var(--violet-bright) 16%, var(--n-950)));
+  --teal-soft:   light-dark(color-mix(in srgb, var(--teal-strong)   12%, #fff), color-mix(in srgb, var(--teal-bright)   16%, var(--n-950)));
+  --orange-soft: light-dark(color-mix(in srgb, var(--orange-strong) 12%, #fff), color-mix(in srgb, var(--orange-bright) 16%, var(--n-950)));
+  --rose-soft:   light-dark(color-mix(in srgb, var(--rose-strong)   12%, #fff), color-mix(in srgb, var(--rose-bright)   16%, var(--n-950)));
+  --lime-soft:   light-dark(color-mix(in srgb, var(--lime-strong)   12%, #fff), color-mix(in srgb, var(--lime-bright)   16%, var(--n-950)));
+
+  /* ============================================================
+     SEMANTIC TOKENS — role-based, theme-aware. Component rules use ONLY these;
+     each maps to primitives above. Change a role here, or a color in the ramp.
+     ============================================================ */
+  --bg:    light-dark(var(--n-0),   var(--n-950));
+  --fg:    light-dark(var(--n-900), var(--n-200));
+  --muted: light-dark(var(--n-500), var(--n-400));
+  --card:  light-dark(var(--n-50),  var(--n-850));
+  --code:  light-dark(var(--n-50),  var(--n-800));   /* code-block (pre) surface */
+  /* Two border tiers. --line is a hairline SEPARATOR (heading rules, hr,
+     blockquote, the sidebar rail) — kept intentionally faint. --edge is the
+     visible OUTLINE of a filled/bordered SHAPE (card, chip, table cell, aside,
+     buttons); --line is too faint to define a shape edge on near-white light
+     surfaces, so outlined shapes use --edge instead. */
+  --line:  light-dark(var(--n-200), var(--n-700));
+  --edge:  light-dark(var(--n-300), var(--n-650));
+
+  --accent: light-dark(var(--blue-strong), var(--blue-bright));
+  --accent-soft: var(--blue-soft);
 
   /* semantic (meaning) — keep hue↔meaning fixed across every document */
-  --note: light-dark(#2563eb, #7aa2ff); --note-soft: light-dark(#eff6ff, #1d2536);
-  --tip:  light-dark(#15803d, #4ade80); --tip-soft:  light-dark(#f0fdf4, #10241a);
-  --warn: light-dark(#b45309, #fbbf24); --warn-soft: light-dark(#fffbeb, #271f0e);
-  --bad:  light-dark(#b91c1c, #f87171); --bad-soft:  light-dark(#fef2f2, #2a1414);
-  --key:  light-dark(#7c3aed, #c4b5fd); --key-soft:  light-dark(#f5f3ff, #201a2e);
-  --mark: light-dark(#ffe08a, #8a6a12);   /* highlighter-pen band color (dark: deep so white text stays legible on the band) */
+  --note: var(--accent);                                          --note-soft: var(--blue-soft);
+  --tip:  light-dark(var(--green-strong),  var(--green-bright));   --tip-soft:  var(--green-soft);
+  --warn: light-dark(var(--amber-strong),  var(--amber-bright));   --warn-soft: var(--amber-soft);
+  --bad:  light-dark(var(--red-strong),    var(--red-bright));     --bad-soft:  var(--red-soft);
+  --key:  light-dark(var(--violet-strong), var(--violet-bright));  --key-soft:  var(--violet-soft);
+  --mark: light-dark(var(--mark-band), var(--mark-band-dark));   /* highlighter-pen band (dark: deep so white text stays legible) */
 
   /* categorical (wayfinding) — defaults to the global accent until a hue-N sets it */
   --cat: var(--accent); --cat-soft: var(--accent-soft);
@@ -55,12 +98,12 @@
 
 /* categorical hues — cycle hue-1..hue-6 (set on <body>, a section, or a card).
    Each light-dark() pair is legible on its own surface. */
-.hue-1 { --cat: light-dark(#2563eb, #7aa2ff); --cat-soft: light-dark(#dbeafe, #16203a); }
-.hue-2 { --cat: light-dark(#0d9488, #2dd4bf); --cat-soft: light-dark(#ccfbf1, #0c2420); }
-.hue-3 { --cat: light-dark(#7c3aed, #c4b5fd); --cat-soft: light-dark(#ede9fe, #1c1730); }
-.hue-4 { --cat: light-dark(#c2410c, #fb923c); --cat-soft: light-dark(#f7e6df, #2a1a0e); }
-.hue-5 { --cat: light-dark(#be123c, #fb7185); --cat-soft: light-dark(#ffe4e6, #2a1218); }
-.hue-6 { --cat: light-dark(#4d7c0f, #a3e635); --cat-soft: light-dark(#e8eee0, #1a2410); }
+.hue-1 { --cat: light-dark(var(--blue-strong),   var(--blue-bright));   --cat-soft: var(--blue-soft); }
+.hue-2 { --cat: light-dark(var(--teal-strong),   var(--teal-bright));   --cat-soft: var(--teal-soft); }
+.hue-3 { --cat: light-dark(var(--violet-strong), var(--violet-bright)); --cat-soft: var(--violet-soft); }
+.hue-4 { --cat: light-dark(var(--orange-strong), var(--orange-bright)); --cat-soft: var(--orange-soft); }
+.hue-5 { --cat: light-dark(var(--rose-strong),   var(--rose-bright));   --cat-soft: var(--rose-soft); }
+.hue-6 { --cat: light-dark(var(--lime-strong),   var(--lime-bright));   --cat-soft: var(--lime-soft); }
 
 /* --- foundation --- */
 * { box-sizing: border-box; }
@@ -89,8 +132,8 @@ blockquote { margin: 1rem 0; padding: .1rem 1rem; border-left: 3px solid var(--l
 code, pre { font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, "Liberation Mono", monospace; }
 /* inline code: a light chip delineated by a hairline border (border darker than
    the fill, so the edge reads on white without a heavy background). */
-code { background: light-dark(#eef1f6, #23262d); border: 1px solid light-dark(#c3cad3, #30343b); border-radius: 4px; padding: .1em .35em; font-size: .88em; }
-pre { background: var(--code); border: 1px solid light-dark(#d0d7de, #30343b); border-radius: 8px; padding: .8rem 1rem; overflow-x: auto; }
+code { background: light-dark(var(--n-100), var(--n-800)); border: 1px solid var(--edge); border-radius: 4px; padding: .1em .35em; font-size: .88em; }
+pre { background: var(--code); border: 1px solid var(--edge); border-radius: 8px; padding: .8rem 1rem; overflow-x: auto; }
 pre code { background: none; padding: 0; border: 0; }
 /* highlighter-pen underline: a color band under the lower part of the glyphs,
    not a full background — keeps the text on the page surface and readable. */
@@ -185,7 +228,7 @@ th { background: var(--card); }
    a consumer may add semantic-colored variants in its own stylesheet. --- */
 .badge {
   display: inline-flex; align-items: center; gap: .25em; font-size: .72rem; font-weight: 600;
-  line-height: 1.4; color: #fff; background: var(--accent);
+  line-height: 1.4; color: var(--n-0); background: var(--accent);
   border-radius: 999px; padding: .05rem .5rem; white-space: nowrap;
 }
 
