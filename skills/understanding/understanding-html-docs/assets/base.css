@@ -31,6 +31,7 @@
   --accent-soft: light-dark(#eff6ff, #1d2536);
   --card: light-dark(#f8fafc, #1e2127);
   --code: light-dark(#f6f8fa, #23262d);   /* code-block (pre) surface — GitHub-style panel; inline code uses its own bordered chip */
+  --table-border: light-dark(#cbd5e1, #30343b);   /* table grid lines — darker than --line in light theme, where --line sits too close to white to read as a grid */
 
   /* semantic (meaning) — keep hue↔meaning fixed across every document */
   --note: light-dark(#2563eb, #7aa2ff); --note-soft: light-dark(#eff6ff, #1d2536);
@@ -96,7 +97,7 @@ footer { max-width: 45rem; margin: 0 auto; padding: 0 1.25rem 2rem; color: var(-
 /* --- tables --- */
 .tablewrap { overflow-x: auto; margin: 1rem 0; }
 table { border-collapse: collapse; font-size: .92rem; min-width: 60%; }
-th, td { border: 1px solid var(--line); padding: .35rem .6rem; text-align: left; }
+th, td { border: 1px solid var(--table-border); padding: .35rem .6rem; text-align: left; }
 th { background: var(--card); }
 
 /* --- callout: semantic message box. Base class = note (blue/info); add a
