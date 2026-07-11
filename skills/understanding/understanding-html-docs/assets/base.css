@@ -26,12 +26,18 @@
   --bg: light-dark(#ffffff, #16181d);
   --fg: light-dark(#1c1e21, #e5e7eb);
   --muted: light-dark(#6b7280, #9ca3af);
-  --line: light-dark(#e5e7eb, #30343b);
   --accent: light-dark(#2563eb, #7aa2ff);
   --accent-soft: light-dark(#eff6ff, #1d2536);
   --card: light-dark(#f8fafc, #1e2127);
   --code: light-dark(#f6f8fa, #23262d);   /* code-block (pre) surface — GitHub-style panel; inline code uses its own bordered chip */
-  --table-border: light-dark(#cbd5e1, #30343b);   /* table grid lines — darker than --line in light theme, where --line sits too close to white to read as a grid */
+  /* Two border tiers. --line is a hairline SEPARATOR (rules under/between
+     content: heading underlines, hr, blockquote, the sidebar rail) — kept
+     intentionally faint. --edge is the visible OUTLINE of a filled/bordered
+     SHAPE (card, chip, table cell, aside, keypoints, buttons); --line is too
+     close to the surface to read as a shape edge, especially on near-white
+     light surfaces, so outlined shapes use --edge instead. */
+  --line: light-dark(#e5e7eb, #30343b);
+  --edge: light-dark(#cbd5e1, #3a3f47);
 
   /* semantic (meaning) — keep hue↔meaning fixed across every document */
   --note: light-dark(#2563eb, #7aa2ff); --note-soft: light-dark(#eff6ff, #1d2536);
@@ -97,7 +103,7 @@ footer { max-width: 48rem; margin: 0 auto; padding: 0 1.25rem 2rem; color: var(-
 /* --- tables --- */
 .tablewrap { overflow-x: auto; margin: 1rem 0; }
 table { border-collapse: collapse; font-size: .92rem; min-width: 60%; }
-th, td { border: 1px solid var(--table-border); padding: .35rem .6rem; text-align: left; }
+th, td { border: 1px solid var(--edge); padding: .35rem .6rem; text-align: left; }
 th { background: var(--card); }
 
 /* --- callout: semantic message box. Base class = note (blue/info); add a
@@ -146,10 +152,7 @@ th { background: var(--card); }
    variants (e.g. .chip.accent) in their own stylesheet. --- */
 .chip {
   display: inline-flex; align-items: center; gap: .25em; font-size: .78rem; color: var(--muted);
-  /* Outline darker than --line: the pill sits on --card (a near-white fill in
-     light), where a hairline --line edge disappears. A chip is an outlined
-     shape, so its border must read against the page. */
-  background: var(--card); border: 1px solid light-dark(#cbd5e1, #3a3f47); border-radius: 999px;
+  background: var(--card); border: 1px solid var(--edge); border-radius: 999px;
   padding: .05rem .7rem; white-space: nowrap;
 }
 .chip.accent { color: var(--accent); border-color: var(--accent); }
@@ -164,7 +167,7 @@ th { background: var(--card); }
 /* --- keypoints: a "key takeaways" box tinted by the categorical hue.
    Author an <h2>/<h3> title plus a <ul> inside. --- */
 .keypoints {
-  background: var(--cat-soft); border: 1px solid var(--line); border-left: 4px solid var(--cat);
+  background: var(--cat-soft); border: 1px solid var(--edge); border-left: 4px solid var(--cat);
   border-radius: 12px; padding: .4rem 1.1rem .7rem; margin: 1.4rem 0;
 }
 .keypoints h2 { font-size: .95rem; border: 0; margin: .7rem 0 .2rem; color: var(--cat); }
@@ -174,7 +177,7 @@ th { background: var(--card); }
 /* --- card / card-grid: a generic bordered content block, and a responsive grid
    that lays a set of them out. Neutral containers — author any content inside;
    add a `hue-N` for a categorical tint. --- */
-.card { background: var(--card); border: 1px solid var(--line); border-radius: 12px; padding: 1rem 1.1rem; }
+.card { background: var(--card); border: 1px solid var(--edge); border-radius: 12px; padding: 1rem 1.1rem; }
 .card-grid { display: grid; gap: .8rem; margin: 1.2rem 0; grid-template-columns: repeat(auto-fit, minmax(14rem, 1fr)); }
 
 /* --- badge: a small FILLED status/count marker. Distinct from .chip (an
@@ -191,7 +194,7 @@ th { background: var(--card); }
    context set slightly apart. Class-based so it never captures a bare <aside>
    used for layout (e.g. a sidebar index). --- */
 .aside {
-  background: var(--card); border: 1px solid var(--line); border-radius: 8px;
+  background: var(--card); border: 1px solid var(--edge); border-radius: 8px;
   padding: .5rem .9rem; margin: 1.2rem 0; font-size: .9rem; color: var(--muted);
 }
 
@@ -207,7 +210,7 @@ th { background: var(--card); }
 
 /* theme toggle button (mounted in header.site, or floating if none) */
 .theme-btn {
-  border: 1px solid var(--line); background: var(--card); color: var(--fg);
+  border: 1px solid var(--edge); background: var(--card); color: var(--fg);
   border-radius: 999px; padding: .15rem .7rem; font-size: .82rem; cursor: pointer;
   display: inline-flex; align-items: center; gap: .3em;
 }
@@ -217,7 +220,7 @@ th { background: var(--card); }
 /* floating action buttons (bottom-right): TOC + back-to-top */
 .fab { position: fixed; right: 1rem; bottom: 1rem; z-index: 18; display: flex; flex-direction: column; gap: .5rem; }
 .fab button {
-  width: 2.8rem; height: 2.8rem; border-radius: 50%; border: 1px solid var(--line);
+  width: 2.8rem; height: 2.8rem; border-radius: 50%; border: 1px solid var(--edge);
   background: var(--card); color: var(--fg); font-size: 1.1rem; cursor: pointer;
   box-shadow: 0 2px 8px rgba(0,0,0,.18); display: flex; align-items: center; justify-content: center;
   opacity: 0; transform: translateY(.4rem); transition: opacity .2s, transform .2s; pointer-events: none;

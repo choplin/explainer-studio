@@ -10,5 +10,5 @@
 .diff-render { margin-top: 0.5rem; }
 .d2h-wrapper { font-size: 0.8125rem; }
 .d2h-file-header { font-size: 0.8125rem; }
-.diff-format-toggle button { cursor: pointer; width: auto; display: inline-block; margin-right: 0.5rem; padding: 0.25rem 0.875rem; font-size: 0.8125rem; background: var(--card); color: var(--fg); border: 1px solid var(--line); border-radius: 999px; }
+.diff-format-toggle button { cursor: pointer; width: auto; display: inline-block; margin-right: 0.5rem; padding: 0.25rem 0.875rem; font-size: 0.8125rem; background: var(--card); color: var(--fg); border: 1px solid var(--edge); border-radius: 999px; }
 .diff-format-toggle button:hover { border-color: var(--accent); }
