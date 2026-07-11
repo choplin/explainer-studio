@@ -274,6 +274,12 @@ th { background: var(--card); }
     background: none; color: var(--cat); border-left-color: var(--cat); font-weight: 600;
   }
   .toc-panel li.sub a { padding-left: 1.7rem; }
+  /* Quiet index: show only the active section's sub-entries. base.js toggles
+     `.reveal` on the h3 links in the active h2 group; the rest stay hidden so
+     the sidebar isn't a wall of every subsection at once. (Sidebar-only — the
+     mobile overlay keeps all subs visible.) */
+  .toc-panel li.sub { display: none; }
+  .toc-panel li.sub.reveal { display: block; }
 }
 
 @media (prefers-reduced-motion: reduce) {

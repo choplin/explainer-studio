@@ -134,6 +134,7 @@
     }
 
     var links = [];
+    var curH2 = null;                            // running section head, to group h3s under their h2
     headings.forEach(function (h, i) {
       if (!h.id) h.id = "sec-" + i;
       var li = document.createElement("li");
@@ -141,19 +142,36 @@
       var a = document.createElement("a");
       a.href = "#" + h.id;
       a.textContent = h.textContent;
+      var entry = { a: a, h: h, li: li, h2: null };
+      if (h.tagName === "H2") curH2 = entry;
+      entry.h2 = curH2;                          // the h2 link this entry belongs to (itself, for an h2)
       a.addEventListener("click", function (e) {
         e.preventDefault();
         closeToc();
         // Pin the indicator to the target up front, then fast-smooth-scroll to
         // it; the spy is locked during the animation so the marker never chases.
         links.forEach(function (l) { l.a.classList.toggle("active", l.a === a); });
+        revealSubs(entry);
         gotoHeading(h);
         history.replaceState(null, "", "#" + h.id);
       });
       li.appendChild(a);
       list.appendChild(li);
-      links.push({ a: a, h: h });
+      links.push(entry);
     });
+
+    // On the wide sidebar, keep the index quiet by showing only the current
+    // section's sub-entries (h3): reveal the .sub links whose h2 group is the
+    // active one, hide the rest. CSS default-hides li.sub in the sidebar media
+    // query; this toggles `.reveal` on the ones in the active group. (In the
+    // mobile overlay every sub stays visible — the CSS hide is sidebar-only.)
+    function revealSubs(current) {
+      var group = current ? current.h2 : null;
+      links.forEach(function (l) {
+        if (l.h.tagName !== "H3") return;
+        l.li.classList.toggle("reveal", !!group && l.h2 === group);
+      });
+    }
 
     var tocBtn = document.createElement("button");
     tocBtn.type = "button";
@@ -182,6 +200,7 @@
         if (links[i].h.offsetTop <= pos) current = links[i];
       }
       links.forEach(function (l) { l.a.classList.toggle("active", l === current); });
+      revealSubs(current);
     }
     window.addEventListener("scroll", function () {
       if (!spyTicking) { spyTicking = true; requestAnimationFrame(spy); }
