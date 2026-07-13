@@ -28,7 +28,7 @@ The library manager (`library.py`) is owned by the **`pdf-studio-site-base`** sk
 
 Run wrangler steps **without the command sandbox** (`dangerouslyDisableSandbox: true`); it needs the network and fails under the sandbox with TLS-looking errors.
 
-1. **Choose a globally-unique project name.** `<name>.pages.dev` must be free across all of Cloudflare, so avoid generic words. Propose a distinctive slug (e.g. a personal prefix + short random suffix like `okuno-library-3f9a`), and confirm it with the user. Also ask for a display title for the index (e.g. その人の「書斎」名); default `Reading Library`.
+1. **Choose a globally-unique project name.** `<name>.pages.dev` must be free across all of Cloudflare, so avoid generic words. Propose a distinctive slug (e.g. a personal prefix + short random suffix like `<yourname>-library-3f9a`), and confirm it with the user. Also ask for a display title for the index (e.g. その人の「書斎」名); default `Reading Library`.
 2. **Create the local library:**
    ```sh
    python3 pdf-studio-site-base/scripts/library.py \
