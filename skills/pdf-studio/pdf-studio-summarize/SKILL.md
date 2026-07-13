@@ -100,15 +100,26 @@ Apply the **`pdf-studio-pdf-stitch`** skill once, reading all `extract/chunk-*.m
 
 ## Phase 3 — Overview report (orchestrator, inline)
 
-Unlike Phases 1–2, this phase runs **inline** in the orchestrator. Its only input is `structured/outline.md` — already the compressed artifact — so reading it into the orchestrator does not bloat context, and an isolated worker would only have to hand the finished report back anyway. The orchestrator reads `structured/outline.md` and writes `reports/overview.md` itself: an executive summary plus a consistent-granularity walkthrough of the structure, keeping key definitions, figures, and `[pNN]` anchors. This report is intentionally the compressed, overview view — detail on demand is the job of [[pdf-studio-deep-dive]].
+Unlike Phases 1–2, this phase runs **inline** in the orchestrator. Its only input is `structured/outline.md` — already the compressed artifact — so reading it into the orchestrator does not bloat context, and an isolated worker would only have to hand the finished report back anyway. The orchestrator reads `structured/outline.md` and writes `reports/overview.md` itself: an executive summary plus a **chapter-level** walkthrough, keeping key definitions, representative figures, and `[pNN]` anchors. This report is intentionally the compressed, overview view — detail on demand is the job of [[pdf-studio-deep-dive]].
 
-- **Take headings and their `[pNN]` from the spine `structured/toc.md`, not by re-reading or re-inventing them.** The overview's section headings are the spine's headings (translated for display if the report language differs, but carrying the spine's anchor). This is what keeps the overview's anchors identical to the outline's and lets the Finalize containment check pass.
+### Altitude cap — the overview flies at chapter level and never descends to section level
+
+This is the rule that keeps the overview an overview instead of a second full-length digest of the same book.
+
+- **Headings: top-level only.** The spine carries every heading level (h1–h4), but only its **top-level (chapter) headings** become overview sections. Deeper headings do **not**. Never write a per-section summary for an h3/h4 heading: enumerating every subsection is the detail reports' job ([[pdf-studio-deep-dive]] / [[pdf-studio-full-guide]]), and reproducing it here turns the overview into a redundant second digest that duplicates their role.
+- **Per chapter: 2–4 sentences plus at most one representative figure.** A chapter that seems to need more than that is a signal to go read its detail report — not to expand the overview.
+- **Scannability comes from the navigation table, not from listing sections.** The "keep subheadings and per-item `[pNN]` anchors" rule belongs to the **detail** reports; it does not apply here. Raising the overview's anchor density by enumerating its sections is precisely the failure this cap exists to prevent — put the anchors in the navigation table instead.
+- **A stated role must be honored by the structure.** If the report opens by calling itself a compressed view that defers detail to the per-chapter reports, the body has to actually be that. A role the structure contradicts is a defect, not a disclaimer.
+- **Take headings and their `[pNN]` from the spine `structured/toc.md`, not by re-reading or re-inventing them.** The overview's section headings are the spine's **top-level (chapter)** headings (translated for display if the report language differs, but carrying the spine's anchor); the spine's deeper headings supply the navigation table's topics and anchors, never new overview sections. This is what keeps the overview's anchors identical to the outline's and lets the Finalize containment check pass.
+
+### Writing the overview
 
 - Open with a "Coverage" note and a 3–5 line executive summary; end with an "Uncovered / continued" note if this was a partial run.
-- **Accuracy first: never let compression flip a fact.** When you reword or compress, a proper noun's classifying attribute (column- vs row-oriented, sync vs async, leader vs follower, …) must survive unchanged — re-check each against `outline.md`. Compose the overview as headings + concise explanatory prose (not a flat bullet list), preserving the chapter/section hierarchy and `[pNN]` anchors.
+- **Accuracy first: never let compression flip a fact.** When you reword or compress, a proper noun's classifying attribute (column- vs row-oriented, sync vs async, leader vs follower, …) must survive unchanged — re-check each against `outline.md`. Compose the overview as chapter headings + concise explanatory prose (not a flat bullet list), preserving the chapter order and `[pNN]` anchors — not the full section hierarchy (see the altitude cap).
 - **If figures were harvested,** embed the ones the summary naturally needs, inline where the prose discusses them, as `![caption](../ocr/figures/fig-pNNN-K.ext)` with a one-line caption and `[pNN]` (relative path from `reports/`). Do not embed a figure without explaining it. You need not use every figure — this is a book, not a paper, so leave crops the overview does not call for unreferenced rather than forcing them in.
+- **Navigation table — the overview's index device (this is how section-level `[pNN]` anchors get in).** Give each chapter a compact table mapping its **main topics → `[pNN]`**, with the topics and anchors taken from the spine's deeper headings. It lets a reader jump straight into the book (or into the right detail report) without the overview having to summarize each section. It is a **pointer table, not a summary**: topic name + anchor, no per-topic prose. This is the sanctioned way to satisfy the overview's indexability — enumerating sections as headings with a sentence each is not.
 - Write the body in the language of the source or the conversation.
-- For very large outlines, build the report in levels (section → chapter → whole) so each reduce step stays manageable.
+- For very large outlines, build the report in levels (section → chapter → whole) so each reduce step stays manageable. The intermediate section-level reduce is **working material for the chapter summary — not output**: do not let it survive into the report as a section-by-section tree.
 
 ## Finalize
 
@@ -132,7 +143,7 @@ The overview is compressed from the stitched `outline.md`, and for large documen
 Read the overview top to bottom as a first-time reader and check:
 - **Continuity** — the sections connect; there is no jump where the prose assumes a step the report never made.
 - **Terms defined before use** — every non-obvious term or concept is introduced where it first appears, not used cold and defined later (or never).
-- **Consistent granularity** — no section is a terse stub next to a deep one for no reason (a symptom of an uneven reduce).
+- **Consistent altitude** — every chapter is treated at the same level (a 2–4 sentence chapter summary), and no chapter is a terse stub next to a deep one for no reason (a symptom of an uneven reduce). Check the cap held: **no h3/h4 section-by-section summaries crept in**. A section-level tree means the overview has drifted into being a second digest — cut it back to chapter level and move that indexing into the navigation table. Note this check is about *altitude*, not uniform coverage: it must never be read as "give every section equal treatment."
 - **Self-contained** — a reader who opens only this file, without the source, can follow it.
 
 Fix issues inline (a one-line definition, a bridging sentence, a granularity trim). If it already reads cleanly, that is a valid outcome — note it and move on.
@@ -158,6 +169,7 @@ To make the work dir a single self-contained folder, move the source PDF into it
 - [ ] `structured/toc.md` exists: one row per heading with a source-form (verbatim) title and its `[pNN]`, built by merging the chunks' heading streams (not re-derived from prose); no heading is anchored to a blank/divider page.
 - [ ] `outline.md`'s heading tree matches `toc.md` (same headings, same anchors) and has no section duplicated across a former chunk boundary; it records where coverage stops.
 - [ ] `reports/overview.md` covers every top-level section present in `toc.md` (no section silently dropped), and each heading it carries maps to a spine heading with the same `[pNN]` (the Finalize containment check passed).
+- [ ] `reports/overview.md` held the **altitude cap**: its headings are top-level (chapter) spine headings only — no h3/h4 section-by-section summaries — each chapter is 2–4 sentences with at most one representative figure, and section-level `[pNN]` indexing lives in the navigation table rather than in enumerated section headings.
 - [ ] `reports/overview.md` reads as one standalone piece: sections connect, non-obvious terms are defined at first use, and it is followable without the source (a light coherence pass, not a source-faithfulness sweep).
 - [ ] The body-start page was detected; front matter (TOC/preface) was not transcribed as content.
 - [ ] If the run was a partial page range, `reports/overview.md` states the covered range and the continuation point.
