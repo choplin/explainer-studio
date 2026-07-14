@@ -1,0 +1,131 @@
+---
+name: understanding-html-docs-review
+description: Review an HTML document generated against the understanding-html-docs design system for whether its markup is used AS INTENDED — not merely whether the classes exist. Reads the contract (the understanding-html-docs reference site) and the generated document, then reports where meaning and markup have come apart: a callout whose variant does not match what it says, a keypoints box that is not the takeaways, color used as decoration, a heading that is really just bold text. Use after generating a document with the base (pdf-studio's site pages, understanding-explain-diff), or when a generated page "looks fine but reads wrong". Triggers on "review this generated page against the design system", "check the HTML follows the contract", "生成したHTMLを規約に照らしてレビュー". Should NOT trigger for authoring the document (use the generating skill), for changing the design system itself (see understanding-html-docs/docs/components.md), or for reviewing prose quality unrelated to the markup contract.
+---
+
+# Reviewing a generated document against the contract
+
+The failures this catches **do not break the page**. A `.callout.tip` wrapped around
+a warning renders as a perfectly good green box; a `.keypoints` filled with an
+introduction renders as a perfectly good takeaways box. Nothing errors, nothing
+looks broken, and the document quietly says something other than what it means.
+
+That is why this is a review and not a linter. **Whether a class exists is nearly
+worthless to know; whether it was used as intended is the whole question** — and
+answering it requires reading what the markup says and comparing it to what the
+prose says. Only a reader can do that.
+
+## Inputs
+
+- The **document(s)** to review: generated `.html` files.
+- The **contract**: the `understanding-html-docs` reference site. Read
+  `SKILL.md`'s *Semantics → element / class* index and *Forbidden* list first; for a
+  close judgment, read the reference pages themselves — `components.html` (what each
+  component is *for*), `color.html` (what each hue means), `contract.html` (the
+  rules).
+
+Locate the base skill's directory before starting. If it cannot be found, stop and
+say so — reviewing against a half-remembered contract is worse than not reviewing.
+
+## What to check
+
+Read the document, and for each item below ask *what the markup claims* versus *what
+the content actually is*. Cite `file:line` for every finding.
+
+### 1. Does each callout's variant match what it says?
+
+The variant is a claim about the content. Check each `.callout` against its own text:
+
+| The text is… | The variant must be |
+|---|---|
+| A hazard, a destructive step, something that breaks | `danger` |
+| Something to be careful about, a caveat | `warn` |
+| Advice worth following, a recommendation | `tip` |
+| The central insight of the section | `key` |
+| Supporting information, everything else | `.callout` (bare = note) |
+
+Also ask the prior question: **should this be a callout at all?** A callout
+interrupts. A remark that merely adds context belongs in `.aside` or in the prose. A
+document where every third paragraph is a callout has stopped using the emphasis it
+is spending.
+
+*Why this first:* a wrong variant is the single most common way meaning and markup
+come apart, and it is invisible — the box renders beautifully in the wrong color, and
+the reader takes the wrong signal.
+
+### 2. Is `.keypoints` actually the takeaways?
+
+`.keypoints` claims "this is what the section boils down to". Check that its content
+is a distillation of the surrounding section, not an introduction, a summary of the
+whole document, or a list that happened to need a box. If the section's substance is
+not in it, the box is lying.
+
+### 3. Is color carrying meaning, and only meaning?
+
+- A meaning hue (`tip`/`warn`/`danger`/`key`, `<mark>`) used for **emphasis or
+  decoration** — because red is eye-catching, not because the thing is dangerous.
+- `<mark>` on a phrase that is not actually load-bearing.
+- Any color reached for **outside the token layer**: a raw hex or `rgb()` in a
+  `style` attribute or in the document's own `<style>` block. It bypasses the theme
+  and breaks in dark mode — light-mode review will not show it.
+- **No position-coding.** Chapters and sections do not get their own hues.
+
+### 4. Are the classes the contract's classes?
+
+Every class token must appear in the contract's index (or be defined in the
+document's own `<style>`, or be an engine-contract class from a shipped component's
+`include.md`). Names from *other* systems are the trap here — `warning`, `error`,
+`info`, `success` do not exist in this contract, and writing one renders a plain note
+instead of failing.
+
+### 5. Do the headings mean "section"?
+
+`h2` / `h3` are the document's structure — the table of contents and the
+reading-progress bar are built from them. Flag a heading used to make a line bold,
+and a real section that was never given a heading (so it is invisible to the TOC).
+
+If the page loads `base.js`, its preconditions must hold: at least one `h2`, headings
+inside the first `main > article`, a `header.site` for the theme button. A page that
+does **not** load `base.js` is not in violation — those are the preconditions of a kit
+it opted out of, and the contract does not constrain document structure.
+
+### 6. Is the markup honest about what the content is?
+
+- A `<table>` holding tabular data (not used for layout), and wrapped in
+  `.tablewrap`.
+- `<blockquote>` for an actual quotation from a source — not for a remark of the
+  author's own (that is `.aside`).
+- `.aside` (the class) rather than a bare `<aside>` element.
+- `.chip` for a tag, `.badge` for a status or count — not swapped for their looks.
+
+### 7. Tier 2: does what is used actually render?
+
+If the document uses `pre.mermaid`, `pre.diff-source`, or `code.language-*`, the
+matching `assets/components/<name>/` bundle must be shipped alongside it, and a
+`pre.diff-source` must hold a **valid unified diff**. A missing bundle does not
+error: the reader gets the raw source instead of the diagram.
+
+## Report
+
+Return findings only — do not edit the document. For each:
+
+```
+<file>:<line>  [dimension]  what the markup claims → what the content actually is
+               → the change to make
+```
+
+Rank by how badly the reader is misled: a wrong callout variant or a decorative
+meaning-color outranks a swapped chip/badge. State plainly when a dimension came back
+clean; a review that reports nothing and says nothing is indistinguishable from a
+review that was never run.
+
+If the document is long, review it whole rather than sampling — the errors here are
+local and independent, so a sample misses exactly the ones it did not look at.
+
+## Gotchas
+
+- **Do not rewrite the document.** This skill reports; the generating skill fixes.
+- **Do not review the prose.** Whether the writing is good is a different question.
+  This is about whether the markup tells the truth about the prose.
+- **Judge against the contract, not taste.** If a choice is defensible under the
+  contract, it is not a finding — say so and move on.

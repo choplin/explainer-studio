@@ -233,3 +233,10 @@ Verify before reporting completion; fix and re-check on any No:
 - [ ] The file is a single self-contained HTML file (base.css and any used
       component assets inlined; only the diff2html and mermaid engines are
       external), and opens standalone in a browser.
+- [ ] The finished file was reviewed with [[understanding-html-docs-review]] and its
+      findings fixed. A design-system violation here never breaks the page — a
+      callout whose variant contradicts its own text renders as a perfectly good box
+      in the wrong color — so it has to be read back against the contract. Under
+      Claude Code, dispatch the `understanding-html-docs-reviewer` subagent: the
+      review has to happen in a fresh context, because you cannot read a page you
+      just wrote as if you had not written it.
