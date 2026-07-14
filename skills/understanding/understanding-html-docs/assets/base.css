@@ -1,19 +1,20 @@
 /* understanding-html-docs base design system.
    The shared substrate for self-contained explanatory HTML documents: typography,
-   layout, a two-layer color model, base components, and the styles the
+   layout, a meaning-only color model, base components, and the styles the
    progressive-enhancement kit (base.js) toggles. Consuming skills copy this file
    verbatim and layer their own context-specific stylesheet on top — do not edit
    this file per document; keep the selectors stable so base.js stays in sync.
 
-   Color model — two layers:
-   1. Semantic colors carry MEANING. Callout variants (note/tip/warn/danger/key)
-      and inline <mark> map a fixed hue to a fixed meaning, so a reader learns the
-      code once and reads faster everywhere. Never reuse a semantic hue for
-      decoration.
-   2. Categorical hues are WAYFINDING. A `hue-N` class (cycled across sections,
-      chapters, or documents) tints `--cat`/`--cat-soft`, answering "where am I"
-      by color at a glance. It falls back to the global accent when unset.
-      Interactive color (links, CTA) stays the single global accent on purpose.
+   Color model — color carries MEANING, and nothing else:
+   1. Semantic colors. Callout variants (note/tip/warn/danger/key) and inline
+      <mark> map a fixed hue to a fixed meaning, so a reader learns the code once
+      and reads faster everywhere. Never reuse a semantic hue for decoration.
+   2. One accent. Everything that is colored but means nothing in particular —
+      links, the reading-progress bar, the TOC's current entry, a keypoints box —
+      uses the single global accent. There is no per-section or per-chapter tint:
+      color-coding a document by position competes with the semantic hues (the
+      reader cannot tell "chapter 5" red from "danger" red), and navigation, not
+      color, is what answers "where am I".
 
    Light/dark: every color is a light-dark() pair resolved against `color-scheme`.
    The theme toggle (base.js) sets color-scheme to `light dark` (auto/OS), `light`,
@@ -36,31 +37,24 @@
   --n-900:#1c1e21; --n-950:#16181d;
 
   /* chromatic ramp: each hue has a STRONG step (reads on light surfaces: text,
-     icons, borders) and a BRIGHT step (the same role on dark surfaces). These
-     carry meaning and are kept fixed; soft fills below are derived from them. */
-  --blue-strong:#2563eb;   --blue-bright:#7aa2ff;
-  --green-strong:#15803d;  --green-bright:#4ade80;
-  --amber-strong:#b45309;  --amber-bright:#fbbf24;
-  --red-strong:#b91c1c;    --red-bright:#f87171;
-  --violet-strong:#7c3aed; --violet-bright:#c4b5fd;
-  --teal-strong:#0d9488;   --teal-bright:#2dd4bf;
-  --orange-strong:#c2410c; --orange-bright:#fb923c;
-  --rose-strong:#be123c;   --rose-bright:#fb7185;
-  --lime-strong:#4d7c0f;   --lime-bright:#a3e635;
-  --mark-band:#ffe08a; --mark-band-dark:#8a6a12;
+     icons, borders) and a BRIGHT step (the same role on dark surfaces). Every hue
+     here is spoken for by exactly one meaning below — the ramp is deliberately no
+     longer than the meanings it serves, so a color can never say two things. */
+  --blue-strong:#2563eb;   --blue-bright:#7aa2ff;    /* accent + note */
+  --green-strong:#15803d;  --green-bright:#4ade80;   /* tip */
+  --amber-strong:#b45309;  --amber-bright:#fbbf24;   /* warn */
+  --red-strong:#b91c1c;    --red-bright:#f87171;     /* danger */
+  --violet-strong:#7c3aed; --violet-bright:#c4b5fd;  /* key */
+  --mark-band:#ffe08a; --mark-band-dark:#8a6a12;     /* <mark> */
 
-  /* soft fills — ONE recipe for every tint (semantic callout or categorical
-     box): tint the theme's identity step toward the page (strong->white in
-     light, bright->darkest-neutral in dark). Uniform amounts => harmonized. */
+  /* soft fills — ONE recipe for every tint: tint the theme's identity step toward
+     the page (strong->white in light, bright->darkest-neutral in dark). Uniform
+     amounts => harmonized. */
   --blue-soft:   light-dark(color-mix(in srgb, var(--blue-strong)   12%, #fff), color-mix(in srgb, var(--blue-bright)   16%, var(--n-950)));
   --green-soft:  light-dark(color-mix(in srgb, var(--green-strong)  12%, #fff), color-mix(in srgb, var(--green-bright)  16%, var(--n-950)));
   --amber-soft:  light-dark(color-mix(in srgb, var(--amber-strong)  12%, #fff), color-mix(in srgb, var(--amber-bright)  16%, var(--n-950)));
   --red-soft:    light-dark(color-mix(in srgb, var(--red-strong)    12%, #fff), color-mix(in srgb, var(--red-bright)    16%, var(--n-950)));
   --violet-soft: light-dark(color-mix(in srgb, var(--violet-strong) 12%, #fff), color-mix(in srgb, var(--violet-bright) 16%, var(--n-950)));
-  --teal-soft:   light-dark(color-mix(in srgb, var(--teal-strong)   12%, #fff), color-mix(in srgb, var(--teal-bright)   16%, var(--n-950)));
-  --orange-soft: light-dark(color-mix(in srgb, var(--orange-strong) 12%, #fff), color-mix(in srgb, var(--orange-bright) 16%, var(--n-950)));
-  --rose-soft:   light-dark(color-mix(in srgb, var(--rose-strong)   12%, #fff), color-mix(in srgb, var(--rose-bright)   16%, var(--n-950)));
-  --lime-soft:   light-dark(color-mix(in srgb, var(--lime-strong)   12%, #fff), color-mix(in srgb, var(--lime-bright)   16%, var(--n-950)));
 
   /* ============================================================
      SEMANTIC TOKENS — role-based, theme-aware. Component rules use ONLY these;
@@ -89,21 +83,9 @@
   --bad:  light-dark(var(--red-strong),    var(--red-bright));     --bad-soft:  var(--red-soft);
   --key:  light-dark(var(--violet-strong), var(--violet-bright));  --key-soft:  var(--violet-soft);
   --mark: light-dark(var(--mark-band), var(--mark-band-dark));   /* highlighter-pen band (dark: deep so white text stays legible) */
-
-  /* categorical (wayfinding) — defaults to the global accent until a hue-N sets it */
-  --cat: var(--accent); --cat-soft: var(--accent-soft);
 }
 :root.theme-light { color-scheme: light; }
 :root.theme-dark  { color-scheme: dark; }
-
-/* categorical hues — cycle hue-1..hue-6 (set on <body>, a section, or a card).
-   Each light-dark() pair is legible on its own surface. */
-.hue-1 { --cat: light-dark(var(--blue-strong),   var(--blue-bright));   --cat-soft: var(--blue-soft); }
-.hue-2 { --cat: light-dark(var(--teal-strong),   var(--teal-bright));   --cat-soft: var(--teal-soft); }
-.hue-3 { --cat: light-dark(var(--violet-strong), var(--violet-bright)); --cat-soft: var(--violet-soft); }
-.hue-4 { --cat: light-dark(var(--orange-strong), var(--orange-bright)); --cat-soft: var(--orange-soft); }
-.hue-5 { --cat: light-dark(var(--rose-strong),   var(--rose-bright));   --cat-soft: var(--rose-soft); }
-.hue-6 { --cat: light-dark(var(--lime-strong),   var(--lime-bright));   --cat-soft: var(--lime-soft); }
 
 /* --- foundation --- */
 * { box-sizing: border-box; }
@@ -183,13 +165,13 @@ th { background: var(--card); }
 /* optional bold lead-in inside a callout, colored to match */
 .callout .label { color: var(--c); font-weight: 700; }
 
-/* --- pullquote: an emphatic single line; uses the categorical hue for the marks --- */
+/* --- pullquote: an emphatic single line; the quote marks take the accent --- */
 .pullquote {
   margin: 1.8rem 0; padding: 0 1.2rem; border: 0;
   font-size: 1.15rem; line-height: 1.9; color: var(--fg); text-align: center;
 }
-.pullquote::before { content: "“"; color: var(--cat); font-size: 1.6rem; }
-.pullquote::after { content: "”"; color: var(--cat); font-size: 1.6rem; }
+.pullquote::before { content: "“"; color: var(--accent); font-size: 1.6rem; }
+.pullquote::after { content: "”"; color: var(--accent); font-size: 1.6rem; }
 
 /* --- chip: a small label. Base is muted; consumers add meaning-carrying
    variants (e.g. .chip.accent) in their own stylesheet. --- */
@@ -200,26 +182,26 @@ th { background: var(--card); }
 }
 .chip.accent { color: var(--accent); border-color: var(--accent); }
 
-/* --- kicker: an eyebrow/label above a heading; uses the categorical hue.
+/* --- kicker: an eyebrow/label above a heading; takes the accent.
    The negative bottom margin pulls the following heading up against it. --- */
-.kicker { color: var(--cat); font-size: .82rem; font-weight: 700; letter-spacing: .06em; margin: 1.2rem 0 -0.4rem; }
+.kicker { color: var(--accent); font-size: .82rem; font-weight: 700; letter-spacing: .06em; margin: 1.2rem 0 -0.4rem; }
 
 /* --- lede: an introductory/standfirst paragraph, larger and muted. --- */
 .lede { font-size: 1.05rem; color: var(--muted); line-height: 2; }
 
-/* --- keypoints: a "key takeaways" box tinted by the categorical hue.
+/* --- keypoints: a "key takeaways" box tinted by the accent.
    Author an <h2>/<h3> title plus a <ul> inside. --- */
 .keypoints {
-  background: var(--cat-soft); border: 1px solid var(--edge); border-left: 4px solid var(--cat);
+  background: var(--accent-soft); border: 1px solid var(--edge); border-left: 4px solid var(--accent);
   border-radius: 12px; padding: .4rem 1.1rem .7rem; margin: 1.4rem 0;
 }
-.keypoints h2 { font-size: .95rem; border: 0; margin: .7rem 0 .2rem; color: var(--cat); }
+.keypoints h2 { font-size: .95rem; border: 0; margin: .7rem 0 .2rem; color: var(--accent); }
 .keypoints ul { margin: .3rem 0; padding-left: 1.2rem; }
 .keypoints li { margin: .3rem 0; }
 
 /* --- card / card-grid: a generic bordered content block, and a responsive grid
    that lays a set of them out. Neutral containers — author any content inside;
-   add a `hue-N` for a categorical tint. --- */
+   Neutral containers — author any content inside. --- */
 .card { background: var(--card); border: 1px solid var(--edge); border-radius: 12px; padding: 1rem 1.1rem; }
 .card-grid { display: grid; gap: .8rem; margin: 1.2rem 0; grid-template-columns: repeat(auto-fit, minmax(14rem, 1fr)); }
 
@@ -249,7 +231,7 @@ th { background: var(--card); }
 
 /* reading-progress bar (top of viewport) */
 .progress { position: fixed; top: 0; left: 0; right: 0; height: 3px; z-index: 20; background: transparent; }
-.progress > i { display: block; height: 100%; width: 0; background: var(--cat); transition: width .1s linear; }
+.progress > i { display: block; height: 100%; width: 0; background: var(--accent); transition: width .1s linear; }
 
 /* theme toggle button (mounted in header.site, or floating if none) */
 .theme-btn {
@@ -269,7 +251,7 @@ th { background: var(--card); }
   opacity: 0; transform: translateY(.4rem); transition: opacity .2s, transform .2s; pointer-events: none;
 }
 .fab button.show { opacity: 1; transform: none; pointer-events: auto; }
-.fab button.toc-btn { border-color: var(--cat); color: var(--cat); }
+.fab button.toc-btn { border-color: var(--accent); color: var(--accent); }
 
 /* table-of-contents panel (slides up from the bottom on mobile) */
 .toc-backdrop {
@@ -279,12 +261,12 @@ th { background: var(--card); }
 .toc-backdrop.open { opacity: 1; pointer-events: auto; }
 .toc-panel {
   position: fixed; left: 0; right: 0; bottom: 0; z-index: 22; max-height: 70vh; overflow-y: auto;
-  background: var(--bg); border-top: 3px solid var(--cat);
+  background: var(--bg); border-top: 3px solid var(--accent);
   border-radius: 16px 16px 0 0; padding: .8rem 1.1rem 1.4rem;
   transform: translateY(100%); transition: transform .25s ease;
 }
 .toc-panel.open { transform: none; }
-.toc-panel h2 { font-size: .95rem; border: 0; margin: .2rem 0 .6rem; color: var(--cat); }
+.toc-panel h2 { font-size: .95rem; border: 0; margin: .2rem 0 .6rem; color: var(--accent); }
 .toc-panel ol { list-style: none; margin: 0; padding: 0; }
 .toc-panel li { margin: 0; }
 .toc-panel li.sub a { padding-left: 1.6rem; font-size: .9rem; color: var(--muted); }
@@ -292,7 +274,7 @@ th { background: var(--card); }
   display: block; padding: .5rem .6rem; text-decoration: none; color: var(--fg);
   border-radius: 8px; border-left: 3px solid transparent; line-height: 1.5;
 }
-.toc-panel a.active { color: var(--cat); border-left-color: var(--cat); background: var(--cat-soft); font-weight: 600; }
+.toc-panel a.active { color: var(--accent); border-left-color: var(--accent); background: var(--accent-soft); font-weight: 600; }
 
 /* --- wide viewport: TOC as a persistent sidebar index ---------------------
    On wide screens the same TOC nav (built and scroll-spied by base.js) is laid
@@ -318,9 +300,9 @@ th { background: var(--card); }
     border-radius: 0; border-left: 2px solid var(--line);
     padding: .28rem .9rem; line-height: 1.45;
   }
-  .toc-panel a:hover { color: var(--cat); border-left-color: var(--muted); background: none; }
+  .toc-panel a:hover { color: var(--accent); border-left-color: var(--muted); background: none; }
   .toc-panel a.active {
-    background: none; color: var(--cat); border-left-color: var(--cat); font-weight: 600;
+    background: none; color: var(--accent); border-left-color: var(--accent); font-weight: 600;
   }
   .toc-panel li.sub a { padding-left: 1.7rem; }
   /* Quiet index: show only the active section's sub-entries. base.js toggles
