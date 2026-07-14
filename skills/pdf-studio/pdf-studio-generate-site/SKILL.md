@@ -18,7 +18,7 @@ The input is a pdf-studio work dir (`<dir>/<name>/`) with at least one report un
 
 ## Phase 1 — Scaffold
 
-1. Inventory `reports/*.md` and `audio/*` (`.m4a`, also `.mp3`/`.wav` for hand-added files). Fix the page order now: `overview` first, the rest naturally sorted (`chapter-2` before `chapter-10`) — prev/next links depend on this order. Assign each page a **chapter hue** by its position in that order, cycling `hue-1`..`hue-6` (position 1 → `hue-1`, … 7 → `hue-1` again). The same hue is used for the page and for its index card, so color = chapter identity across the whole site.
+1. Inventory `reports/*.md` and `audio/*` (`.m4a`, also `.mp3`/`.wav` for hand-added files). Fix the page order now: `overview` first, the rest naturally sorted (`chapter-2` before `chapter-10`) — prev/next links depend on this order. Chapters are **not** color-coded: color carries meaning in this design system, so a per-chapter hue would collide with it (a reader cannot tell "chapter 5 red" from "hazard red"). Which chapter you are in is answered by the nav, the title, and the index — not by a color.
 2. **If `<WORK_DIR>/site/` already exists, ask the user before clearing it** (no prompt is needed when it doesn't exist yet). A clean rebuild (recommended) does `rm -rf <WORK_DIR>/site` first so that anything no longer produced (renamed/removed chapters, stale narration, superseded assets) leaves no orphan behind — which matters because a later [[pdf-studio-deploy-site]] run publishes whatever is on disk. If the user declines, build over the existing tree instead and warn that orphaned files may remain and would be published on the next deploy. Clearing is safe: everything under `site/` is reproducible from `reports/` and `audio/`, and hand-added audio lives in the **source** `audio/` (not `site/`), so it is never touched. Then create `<WORK_DIR>/site/assets/` and `site/audio/` and copy the **four asset files** into `site/assets/` — the base substrate `understanding-html-docs/assets/base.css` and `.../base.js`, and the pdf-studio context layer `pdf-studio-site-base/assets/pdf-studio.css` and `.../pdf-studio.js` — plus the audio files into `site/audio/`. Copy each verbatim; never edit them per site. `site/` is disposable — never hand-edit it (edit `reports/` and regenerate instead).
 
 ## Phase 2 — Author pages (parallel)
@@ -32,7 +32,6 @@ Pass only the per-page inputs, all absolute paths:
 
 - source report path; template path (`pdf-studio-generate-site/assets/page.html`); output path `site/<slug>.html`
 - site title; kicker label (第N章 / 全体レポート)
-- the page's chapter hue class (`hue-1`..`hue-6`) from Phase 1
 - matching audio file name under `site/audio/` (or "none")
 - prev/next hrefs + labels from the Phase 1 order (or "none" at the ends)
 
@@ -40,7 +39,16 @@ Each returns only the output path, the page title, and a 2–3 line card summary
 
 ## Phase 3 — Landing page (orchestrator, inline)
 
-Write `site/index.html` from `pdf-studio-generate-site/assets/index.html`: hero (site title = the book title, a 2–3 sentence lede composed from the overview card summary, chapter/audio count chips, CTA to `overview.html`), then one card per page in order — kicker, returned title, returned summary. Give each card the **same `hue-N` class** its page uses so card color matches the chapter, and a ⏱ reading-time chip and a 🔊 chip when they apply. Audio files with no matching report get inline players under 音声ガイド. Then verify (see Success criteria).
+Write `site/index.html` from `pdf-studio-generate-site/assets/index.html`: hero (site title = the book title, a 2–3 sentence lede composed from the overview card summary, chapter/audio count chips, CTA to `overview.html`), then one card per page in order — kicker, returned title, returned summary. Give each card a ⏱ reading-time chip and a 🔊 chip when they apply. Audio files with no matching report get inline players under 音声ガイド. Then verify (see Success criteria).
+
+## Phase 4 — Review the generated pages
+
+The pages were authored by an agent against a written contract, and a contract violation here **does not break the page** — a callout whose variant contradicts its own text renders as a perfectly good box in the wrong color, and nobody notices. So read them back: apply **[[understanding-html-docs-review]]** to every page under `site/` (including `index.html`).
+
+- **Under Claude Code**, dispatch one `understanding-html-docs-reviewer` subagent per page (multiple Agent calls in one message) so each review runs concurrently in a **fresh context**. This matters: the agent that authored a page cannot read it independently of having just written it.
+- **Otherwise**, apply the `understanding-html-docs-review` skill once per page.
+
+Fix what comes back (the review reports; it does not edit), then re-check. Report to the user what was found and fixed — a review whose findings are never surfaced is indistinguishable from one that never ran.
 
 ## Hand off to deployment
 
@@ -55,7 +63,8 @@ After building `site/`, tell the user the site is ready under `<WORK_DIR>/site/`
 
 - [ ] Every `reports/*.md` has a `site/<slug>.html`, and `index.html` has a card for each with a composed (not copied) summary; `overview` is the hero CTA.
 - [ ] Each page carries a `lede` and a `keypoints` box, and no unrendered Markdown artifacts (verify: `grep -n '\*\*\|^#\{1,3\} ' site/*.html` → only hits inside `<pre>` blocks, if any).
-- [ ] Every page `<body>` has a `hue-N` class and its index card carries the same `hue-N` (color = chapter identity); callout variants, if used, match their meaning.
+- [ ] No page carries a `hue-N` class (chapters are not color-coded).
+- [ ] Every page was reviewed with [[understanding-html-docs-review]], its findings were fixed, and the user was told what they were.
 - [ ] Reports with a matching audio slug have an in-page `<audio>` player; unmatched audio is listed on the index; every referenced audio file exists in `site/audio/`.
 - [ ] The design system is bundled locally: all four of `site/assets/base.css`, `site/assets/base.js`, `site/assets/pdf-studio.css`, `site/assets/pdf-studio.js` exist, and every page's `<head>` keeps the theme-boot inline script (key `html-docs-theme`) and the `assets/base.js` + `assets/pdf-studio.js` references. (External references — web fonts, CDN libraries, remote images, report-embedded links — are allowed where a page needs them; they are not checked.)
 - [ ] The user was told the site is built under `<WORK_DIR>/site/` and pointed to [[pdf-studio-deploy-site]] for putting it online.

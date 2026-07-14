@@ -14,7 +14,7 @@ Owns the two resources shared across the pdf-studio hosting skills, so there is 
 
 `pdf-studio-generate-site` copies both context files into each built site's `assets/` next to `base.css`/`base.js`, and `library.py` copies all four into the library's `public/assets/` for the index page — so the library index and every book page share one visual language and one interaction kit.
 
-The base design system itself (`base.css` / `base.js`) is **not** owned here — it lives in the sibling **[[understanding-html-docs]]** skill, which pdf-studio consumes as a copy-mode base (see that skill's "Consuming this base"). The categorical wayfinding variable is `--cat`/`--cat-soft` (set by base.css's `hue-N`); pdf-studio.css does not redefine the hues.
+The base design system itself (`base.css` / `base.js`) is **not** owned here — it lives in the sibling **[[understanding-html-docs]]** skill, which pdf-studio consumes as a copy-mode base (see that skill's "Consuming this base"). Color carries meaning only: chapters are not color-coded, and anything colored without a meaning uses `--accent`.
 
 ## Delegation
 
