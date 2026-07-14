@@ -65,10 +65,9 @@ directory):
 
 At this skill's root, alongside the reference site:
 
-- **`docs/components.md`** — the maintainer's reference for the component system:
-  why the base is hand-written CSS, how the tiers and the token pipeline fit
-  together, what adding a component costs, and where the model is known to be
-  thin. Not needed to *author* a document; read it before *changing the base*.
+- **`docs/components.md`** — the **design of the component system**: what a component
+  is for, the rules that decide where one lives and who owns it, and where the model
+  runs out. Not needed to *author* a document; read it before *changing the base*.
 
 ## Principles
 
@@ -80,10 +79,9 @@ At this skill's root, alongside the reference site:
   and the wiring of any rendering engine a document needs (including a diagram
   engine's palette hook); a consuming skill defines only what the document says
   and what it means (e.g. a domain-specific risk axis). The full rationale — the
-  three-tier component model and the promotion criterion — is recorded in the
-  design ADR `docs/2026-07-10-html-docs-component-library-design.md`
-  (my-agent-skills repo). Heavy renderers (diff2html, mermaid, highlight.js) live
-  in the base as opt-in components under `assets/components/`.
+  three-tier component model and the promotion criterion — is in
+  [`docs/components.md`](docs/components.md). Heavy renderers (diff2html, mermaid,
+  highlight.js) live in the base as opt-in components under `assets/components/`.
 - **The substrate is offline; heavy components assume an online viewer.** The
   foundation, color model, and PE kit render with no network. A heavy component
   that renders via a third-party engine pulls it version-pinned from a CDN by
@@ -224,16 +222,15 @@ external).
 
 ## Adding a component
 
-The full procedure — where a component belongs (`base.css` vs a bundle), what it
-costs, and the standing scope rules — is in [`docs/components.md`](docs/components.md).
-The invariants it must satisfy:
+Changing the design system is a different job from authoring a document. What a
+component is for, what decides whether it belongs in the base at all, and where the
+model runs out are in **[`docs/components.md`](docs/components.md)** — read it first.
 
-- Style it with **semantic tokens only** — never a primitive.
-- It must hold up in **both light and dark** themes.
-- The prose must still **read with no JS** (progressive enhancement).
-- It carries a **meaning color, or no color** — never a meaning color for emphasis.
-- **Demonstrate it on the reference site.** A component that is not shown there
-  does not exist: the site is the catalog, and it is what a review judges against.
+Whatever you add exists in three places at once, and they must agree: the rule in
+`base.css` (or a bundle), a demo on the reference site (the catalog a review judges
+against), and a row in the *Semantics → element / class* index above. A class missing
+from that index is reported as a **forbidden class** by
+[[understanding-html-docs-review]] in every document that uses it.
 
 ## Gotchas
 

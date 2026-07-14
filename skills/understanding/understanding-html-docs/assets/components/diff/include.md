@@ -1,7 +1,7 @@
 # `diff` component — render git diffs with diff2html
 
 A **Tier 2 opt-in component** of the understanding-html-docs design system (see
-`docs/2026-07-10-html-docs-component-library-design.md`). Include it only in a
+`docs/components.md`). Include it only in a
 document that shows diffs — a consumer that renders no diffs never copies this
 folder and never loads diff2html.
 

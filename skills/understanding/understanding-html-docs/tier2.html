@@ -156,11 +156,11 @@ console.log(resolve(marks, /* dark */ true));</code></pre>
                     <pre class="diff-source" hidden>diff --git a/assets/base.css b/assets/base.css
 --- a/assets/base.css
 +++ b/assets/base.css
-@@ -93,4 +93,2 @@
-   --mark: light-dark(var(--mark-band), var(--mark-band-dark));
--
--  /* categorical (wayfinding) — defaults to the accent until a hue-N sets it */
--  --cat: var(--accent); --cat-soft: var(--accent-soft);
+@@ -72,3 +72,4 @@
+   --card: light-dark(var(--n-50), var(--n-850));
+-  --line: light-dark(var(--n-200), var(--n-700));
++  --line: light-dark(var(--n-200), var(--n-700));  /* hairline separator */
++  --edge: light-dark(var(--n-300), var(--n-650));  /* outline of a shape */
  }</pre>
                     <div class="diff-render"></div>
                 </section>

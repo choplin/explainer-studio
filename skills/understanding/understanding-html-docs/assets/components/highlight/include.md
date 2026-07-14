@@ -1,7 +1,7 @@
 # `highlight` component — syntax-highlight code blocks with highlight.js
 
 A **Tier 2 opt-in component** of the understanding-html-docs design system (see
-`docs/2026-07-10-html-docs-component-library-design.md`). Include it only in a
+`docs/components.md`). Include it only in a
 document whose code blocks should be colorized — a consumer that needs no
 highlighting never copies this folder and never loads highlight.js.
 
@@ -65,5 +65,5 @@ The base markup is unchanged — one `<pre><code>` per block:
 This component owns *how code is colorized* (the engine, the token theme, the
 load wiring). The consumer owns *which* code to show and the prose around it. The
 token palette is the design system's own light/dark theme, not a page-level color
-axis — it never collides with the semantic/categorical layers, which carry
+axis — it never collides with the semantic layer, which carries
 meaning elsewhere in the document.

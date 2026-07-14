@@ -1,7 +1,7 @@
 # `diagram` component — render diagrams with mermaid
 
 A **Tier 2 opt-in component** of the understanding-html-docs design system (see
-`docs/2026-07-10-html-docs-component-library-design.md`). Include it only in a
+`docs/components.md`). Include it only in a
 document that shows diagrams — a consumer with no diagrams never copies this
 folder and never loads mermaid.
 
