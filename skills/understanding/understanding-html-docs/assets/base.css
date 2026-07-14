@@ -108,6 +108,20 @@ h3 { font-size: 1.05rem; margin: 1.6rem 0 .4rem; scroll-margin-top: 3.4rem; }
 p { margin: .7rem 0; }
 hr { border: 0; border-top: 1px solid var(--line); margin: 2rem 0; }
 blockquote { margin: 1rem 0; padding: .1rem 1rem; border-left: 3px solid var(--line); color: var(--muted); }
+/* media never exceeds its container: `main` is 48rem, but an embedded asset
+   (a harvested figure crop, a screenshot) is whatever pixel width it was made
+   at — typically wider — and would push the page into horizontal scroll on a
+   phone. `height: auto` keeps the aspect ratio while the width is clamped. */
+img, svg, video { max-width: 100%; height: auto; }
+/* figure: an illustration with its caption. Capped at the text column and
+   centered, but never scaled UP — a small crop stays small rather than being
+   stretched to the column and going soft. */
+figure { margin: 1.4rem 0; }
+/* the plate stays light in BOTH themes: a figure is usually a crop off a white
+   page (or a transparent PNG of dark strokes), so a dark backing would erase it.
+   The border is what seats it against the dark surface. */
+figure img { display: block; margin: 0 auto; border: 1px solid var(--edge); border-radius: 8px; background: light-dark(var(--n-0), var(--n-100)); }
+figcaption { margin-top: .5rem; color: var(--muted); font-size: .85rem; line-height: 1.7; text-align: center; }
 /* explicit monospace stack: don't leave code/pre to the platform's default
    `monospace` keyword, which is often an indistinct face — so inline code reads
    clearly as code, not just a tinted chip in the body sans-serif. */

@@ -88,6 +88,13 @@
                                     <td><code>blockquote</code></td>
                                 </tr>
                                 <tr>
+                                    <td>An illustration and its caption</td>
+                                    <td>
+                                        <code>figure</code> &gt; <code>img</code> +
+                                        <code>figcaption</code>
+                                    </td>
+                                </tr>
+                                <tr>
                                     <td>A break in the subject</td>
                                     <td><code>hr</code></td>
                                 </tr>
@@ -165,6 +172,37 @@
                     <pre><code class="nohighlight">&lt;div class="tablewrap"&gt;
   &lt;table&gt;…&lt;/table&gt;
 &lt;/div&gt;</code></pre>
+                </section>
+
+                <section>
+                    <h2>Figures</h2>
+                    <p>
+                        An illustration is a <code>figure</code> holding an
+                        <code>img</code> and a <code>figcaption</code> — never a bare
+                        <code>img</code>. <code>img</code>, <code>svg</code> and
+                        <code>video</code> are clamped to the text column, so an asset
+                        authored at any pixel width cannot push the page into horizontal
+                        scroll on a phone. They are never scaled <em>up</em>: a small crop
+                        stays small rather than being stretched soft.
+                    </p>
+                    <pre><code class="nohighlight">&lt;figure&gt;
+  &lt;img src="figures/fig-p031-1.jpg" alt="what the figure shows"&gt;
+  &lt;figcaption&gt;The caption.&lt;/figcaption&gt;
+&lt;/figure&gt;</code></pre>
+                    <div class="callout">
+                        <span class="label">The plate stays light in dark mode</span> — a
+                        figure is usually a crop off a white page, or a transparent PNG of
+                        dark strokes. A dark backing would erase it, so the image sits on a
+                        light plate in both themes and the border seats it against the
+                        surface.
+                    </div>
+                    <div class="callout warn">
+                        <span class="label">A relative path can escape the document</span> —
+                        an <code>src</code> is resolved against the page, not against where
+                        the content was written. A path that reaches outside what actually
+                        gets deployed still renders locally and 404s in production. Point at
+                        assets that ship with the document.
+                    </div>
                 </section>
 
                 <section>

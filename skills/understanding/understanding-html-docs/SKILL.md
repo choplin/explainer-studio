@@ -147,7 +147,10 @@ A copy-mode generation step should:
 document body), `header.site` / `footer` (page chrome), `h1` (title), `h2`/`h3`
 (sections — the TOC and progress bar are built from these), `p`, `ul`/`ol`,
 `table` (always inside `.tablewrap`), `code` / `pre > code`, `blockquote`, `hr`,
-`mark`, `a`.
+`mark`, `a`, and `figure` > `img` + `figcaption` (an illustration with its
+caption — `img`/`svg`/`video` are clamped to the column so nothing overflows on
+a phone, and never scaled up past their natural size; author a figure with a
+real `alt` and a `figcaption`, never a bare `<img>`).
 
 **Components — opted into with a class:**
 
