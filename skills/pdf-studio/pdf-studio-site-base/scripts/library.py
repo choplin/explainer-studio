@@ -8,7 +8,7 @@ network, no wrangler. The skills run wrangler separately.
 
 Layout:
   <root>/                       $XDG_DATA_HOME/pdf-studio (or ~/.local/share/...)
-  ├── library.json              metadata (NOT deployed): project, books, access
+  ├── library.json              metadata (NOT deployed): project, books
   └── public/                   the deploy root (uploaded whole by wrangler)
       ├── index.html            library index, rebuilt from library.json
       ├── assets/base.css       shared base design system (from understanding-html-docs)
@@ -235,11 +235,15 @@ def cmd_init(args):
             "reinitialize." % (existing.get("project"), root())
         )
     root().mkdir(parents=True, exist_ok=True)
+    # No `access` field: Cloudflare Access is configured in the dashboard, and
+    # nothing here can set it or read it back. A local mirror of state another
+    # system owns can only ever drift — and a stale `"access": false` is worse
+    # than no record, because it gets believed. The live URL is the only source
+    # of truth (`curl -sI` → 302 = protected); the deploy skill checks it there.
     meta = {
         "project": args.project,
         "title": args.title or "Reading Library",
         "created": today(),
-        "access": False,
         "books": [],
     }
     save_meta(meta)

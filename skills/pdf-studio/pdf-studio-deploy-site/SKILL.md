@@ -24,7 +24,7 @@ The inputs are a built `<WORK_DIR>/site/` and an already-initialized library. If
 
 ## Procedure
 
-Run wrangler **without the command sandbox** (`dangerouslyDisableSandbox: true`) — it needs the network. The `library.py` steps are local-only and need no special handling.
+Run **both `library.py` and wrangler without the command sandbox** (`dangerouslyDisableSandbox: true`). Two different reasons: wrangler needs the network, and `library.py` writes into the XDG library (`~/.local/share/pdf-studio/`) — **outside the workspace**, which the sandbox denies with a `PermissionError` on `shutil.rmtree`/`copytree`. "Local-only" is not the same as "sandbox-safe": what decides it is *where a command writes*, not whether it touches the network.
 
 1. **Decide the book's slug and card text.**
    - `<slug>`: the URL subpath, lowercase `a-z0-9-`, derived from the work dir name. For a Japanese name, propose a romanized slug and confirm it. Reusing an existing slug **replaces** that already-published book in place — so `library.py add` refuses an existing slug unless `--force`. Check `library.py status` first; if the slug is already listed, confirm with the user that they mean to replace the published book before re-running with `--force`.
@@ -47,8 +47,10 @@ Run wrangler **without the command sandbox** (`dangerouslyDisableSandbox: true`)
 ## Gotchas
 
 - **`wrangler` needs the network — run it without the command sandbox** (`dangerouslyDisableSandbox: true`). Under the sandbox it fails with TLS/connection errors that look like auth problems.
+- **`library.py` also needs the sandbox off, for a different reason.** It never touches the network, but it writes to `~/.local/share/pdf-studio/` — outside the workspace the sandbox permits — so under the sandbox `add` dies with `PermissionError` while copying `site/` into `public/<slug>/`. Do not read that as a broken script or a bad path; run it unsandboxed.
 - **Deploy always targets the whole `public/`, never one book.** `wrangler pages deploy` replaces the project's entire content with the given directory, so deploying a single book's `site/` would wipe every other book. Always deploy the library root from `library.py public`. `library.py add` is what puts the book into that root first.
 - **Access is already handled by [[pdf-studio-initialize-site]].** It covers the whole project, so a new subpath is protected automatically — no per-book Access step. If `curl` unexpectedly returns 200, Access was never enabled; point the user to initialize-site step 4.
+- **Never report the protection state from a local file.** Access lives in the Cloudflare dashboard; `library.json` does not record it (by design — see [[pdf-studio-site-base]]). The only way to know whether the site is protected is to ask the deployed URL, which is what step 4's `curl -sI` does. Telling the user "the site is public" on the strength of a local record is how you hand them a confident falsehood.
 - **Regenerate, then redeploy.** [[pdf-studio-generate-site]] rebuilds `<WORK_DIR>/site/` from source; this skill copies whatever is there now. Re-run [[pdf-studio-generate-site]] before redeploying a changed book (same slug replaces it in place — gated behind a user-confirmed `--force`).
 - **Pages limits: 25 MiB per file, 20,000 files across the whole library.** [[pdf-studio-audio-narrate]]'s 64 kbps m4a (~5 MB/10 min) is fine; a hand-added WAV can exceed 25 MiB and the deploy will reject it — re-encode it.
 
