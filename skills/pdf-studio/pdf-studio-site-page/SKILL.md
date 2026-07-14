@@ -49,7 +49,14 @@ Do NOT walk the Markdown top-to-bottom translating syntax. Author the page as an
 1. Read the whole report first; identify its 3–6 load-bearing ideas.
 2. Write a `lede` (2–3 sentences: what this covers, why it matters) and a `keypoints` box (3–5 bullets) — these are NEW text you compose, not copied sentences.
 3. Rebuild the body for scanning: short sections under `<h2>`/`<h3>` (renaming vague headings so each states its message), paragraphs of 2–4 sentences, lists where the source rambles, `tablewrap` tables kept as tables.
-4. Promote buried material with SEMANTIC color — pick the callout variant by meaning, not decoration: a note/aside → `callout`; a practical tip → `callout tip`; a caveat or pitfall → `callout warn`; a hard prohibition or serious risk → `callout danger`; a load-bearing insight worth boxing → `callout key`. Use them sparingly (a page that is all callouts flattens the signal). One genuinely striking claim → `pullquote` (at most one per page; skip if nothing earns it). Highlight a few key terms inline with `<mark>` — a handful per page, not every noun.
+4. Promote buried material with SEMANTIC color. **Color is not volume.** "This matters, so give it a loud color" is always the wrong move — it is the single most common way these pages go wrong. A variant is chosen by *what the content does to the reader*, never by how much you want it noticed. Pick by meaning: a note/aside → `callout`; a practical tip → `callout tip`; a caveat or pitfall → `callout warn`; a hard prohibition or serious risk → `callout danger`; a load-bearing insight worth boxing → `callout key`.
+
+   Two mistakes to avoid by name — both are real, both were the majority of what a review of these pages had to fix:
+
+   - ✗ **A term definition in `callout tip`.** A definition is not advice. The reader is not being told to *do* anything. Use a plain `callout`, or just `<mark>` the term in the prose — most definitions do not need a box at all.
+   - ✗ **A chapter's central claim in `callout warn` / `callout danger`.** A claim is not a hazard. That is `callout key`. The moment `danger` is used to mean "the most important thing here", it stops being distinguishable from a real hazard, and the color is dead for the whole site.
+
+   Before choosing `warn` or `danger`, ask: **"if the reader skips this, what breaks?"** If nothing breaks — they merely understand less — it is not `warn` and not `danger`. Use them sparingly overall (a page that is all callouts flattens the signal). One genuinely striking claim → `pullquote` (at most one per page; skip if nothing earns it). Highlight a few key terms inline with `<mark>` — a handful per page, not every noun.
 5. Cut redundancy that only made sense in a linear report ("as mentioned above", section numbering artifacts, coverage notes). The chapnav and index carry the navigation now.
 
 A page that ends up with the same heading sequence and sentence order as the source Markdown means the restructuring did not happen — do it again properly.
