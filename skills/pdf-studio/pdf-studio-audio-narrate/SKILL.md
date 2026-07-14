@@ -49,7 +49,7 @@ Report the output path and duration to the user.
 
 Voices come from a **STYLE preset** — a speaker pairing meant to match the script's 口調. The preset is chosen (highest priority first) from the `STYLE` env var, then a `# style: <preset>` marker line at the top of the script (written by [[pdf-studio-audio-dialogue]]), then the default.
 
-| Preset | Speaker A (navigator) | Speaker B (explainer) | Pairs with 口調 |
+| Preset | Speaker A (learner) | Speaker B (explainer) | Pairs with 口調 |
 |--------|----------------------|-----------------------|-----------------|
 | `zundamon` *(default)* | 四国めたん / ノーマル (2) | ずんだもん / ノーマル (3) | めたん＆ずんだもん（「〜なのだ」） |
 | `natural` | 四国めたん / ノーマル (2) | 青山龍星 / ノーマル (13) | 普通のフレンドリー敬体 |
