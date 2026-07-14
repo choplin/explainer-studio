@@ -1,0 +1,298 @@
+<!doctype html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <title>Color model — understanding-html-docs</title>
+        <!-- no-flash theme boot: must match base.js THEME_KEY ('html-docs-theme') -->
+        <script>
+            try {
+                var t = localStorage.getItem("html-docs-theme");
+                if (t === "dark")
+                    document.documentElement.classList.add("theme-dark");
+                else if (t === "light")
+                    document.documentElement.classList.add("theme-light");
+            } catch (e) {}
+        </script>
+        <link rel="stylesheet" href="assets/base.css" />
+        <script src="assets/base.js" defer></script>
+        <style>
+            /* page-local: swatches for displaying the palette. Not part of the design
+               system — a page that shows the colors needs a way to show them. */
+            .swatch {
+                border: 1px solid var(--edge);
+                border-radius: 10px;
+                padding: 0.7rem 0.8rem;
+                font-size: 0.82rem;
+            }
+            .swatch .name {
+                font-weight: 600;
+            }
+            .swatch .val {
+                color: var(--muted);
+                font-size: 0.74rem;
+                font-family: ui-monospace, monospace;
+            }
+            .swatch .bar {
+                height: 1.6rem;
+                border-radius: 6px;
+                margin: 0.4rem 0 0.5rem;
+            }
+            .ramp {
+                display: flex;
+                overflow: hidden;
+                border: 1px solid var(--edge);
+                border-radius: 10px;
+                margin: 0.8rem 0;
+            }
+            .ramp > i {
+                flex: 1;
+                height: 2.6rem;
+            }
+        </style>
+    </head>
+    <body>
+        <header class="site">
+            <a href="index.html">understanding-html-docs</a>
+        </header>
+
+        <main>
+            <article>
+                <p class="kicker">COLOR</p>
+                <h1>Color model</h1>
+                <p class="lede">
+                    <strong>Color carries meaning, and nothing else.</strong> Everything
+                    that is colored without meaning anything collapses into a single
+                    accent. Learn the code once and every document reads the same way.
+                </p>
+
+                <section>
+                    <h2>Colors that mean something</h2>
+                    <p>
+                        The mapping is fixed.
+                        <strong>Never borrow a meaning color for decoration</strong> — red
+                        says "hazard", not "look here".
+                    </p>
+                    <div class="tablewrap">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Meaning</th>
+                                    <th>Token</th>
+                                    <th>Hue</th>
+                                    <th>Where it shows</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>Information</td>
+                                    <td><code>--note</code></td>
+                                    <td>blue</td>
+                                    <td><code>.callout</code></td>
+                                </tr>
+                                <tr>
+                                    <td>Advice</td>
+                                    <td><code>--tip</code></td>
+                                    <td>green</td>
+                                    <td><code>.callout.tip</code></td>
+                                </tr>
+                                <tr>
+                                    <td>Caution</td>
+                                    <td><code>--warn</code></td>
+                                    <td>amber</td>
+                                    <td><code>.callout.warn</code></td>
+                                </tr>
+                                <tr>
+                                    <td>Hazard</td>
+                                    <td><code>--bad</code></td>
+                                    <td>red</td>
+                                    <td><code>.callout.danger</code></td>
+                                </tr>
+                                <tr>
+                                    <td>Key insight</td>
+                                    <td><code>--key</code></td>
+                                    <td>violet</td>
+                                    <td><code>.callout.key</code></td>
+                                </tr>
+                                <tr>
+                                    <td>A highlighted phrase</td>
+                                    <td><code>--mark</code></td>
+                                    <td>yellow</td>
+                                    <td><code>&lt;mark&gt;</code></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </section>
+
+                <section>
+                    <h2>Colors that mean nothing — one accent</h2>
+                    <p>
+                        Links, the reading-progress bar, the current entry in the table of
+                        contents, <code>.keypoints</code>, <code>.kicker</code>, the quote
+                        marks of a <code>.pullquote</code>. These are colored, but the
+                        color is not saying anything. They all take
+                        <code>--accent</code>.
+                    </p>
+                    <div class="callout key">
+                        <span class="label">No color-coding by position</span> — chapters
+                        and pages are not assigned their own hues. A reader cannot tell
+                        "chapter 5 red" from "hazard red", so position-coding would break
+                        the very code the semantic colors depend on. "Where am I" is
+                        answered by navigation and headings, not by color.
+                    </div>
+                </section>
+
+                <section>
+                    <h2>Three token layers</h2>
+                    <p>
+                        Color reaches the screen through three layers.
+                        <strong>A component rule may read only the middle one.</strong>
+                    </p>
+                    <div class="tablewrap">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Layer</th>
+                                    <th>Example</th>
+                                    <th>Who may read it</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>Primitives — raw color</td>
+                                    <td>
+                                        <code>--n-900</code>,
+                                        <code>--blue-strong</code>
+                                    </td>
+                                    <td>Only the semantic tokens</td>
+                                </tr>
+                                <tr>
+                                    <td>Semantic tokens — roles</td>
+                                    <td>
+                                        <code>--fg</code>, <code>--edge</code>,
+                                        <code>--warn</code>, <code>--accent</code>
+                                    </td>
+                                    <td><strong>Component rules</strong></td>
+                                </tr>
+                                <tr>
+                                    <td>The rules themselves</td>
+                                    <td><code>.callout</code>, <code>.card</code>, …</td>
+                                    <td>—</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <p>
+                        To re-theme, edit the primitive layer alone. Light and dark are not
+                        two palettes: every token holds a <code>light-dark()</code> pair,
+                        so there is nothing to keep in sync.
+                    </p>
+                </section>
+
+                <section>
+                    <h2>The primitive palette</h2>
+                    <p>
+                        Every color comes from these ramps.
+                        <strong>A component rule never reads them directly</strong> — it
+                        goes through a semantic token.
+                    </p>
+
+                    <h3>Neutral ramp — surfaces, text, borders</h3>
+                    <div class="ramp">
+                        <i style="background: var(--n-0)"></i>
+                        <i style="background: var(--n-100)"></i>
+                        <i style="background: var(--n-300)"></i>
+                        <i style="background: var(--n-500)"></i>
+                        <i style="background: var(--n-700)"></i>
+                        <i style="background: var(--n-850)"></i>
+                        <i style="background: var(--n-950)"></i>
+                    </div>
+
+                    <h3>Chromatic ramp — one hue, one meaning</h3>
+                    <p>
+                        Each hue is spoken for by exactly one meaning. The ramp is
+                        deliberately no longer than the meanings it serves, so
+                        <strong>a color can never say two things</strong>. Each swatch
+                        shows its light step and its dark step.
+                    </p>
+                    <div class="card-grid">
+                        <div class="swatch">
+                            <div
+                                class="bar"
+                                style="background: linear-gradient(90deg, var(--blue-strong) 50%, var(--blue-bright) 50%)"
+                            ></div>
+                            <span class="name" style="color: var(--accent)">blue</span>
+                            <div class="val">accent + note</div>
+                        </div>
+                        <div class="swatch">
+                            <div
+                                class="bar"
+                                style="background: linear-gradient(90deg, var(--green-strong) 50%, var(--green-bright) 50%)"
+                            ></div>
+                            <span class="name" style="color: var(--tip)">green</span>
+                            <div class="val">tip</div>
+                        </div>
+                        <div class="swatch">
+                            <div
+                                class="bar"
+                                style="background: linear-gradient(90deg, var(--amber-strong) 50%, var(--amber-bright) 50%)"
+                            ></div>
+                            <span class="name" style="color: var(--warn)">amber</span>
+                            <div class="val">warn</div>
+                        </div>
+                        <div class="swatch">
+                            <div
+                                class="bar"
+                                style="background: linear-gradient(90deg, var(--red-strong) 50%, var(--red-bright) 50%)"
+                            ></div>
+                            <span class="name" style="color: var(--bad)">red</span>
+                            <div class="val">danger</div>
+                        </div>
+                        <div class="swatch">
+                            <div
+                                class="bar"
+                                style="background: linear-gradient(90deg, var(--violet-strong) 50%, var(--violet-bright) 50%)"
+                            ></div>
+                            <span class="name" style="color: var(--key)">violet</span>
+                            <div class="val">key</div>
+                        </div>
+                        <div class="swatch">
+                            <div class="bar" style="background: var(--mark)"></div>
+                            <span class="name">yellow</span>
+                            <div class="val">&lt;mark&gt;</div>
+                        </div>
+                    </div>
+                </section>
+
+                <section>
+                    <h2>When you want another color</h2>
+                    <div class="keypoints">
+                        <h3>Before you add one</h3>
+                        <ul>
+                            <li>
+                                <strong>Try prose first.</strong> Every color is one more
+                                thing the reader has to learn.
+                            </li>
+                            <li>
+                                If you still need it, then it is a
+                                <strong>new meaning</strong>. Define it as a semantic axis
+                                in the consuming skill's own stylesheet, on a hue that does
+                                not collide with the ones above.
+                            </li>
+                            <li>Never add a color for decoration.</li>
+                        </ul>
+                    </div>
+                    <div class="callout danger">
+                        <span class="label">Never write a raw color</span> —
+                        <code>style="color:#e11"</code> bypasses the token layer and breaks
+                        in dark theme. Always go through
+                        <code>var(--token)</code>.
+                    </div>
+                </section>
+            </article>
+        </main>
+
+        <footer><a href="index.html">← Back to the index</a></footer>
+    </body>
+</html>

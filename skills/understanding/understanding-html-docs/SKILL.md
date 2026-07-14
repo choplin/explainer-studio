@@ -1,6 +1,6 @@
 ---
 name: understanding-html-docs
-description: Shared resources for skills that explain something as a self-contained HTML document — the design system (typography, a two-layer semantic/categorical color model, callouts, chips), the progressive-enhancement kit (theme toggle, reading progress, table of contents, back-to-top), and the authoring principles that keep the output deployable as static HTML. Other skills delegate to this skill to copy the base assets and follow the color/PE conventions, then layer their own context-specific markup on top. Use this skill when another skill asks to apply the understanding-html-docs design system or copy its base assets. Not typically invoked on its own.
+description: Shared resources for skills that explain something as a self-contained HTML document — the design system (typography, a meaning-only color model, callouts, chips), the progressive-enhancement kit (theme toggle, reading progress, table of contents, back-to-top), and the authoring contract that keeps the output deployable as static HTML. Other skills delegate to this skill to copy the base assets and follow the color/PE conventions, then layer their own context-specific markup on top. Use this skill when another skill asks to apply the understanding-html-docs design system or copy its base assets. Not typically invoked on its own.
 ---
 
 # understanding-html-docs — shared HTML explanation-document resources
@@ -18,12 +18,36 @@ The idea:
 > The first three are here; the context layer (what the document is *about*, and
 > any heavy third-party libraries it needs) stays in the consuming skill.
 
-Consuming skills copy the two asset files verbatim and add their own stylesheet
-and markup — they never edit these files per document.
+Consuming skills copy the asset files verbatim and add their own stylesheet and
+markup — they never edit these files per document.
+
+## The reference site is the contract
+
+**The normative source is the reference site at this skill's root** — `index.html`
+and the six pages it links. It is written in the design system it documents, so the
+contract and the worked example are the same artifact and cannot drift apart. It is
+also the living catalog — every component, in both themes — and the worked example a
+generated document is reviewed against.
+
+| Page | Covers |
+|---|---|
+| `index.html` | The two consumption modes, the skeleton, the page index |
+| `foundation.html` | What works with no class: headings, prose, tables, code, quotes |
+| `color.html` | The meaning-only color model and the token layers |
+| `components.html` | The classes you opt into: callout, keypoints, card, chip, aside… |
+| `enhancement.html` | What `base.js` adds, and the preconditions it needs |
+| `tier2.html` | The opt-in bundles: highlight, diff, diagram |
+| `contract.html` | The rules, and how a generated document is reviewed against them |
+
+Serve it over HTTP (`python3 -m http.server`) — the diagram component is an ES
+module and will not render over `file://`.
+
+The table below is an index into that site, not a second source of truth. When the
+two disagree, the site wins — it is the one written in the system it describes.
 
 ## Assets
 
-Both live under this skill's `assets/` (resolve relative to this skill's installed
+Under this skill's `assets/` (resolve relative to this skill's installed
 directory):
 
 - **`base.css`** — the design system: foundation (reset, typography, layout,
@@ -35,8 +59,16 @@ directory):
   vanilla, no dependencies, no network. Every feature degrades to nothing if the
   script never loads. The TOC is **responsive**: a bottom-sliding overlay panel
   (☰ FAB) on narrow screens, and a **persistent sidebar index** in the left
-  gutter beside the article on wide screens (≥ 76rem) — same nav and scroll-spy,
+  gutter beside the article on wide screens (≥ 79rem) — same nav and scroll-spy,
   only the layout branches (in `base.css`, no logic duplicated).
+- **`assets/components/<name>/`** — the Tier 2 opt-in bundles (see below).
+
+At this skill's root, alongside the reference site:
+
+- **`docs/components.md`** — the maintainer's reference for the component system:
+  why the base is hand-written CSS, how the tiers and the token pipeline fit
+  together, what adding a component costs, and where the model is known to be
+  thin. Not needed to *author* a document; read it before *changing the base*.
 
 ## Principles
 
@@ -48,49 +80,48 @@ directory):
   and the wiring of any rendering engine a document needs (including a diagram
   engine's palette hook); a consuming skill defines only what the document says
   and what it means (e.g. a domain-specific risk axis). The full rationale — the
-  three-tier component model (foundation / pure-CSS UI + PE kit / heavy opt-in
-  components) and the promotion criterion — is recorded in the design ADR
-  `docs/2026-07-10-html-docs-component-library-design.md` (my-agent-skills repo).
-  *(Heavy renderers such as diff2html/mermaid still live in the consumer's markup
-  today; moving them into base opt-in components under `assets/components/` is
-  tracked as follow-up implementation.)*
+  three-tier component model and the promotion criterion — is recorded in the
+  design ADR `docs/2026-07-10-html-docs-component-library-design.md`
+  (my-agent-skills repo). Heavy renderers (diff2html, mermaid, highlight.js) live
+  in the base as opt-in components under `assets/components/`.
 - **The substrate is offline; heavy components assume an online viewer.** The
-  foundation, color model, and PE kit (`base.css`/`base.js`) render with no
-  network — copy them next to the HTML, never hot-link them. A heavy component
-  that renders via a third-party engine (a diff renderer, a diagram engine) pulls
-  it version-pinned from a CDN by default (vendoring is the offline opt-in); only
-  that rendering needs the network. The base substrate itself stays CDN-free.
-- **Color carries one meaning.** The model is two disjoint layers — never blur
-  them, and never introduce a third ad-hoc color; prefer prose over a new hue.
-  - **Semantic** (meaning): callout variants (`note`/`tip`/`warn`/`danger`/`key`)
-    and inline `<mark>` map a fixed hue to a fixed meaning. A consuming skill may
-    define *additional* semantic axes in its own stylesheet (e.g. a risk axis),
-    but each hue still means exactly one thing across the whole document.
-  - **Categorical** (wayfinding): a `hue-N` class tints `--cat`/`--cat-soft` for
-    sections/chapters/documents, so "where am I" is answerable by color. It falls
-    back to the global accent when unset. Interactive color (links) stays the
-    single global accent.
+  foundation, color model, and PE kit render with no network. A heavy component
+  that renders via a third-party engine pulls it version-pinned from a CDN by
+  default (vendoring is the offline opt-in); only that rendering needs the network.
+- **Color carries meaning, and nothing else.** The semantic hues
+  (`note`/`tip`/`warn`/`danger`/`key`, plus `<mark>`) each mean exactly one thing,
+  and everything else that is colored — links, the progress bar, the TOC's current
+  entry, `.keypoints` — takes the single global `--accent`. **Documents are not
+  color-coded by position** (no per-chapter or per-section hue): a reader cannot
+  tell "chapter 5 red" from "hazard red", so position-coding would destroy the very
+  code the semantic colors rely on. "Where am I" is answered by navigation and
+  headings. A consuming skill may add its *own* semantic axis (e.g. a risk axis) in
+  its own stylesheet, but the hue it picks must not collide with an existing meaning.
+- **Structure is a reference, not a mandate.** The contract binds how meaning is
+  expressed, not how the document is shaped. A document whose job needs a different
+  skeleton — several `article` elements under `main`, no `base.js` — is not in
+  violation; it simply forgoes the parts of the kit it opted out of.
 - **Progressive enhancement, not dependence.** Everything `base.js` adds is a
   layer on top of a page that already reads correctly. Author the semantic HTML
   first; let the kit enrich it.
 
 ## Consuming this base
 
-There are two consumption modes; pick by the output shape:
+Two consumption modes; pick by the output shape:
 
 - **Copy mode** (multi-page sites): copy `base.css`/`base.js` into a shared
   `assets/` directory and `<link>`/`<script src>` them from every page. One
-  stylesheet serves the whole site. This is the default; steps below describe it.
+  stylesheet serves the whole site. This is the default, and what the reference
+  site itself does.
 - **Inline mode** (a single self-contained file): paste `base.css` into a
   `<style>` element and, if the DOM fits the kit, `base.js` into a `<script>`.
-  Use this when the output must stay one portable file (e.g. it is published or
-  emailed as a lone `.html`). The base stays the source of truth — the file is
-  re-inlined on each regeneration; never hand-tune the inlined copy.
+  Use this when the output must stay one portable file. The base stays the source
+  of truth — the file is re-inlined on each regeneration; never hand-tune the
+  inlined copy.
 
 A copy-mode generation step should:
 
-1. Copy `assets/base.css` and `assets/base.js` (from this skill's installed
-   directory) into the output's `assets/` directory.
+1. Copy `assets/base.css` and `assets/base.js` into the output's `assets/`.
 2. Add its own context stylesheet next to them and link both from each page,
    base first:
    ```html
@@ -104,49 +135,79 @@ A copy-mode generation step should:
    <script>try{var t=localStorage.getItem('html-docs-theme');if(t==='dark')document.documentElement.classList.add('theme-dark');else if(t==='light')document.documentElement.classList.add('theme-light');}catch(e){}</script>
    <script src="assets/base.js" defer></script>
    ```
-4. Give the page the semantic structure `base.js` wires from: a `header.site`
-   (where the theme button mounts), a `main article`, and `h2`/`h3` section
-   headings (the TOC and reading-progress build on these). A page with fewer than
-   two `h2`s simply gets no TOC.
-5. Author context markup using the class catalog below plus its own classes.
+4. Give the page the structure `base.js` wires from: a `header.site` (where the
+   theme button mounts), a `main article`, and `h2`/`h3` section headings. A page
+   with fewer than two `h2`s simply gets no TOC.
+5. Author the markup against the index below (the reference site has the detail).
+6. **Review every page produced** with [[understanding-html-docs-review]]. A generated
+   document nobody reads back against the contract is the failure this base exists to
+   prevent.
 
-## Class catalog (base.css)
+## Semantics → element / class (index)
 
-Foundation is automatic from element selectors (`body`, `main`, `h1`–`h3`, `p`,
-`blockquote`, `code`, `pre`, `mark`, `footer`). Named components:
+**Foundation — carried by the element alone**, no class: `main > article` (the
+document body), `header.site` / `footer` (page chrome), `h1` (title), `h2`/`h3`
+(sections — the TOC and progress bar are built from these), `p`, `ul`/`ol`,
+`table` (always inside `.tablewrap`), `code` / `pre > code`, `blockquote`, `hr`,
+`mark`, `a`.
 
-| Class | Purpose |
-|-------|---------|
-| `header.site` | Sticky top bar; the theme button mounts here |
-| `.callout` | Semantic message box (base = note/info) |
-| `.callout.tip` / `.warn` / `.danger` / `.key` | Meaning + color + icon variants |
-| `.callout .label` | Bold colored lead-in inside a callout |
-| `.pullquote` | Emphatic single line; quote marks in the categorical hue |
-| `.chip` | Small muted label; `.chip.accent` for an accented one |
-| `.kicker` | Eyebrow/label above a heading, in the categorical hue |
-| `.lede` | Introductory standfirst paragraph (larger, muted) |
-| `.keypoints` | "Key takeaways" box (categorical hue); author an `h2`/`h3` + `ul` |
-| `.card` / `.card-grid` | Bordered content block, and a responsive grid of them |
-| `.badge` | Small filled status/count marker (accent); the filled counterpart to `.chip` |
-| `.aside` | Quiet supplementary/tangential note (no icon, no semantic hue) |
-| `.tablewrap` > `table` | Horizontally scrollable table wrapper |
-| `.hue-1` … `.hue-6` | Categorical hue (sets `--cat`/`--cat-soft`) |
+**Components — opted into with a class:**
 
-PE classes (`.progress`, `.theme-btn`, `.fab`, `.toc-backdrop`, `.toc-panel`) are
-injected/toggled by `base.js`; author markup does not use them directly. On wide
-viewports (≥ 76rem) a `base.css` media query re-lays the same `.toc-panel` as a
-persistent left sidebar and hides the `.toc-btn`/`.toc-backdrop` overlay
-affordances — a pure-CSS presentation branch over the JS-built nav.
+| To express | Author |
+|---|---|
+| General supporting information | `.callout` (the base variant *is* note) |
+| Advice worth following | `.callout.tip` |
+| Something to be careful about | `.callout.warn` |
+| A hazard — this breaks, this destroys | `.callout.danger` (**not** `warning`, not `error`) |
+| The key insight | `.callout.key` |
+| A bold lead-in inside a callout | `.callout .label` |
+| What a section boils down to | `.keypoints` — a heading + `ul` inside |
+| One line, said louder | `.pullquote` |
+| An eyebrow above a heading | `.kicker` |
+| The opening paragraph | `.lede` |
+| A bordered block, and a grid of them | `.card` / `.card-grid` |
+| A small outlined label | `.chip` (`.chip.accent` to accent it) |
+| A small filled status/count marker | `.badge` |
+| A quiet remark, carrying no meaning-color | `.aside` (the class — not a bare `<aside>`) |
+| A horizontally scrollable table | `.tablewrap` > `table` |
+
+**Injected by `base.js` — never authored:** `.progress`, `.theme-btn`, `.fab`,
+`.toc-btn`, `.toc-backdrop`, `.toc-panel`.
+
+**Forbidden:** a class nothing defines; a raw color in a `style` attribute
+(`style="color:#e11"` — go through `var(--token)`); a primitive (`--n-*`,
+`--blue-strong`) read from a component rule; a `<table>` outside `.tablewrap`; a
+meaning color used as decoration; a new ad-hoc hue; a Tier 2 marker without its
+bundle.
+
+## Reviewing a document — [[understanding-html-docs-review]]
+
+There is deliberately **no linter**. A checker can establish that a class *exists*,
+and that is worth almost nothing here: the errors that matter are **well-formed**. A
+`.callout.tip` wrapped around a hazard passes every conceivable class check, renders
+as a perfectly good green box, and tells the reader the opposite of the truth.
+
+> Whether a class exists is not the question. Whether it was used as intended is.
+
+That is a reading task, so a generated document is **reviewed**, not linted. Run
+[[understanding-html-docs-review]] on every page produced — it reads the contract and
+the document and reports where the markup and the meaning have come apart: a callout
+whose variant contradicts its own text (or that should not have been a callout at
+all), a `.keypoints` that is not the takeaways, a meaning color spent on decoration,
+a class borrowed from another system (`warning`/`error`/`info` render as a plain
+note), a heading used to make a line bold, a Tier 2 marker whose bundle was never
+shipped.
+
+Under Claude Code the `understanding-html-docs-reviewer` subagent wraps it, so the
+review runs in a **fresh context** — the agent that just authored the page cannot
+read it independently of having written it.
 
 ## Opt-in components (Tier 2)
 
-The foundation and the class catalog above are the always-present layers (they
-ship in `base.css`/`base.js` and cost nothing to include). A document that needs
-a heavy renderer — a diff viewer, a diagram engine — pulls in an **opt-in
-component** instead of re-deriving the integration. Each lives in its own bundle
-under `assets/components/<name>/` and is copied **only by a consumer that uses
-it**, so a document that renders no diffs never ships diff2html. See the design
-rationale for the tier model: `docs/2026-07-10-html-docs-component-library-design.md`.
+A document that needs a heavy renderer pulls in an **opt-in component** instead of
+re-deriving the integration. Each lives in its own bundle under
+`assets/components/<name>/` and is copied **only by a consumer that uses it**, so a
+document that renders no diffs never ships diff2html.
 
 | Component | Renders | Third-party engine (CDN by default) |
 |-----------|---------|-------------------------------------|
@@ -157,25 +218,37 @@ rationale for the tier model: `docs/2026-07-10-html-docs-component-library-desig
 Each bundle carries its own CSS/JS plus an **`include.md`** that is the source of
 truth for wiring it: the CDN tags (version-pinned; vendor locally for the offline
 opt-in), the markup contract, and the escaping/validity rules the engine needs.
-To use a component, follow its `include.md` — copy-mode (link/`src` the files) or
+**Follow the bundle's `include.md`** — copy-mode (link/`src` the files) or
 inline-mode (paste them into `<style>`/`<script>`, keeping only the CDN engine
-external). These components own *how* their artifact renders; the consuming skill
-owns *what* it shows and what it means (e.g. a risk/change color axis). The base
-substrate stays offline; only a Tier 2 component's rendering needs the network.
+external).
+
+## Adding a component
+
+The full procedure — where a component belongs (`base.css` vs a bundle), what it
+costs, and the standing scope rules — is in [`docs/components.md`](docs/components.md).
+The invariants it must satisfy:
+
+- Style it with **semantic tokens only** — never a primitive.
+- It must hold up in **both light and dark** themes.
+- The prose must still **read with no JS** (progressive enhancement).
+- It carries a **meaning color, or no color** — never a meaning color for emphasis.
+- **Demonstrate it on the reference site.** A component that is not shown there
+  does not exist: the site is the catalog, and it is what a review judges against.
 
 ## Gotchas
 
 - **Copy, don't reference.** The assets must be copied into each output so the
   document stays self-contained. Never link to this skill's install path.
-- **Keep the two color layers disjoint.** If a consumer adds a semantic axis, it
-  must not reuse a categorical `hue-N` color or the global accent for it, and vice
-  versa — overlapping hues destroy the "color = one meaning" signal.
 - **Boot key must match.** If the inline `<head>` snippet's storage key drifts
   from `base.js`'s `THEME_KEY`, the saved theme silently stops applying and the
   page flashes on load.
-- **`base.js` targets `main article`.** Its reading-progress bar and TOC assume
-  the document body is one `main > article`. A page that instead puts several
-  `article` elements directly under `main` will mis-target the first one — such a
-  consumer should either wrap its content in a single outer `article` or skip
-  `base.js` and keep its own scripts (`base.css`'s auto light/dark still works
-  without any JS). `understanding-explain-diff` takes the latter route.
+- **`base.js` targets the first `main article`.** A page that puts several
+  `article` elements directly under `main` would mis-target the first one — so such
+  a page should not load `base.js`, and keeps its own scripts instead
+  (`base.css`'s design system and auto light/dark still work with no JS).
+  [[understanding-explain-diff]] takes that route. This is a supported choice, not a
+  violation — the PE preconditions simply do not apply to it.
+- **Nothing here fails loudly.** A misspelled class, an inline hex color, a callout
+  whose variant contradicts its own text — each renders plausibly and is never
+  noticed. That is what [[understanding-html-docs-review]] is for; run it on what you
+  generate.
