@@ -36,9 +36,43 @@ article { border-top: 3px solid var(--accent); padding-top: .6rem; }
 .player span { font-size: .85rem; white-space: nowrap; }
 .player audio { width: 100%; height: 2rem; }
 
-/* prev/next chapter navigation at the foot of a page */
+/* prev/next chapter navigation at the foot of a page (rendered by pdf-studio.js
+   from nav-manifest.js; at either end the missing side is an empty <span>). */
 .chapnav { display: flex; justify-content: space-between; gap: 1rem; margin: 3rem 0 0; padding-top: 1rem; border-top: 1px solid var(--line); font-size: .92rem; }
 .chapnav a { text-decoration: none; }
+
+/* --- all-pages navigation (manifest-driven, pdf-studio.js) ---
+   A 📖 FAB opens this slide-up drawer listing every page, current highlighted.
+   A DIFFERENT axis from base.js's ☰ TOC (this page's sections): pages vs
+   sections. Unlike the TOC (which base.css promotes to a sidebar on wide
+   screens) this stays a drawer at every width — hence its own class, not
+   .toc-panel. The 📖 button rides in base.js's .fab; accent it like the ☰. */
+.fab button.pages-btn { border-color: var(--accent); color: var(--accent); }
+.pagenav-backdrop {
+  position: fixed; inset: 0; z-index: 21; background: rgba(0,0,0,.4);
+  opacity: 0; pointer-events: none; transition: opacity .2s;
+}
+.pagenav-backdrop.open { opacity: 1; pointer-events: auto; }
+.pagenav-panel {
+  position: fixed; left: 0; right: 0; bottom: 0; z-index: 22; max-height: 70vh; overflow-y: auto;
+  background: var(--bg); border-top: 3px solid var(--accent);
+  border-radius: 16px 16px 0 0; padding: .8rem 1.1rem 1.4rem;
+  transform: translateY(100%); transition: transform .25s ease;
+}
+.pagenav-panel.open { transform: none; }
+.pagenav-panel h2 { font-size: .95rem; border: 0; margin: .2rem 0 .6rem; color: var(--accent); }
+.pagenav-panel ol { list-style: none; margin: 0; padding: 0; }
+.pagenav-panel li { margin: 0; }
+.pagenav-panel a {
+  display: block; padding: .5rem .6rem; text-decoration: none; color: var(--fg);
+  border-radius: 8px; border-left: 3px solid transparent; line-height: 1.5;
+}
+.pagenav-panel a .k { display: block; font-size: .72rem; color: var(--muted); }
+.pagenav-panel a.active { color: var(--accent); border-left-color: var(--accent); background: var(--accent-soft); font-weight: 600; }
+.pagenav-panel a.active .k { color: var(--accent); }
+@media (prefers-reduced-motion: reduce) {
+  .pagenav-backdrop, .pagenav-panel { transition: none; }
+}
 
 /* chip variants (base.css owns .chip and .chip.accent) */
 .chip.audio { color: var(--tip);  border-color: var(--tip);  }

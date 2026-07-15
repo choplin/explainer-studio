@@ -62,10 +62,14 @@
       if (pages[i].href === here) { idx = i; break; }
     }
 
-    // prev/next belongs on a report page that is itself in the manifest.
-    // (The landing page is the whole-book view; it gets no prev/next.)
+    // Everything here is for a report page that is itself in the manifest.
+    // (The landing page is the whole-book view — it already lists every page as
+    // cards — so it gets neither prev/next nor the drawer.)
+    if (idx === -1) return;
+
+    // --- prev/next at the article foot ---
     var article = document.querySelector("main article");
-    if (idx !== -1 && article) {
+    if (article) {
       var prev = idx > 0 ? pages[idx - 1] : null;
       var next = idx < pages.length - 1 ? pages[idx + 1] : null;
 
@@ -83,9 +87,55 @@
       article.appendChild(chapnav);
     }
 
-    // NOTE: the all-pages list nav (full jump list + current highlight) mounts
-    // here. Its UI form is deferred; this block already computes `idx` for the
-    // current-page highlight it will need.
+    // --- all-pages drawer: a 📖 FAB opening a slide-up list of every page, the
+    // current one highlighted. A DIFFERENT axis from base.js's ☰ TOC (which lists
+    // this page's sections): pages vs sections. Unlike the TOC it stays a drawer
+    // at every width (base.css promotes only .toc-panel to a wide sidebar, and
+    // this panel uses its own class). base.js runs first (script order) and has
+    // already created .fab, so we just prepend our button to it. ---
+    var fab = document.querySelector(".fab");
+    if (fab) {
+      var backdrop = document.createElement("div");
+      backdrop.className = "pagenav-backdrop";
+      var panel = document.createElement("nav");
+      panel.className = "pagenav-panel";
+      panel.setAttribute("aria-label", "全ページ");
+      var title = document.createElement("h2");
+      title.textContent = "全ページ";
+      panel.appendChild(title);
+      var list = document.createElement("ol");
+      pages.forEach(function (p, i) {
+        var li = document.createElement("li");
+        var a = document.createElement("a");
+        a.href = p.href;
+        if (i === idx) { a.className = "active"; a.setAttribute("aria-current", "page"); }
+        if (p.kicker) {
+          var k = document.createElement("span");
+          k.className = "k";
+          k.textContent = p.kicker;
+          a.appendChild(k);
+        }
+        a.appendChild(document.createTextNode(p.title || p.href));
+        li.appendChild(a);
+        list.appendChild(li);
+      });
+      panel.appendChild(list);
+
+      var btn = document.createElement("button");
+      btn.type = "button";
+      btn.className = "pages-btn show";
+      btn.textContent = "📖";
+      btn.setAttribute("aria-label", "全ページ");
+      function openPages() { backdrop.classList.add("open"); panel.classList.add("open"); }
+      function closePages() { backdrop.classList.remove("open"); panel.classList.remove("open"); }
+      btn.addEventListener("click", openPages);
+      backdrop.addEventListener("click", closePages);
+      document.addEventListener("keydown", function (e) { if (e.key === "Escape") closePages(); });
+
+      fab.insertBefore(btn, fab.firstChild);   // 📖 sits above ☰ and ↑
+      document.body.appendChild(backdrop);
+      document.body.appendChild(panel);
+    }
 
     function navLabel(p) {
       // kicker (第N章 / 全体レポート) is the compact neighbor label; fall back to
