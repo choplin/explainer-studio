@@ -236,7 +236,10 @@ Verify before reporting completion; fix and re-check on any No:
 - [ ] The finished file was reviewed with [[understanding-html-docs-review]] and its
       findings fixed. A design-system violation here never breaks the page — a
       callout whose variant contradicts its own text renders as a perfectly good box
-      in the wrong color — so it has to be read back against the contract. Under
-      Claude Code, dispatch the `understanding-html-docs-reviewer` subagent: the
-      review has to happen in a fresh context, because you cannot read a page you
-      just wrote as if you had not written it.
+      in the wrong color — so it has to be read back against the contract. Pass this
+      skill's **Color language** section (only that section, not this whole SKILL) as
+      the *consumer context contract* so the review also judges the risk / change /
+      verify axes — not just the base layer, which is all the reviewer sees on its
+      own. Under Claude Code, dispatch the `understanding-html-docs-reviewer`
+      subagent: the review has to happen in a fresh context, because you cannot read a
+      page you just wrote as if you had not written it.
