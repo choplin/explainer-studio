@@ -82,7 +82,7 @@ article { border-top: 3px solid var(--accent); padding-top: .6rem; }
 /* --- landing / library index page --- */
 .hero {
   padding: 1.6rem 1.2rem .8rem; margin: .4rem -.2rem 0; border-radius: 16px;
-  background: linear-gradient(160deg, var(--accent-soft), transparent 70%);
+  background: var(--accent-soft);
 }
 .hero h1 { font-size: 1.8rem; margin: .4rem 0; }
 .hero .lede { margin: .6rem 0 1rem; }
