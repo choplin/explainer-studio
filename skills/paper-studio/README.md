@@ -35,9 +35,13 @@ OCR materializes `ocr/paper.md` (full text as Markdown with LaTeX math, one `[pN
 
 | Skill | Role |
 |-------|------|
-| `paper-studio-summarize` | The whole pipeline: scope confirmation → Phase 1 (inline OCR read + spine + overview) → Phase 2 (parallel perspective reports) → Finalize (consistency sweep + fixes). Triggers on "この論文をまとめて", "落合フォーマットで読んで", "summarize this paper". |
+| `paper-studio-summarize` | The summary pipeline: scope confirmation → Phase 1 (inline OCR read + spine + overview) → Phase 2 (parallel perspective reports) → Finalize (consistency sweep + fixes). Triggers on "この論文をまとめて", "落合フォーマットで読んで", "summarize this paper". |
+| `paper-studio-generate-site` | Build a browsable **website** from the reports — a landing page plus one authored (restructured, not converted) page per report, ordered by perspective (overview → 背景 → 手法 → 実験 → 議論 → 関連研究) with the overview audio playable in-page. The paper-tuned sibling of `pdf-studio-generate-site`; reuses pdf-studio's site worker/assets and differs only in report order and kicker labels. Triggers on "論文レポートをWebサイトにして", "HTMLにして". |
+| `paper-studio-full-guide` | Run the **whole chain end-to-end** on one paper: summary + perspective reports → overview audio guide → website, confirmed once up front. Triggers on "この論文を全部やって", "サマリから音声・サイトまで一気に". |
 | `paper-studio-paper-detail` | Internal Phase 2 logic: writes ONE perspective detail report (background / method / experiments / discussion / related-work), taking shared facts from `spine.md`. Applied once per perspective; not invoked directly. |
 | `paper-studio-consistency-sweep` | Internal Finalize logic: reads the whole report set + `spine.md` + the source, returns a findings list of cross-report contradictions and source-faithfulness / logical-structure drift (it never edits reports). Applied once at Finalize; not invoked directly. |
+
+The **audio** guide reuses pdf-studio's fully generic audio skills unchanged (there is no paper-specific audio skill): `pdf-studio-audio-dialogue` writes a two-speaker script from `reports/overview.md`, and `pdf-studio-audio-narrate` synthesizes it to `audio/overview.m4a` via a local VOICEVOX ENGINE. paper-studio's audio is overview-only by design — the perspective detail reports are for reading, not listening.
 
 The per-perspective report templates and the strict bibliographic constraints live in `paper-studio-paper-detail`; the whole-set check criteria live in `paper-studio-consistency-sweep`. The orchestrator passes each only its inputs. Under Claude Code each is wrapped by a thin subagent (`opts/claude/agents/paper-studio-paper-detail` for the parallel perspective writers, `opts/claude/agents/paper-studio-consistency-sweep` for the Finalize sweep) so it runs in an isolated context; on any other agent the same skill is applied inline. This graceful fallback is written into the orchestrator.
 
@@ -79,10 +83,11 @@ The work dir is named with a `{year}-{venue}-{short-title}` citation slug (e.g. 
 
 ### Interop with pdf-studio
 
-The layout matches pdf-studio's work-dir conventions (`reports/*.md`, `[pNN]` anchors), so with pdf-studio installed:
+The layout matches pdf-studio's work-dir conventions (`reports/*.md`, `[pNN]` anchors), so with pdf-studio installed the pipeline extends into audio and a website:
 
-- **`pdf-studio-audio-dialogue` → `pdf-studio-audio-narrate`** — turn `overview.md` or any detail report into a two-host audio guide.
-- **`pdf-studio-generate-site`** — publish the reports (and extracted figures) as a website.
+- **Audio guide** — `pdf-studio-audio-dialogue` (pointed at `overview.md`) → `pdf-studio-audio-narrate`. These pdf-studio skills are fully source-generic and run unchanged; paper-studio narrates the overview only.
+- **Website** — `paper-studio-generate-site` (in this group) builds the site with the correct perspective order and kicker labels; the shared site worker (`pdf-studio-site-page`), context assets (`pdf-studio-site-base`), and hosting (`pdf-studio-deploy-site`) are reused from pdf-studio. (Running `pdf-studio-generate-site` directly also *works*, but mislabels the pages as 第N章 — use the paper-studio one.)
+- **End-to-end** — `paper-studio-full-guide` chains summary → overview audio → website in one request.
 - **`pdf-studio-deep-dive`** — drill further into a page span; `overview.md` ends with a section map whose `[pNN]` spans it can resolve against.
 
 ## Notes
