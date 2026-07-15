@@ -42,19 +42,32 @@ article { border-top: 3px solid var(--accent); padding-top: .6rem; }
 .chapnav a { text-decoration: none; }
 
 /* --- all-pages navigation (manifest-driven, pdf-studio.js) ---
-   A 📖 FAB opens this slide-up drawer listing every page, current highlighted.
+   A list FAB opens this slide-up drawer listing every page, current highlighted.
    A DIFFERENT axis from base.js's ☰ TOC (this page's sections): pages vs
    sections. Unlike the TOC (which base.css promotes to a sidebar on wide
    screens) this stays a drawer at every width — hence its own class, not
-   .toc-panel. The 📖 button rides in base.js's .fab; accent it like the ☰. */
+   .toc-panel. The list button rides in base.js's .fab; accent it like the ☰. */
 .fab button.pages-btn { border-color: var(--accent); color: var(--accent); }
+.fab button.pages-btn svg { width: 1.25rem; height: 1.25rem; display: block; }
+
+/* Pull the whole FAB stack in from the viewport corner so it hugs the RIGHT
+   EDGE of the centered article instead of floating far out in the wide-screen
+   gutter (48rem article → its right edge is calc(50vw - 24rem) from the viewport
+   right; sit the stack just outside that). max() keeps it at the 1rem corner on
+   narrow screens, where the article already fills the width. */
+.fab { right: max(1rem, calc(50vw - 27.5rem)); }
+
 .pagenav-backdrop {
   position: fixed; inset: 0; z-index: 21; background: rgba(0,0,0,.4);
   opacity: 0; pointer-events: none; transition: opacity .2s;
 }
 .pagenav-backdrop.open { opacity: 1; pointer-events: auto; }
+/* Bottom sheet, but capped to the article width and centered so on wide screens
+   it sits under the (centered) content column, not spanning the whole viewport.
+   On narrow screens min() makes it full-bleed, the usual mobile bottom sheet. */
 .pagenav-panel {
-  position: fixed; left: 0; right: 0; bottom: 0; z-index: 22; max-height: 70vh; overflow-y: auto;
+  position: fixed; left: 0; right: 0; bottom: 0; margin-inline: auto;
+  width: min(100%, 48rem); z-index: 22; max-height: 70vh; overflow-y: auto;
   background: var(--bg); border-top: 3px solid var(--accent);
   border-radius: 16px 16px 0 0; padding: .8rem 1.1rem 1.4rem;
   transform: translateY(100%); transition: transform .25s ease;

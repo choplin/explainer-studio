@@ -87,7 +87,7 @@
       article.appendChild(chapnav);
     }
 
-    // --- all-pages drawer: a 📖 FAB opening a slide-up list of every page, the
+    // --- all-pages drawer: a list FAB opening a slide-up list of every page, the
     // current one highlighted. A DIFFERENT axis from base.js's ☰ TOC (which lists
     // this page's sections): pages vs sections. Unlike the TOC it stays a drawer
     // at every width (base.css promotes only .toc-panel to a wide sidebar, and
@@ -124,7 +124,11 @@
       var btn = document.createElement("button");
       btn.type = "button";
       btn.className = "pages-btn show";
-      btn.textContent = "📖";
+      // three horizontal lines (a list/menu mark) for the page list, colored via
+      // currentColor (accent). An SVG, not an emoji, so it stays crisp and on-brand.
+      btn.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" ' +
+        'stroke-width="2" stroke-linecap="round" aria-hidden="true">' +
+        '<path d="M4 7h16"/><path d="M4 12h16"/><path d="M4 17h16"/></svg>';
       btn.setAttribute("aria-label", "全ページ");
       function openPages() { backdrop.classList.add("open"); panel.classList.add("open"); }
       function closePages() { backdrop.classList.remove("open"); panel.classList.remove("open"); }
