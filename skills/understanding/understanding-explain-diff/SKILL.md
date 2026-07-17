@@ -36,6 +36,14 @@ Resolve each input in this order; ask only if genuinely ambiguous.
   messages are context even when no other material is provided.
 - Read surrounding source files when the diff alone is not enough to explain a
   chunk correctly (e.g. a modified function whose callers matter).
+- When the diff and its commit messages still leave a chunk genuinely ambiguous in
+  a way that would change the explanation — e.g. you cannot tell whether a change is
+  a behavior change or a pure refactor, which flips its risk level — **ask the user
+  rather than guessing, when the session is interactive**. When running headless or
+  delegated by a caller (e.g. `git-helpers-explain-pr`) there is no one to ask: fall
+  back to inferring and marking it inferred (see Background & Why). Reserve the
+  question for gaps that affect correctness; route minor uncertainty to the
+  `.inferred-note` path, not to the user.
 
 ### 2. Plan the walkthrough
 
@@ -246,13 +254,13 @@ Verify before reporting completion; fix and re-check on any No:
 - [ ] The file is a single self-contained HTML file (base.css and any used
       component assets inlined; only the diff2html and mermaid engines are
       external), and opens standalone in a browser.
-- [ ] The finished file was reviewed with [[understanding-html-docs-review]] and its
-      findings fixed. A design-system violation here never breaks the page — a
-      callout whose variant contradicts its own text renders as a perfectly good box
-      in the wrong color — so it has to be read back against the contract. Pass this
-      skill's **Color language** section (only that section, not this whole SKILL) as
-      the *consumer context contract* so the review also judges the risk / change /
-      verify axes — not just the base layer, which is all the reviewer sees on its
-      own. Under Claude Code, dispatch the `understanding-html-docs-reviewer`
-      subagent: the review has to happen in a fresh context, because you cannot read a
-      page you just wrote as if you had not written it.
+- [ ] The risk / change / verify color axes were self-checked against the **Color
+      language** section: every risk badge/border/budget line, every `.ba-before`/
+      `.ba-after` and `col-before`/`col-after`, and every `data-tested` status carries
+      the hue its own text implies. A design-system violation never breaks the page — a
+      callout whose variant contradicts its text renders as a perfectly good box in the
+      wrong color — and on this ephemeral document that mis-coloring is the one failure
+      that matters, so read the semantic axes back against the contract. This is an
+      inline self-check, not a separate design-system review pass (the full
+      `understanding-html-docs-review` subagent is disproportionate for a throwaway
+      review artifact).
