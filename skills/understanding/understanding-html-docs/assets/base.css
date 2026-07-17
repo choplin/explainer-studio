@@ -298,7 +298,11 @@ th { background: var(--card); }
    is the width at which a 14rem sidebar + 1rem gap fits in the gutter to the
    left of the 48rem `main`; below it, the overlay panel + FAB stay. */
 @media (min-width: 79rem) {
-  .toc-btn, .toc-backdrop { display: none; }
+  /* .fab button.toc-btn, not .toc-btn: `.fab button { display: flex }` is (0,1,1)
+     and would out-specify a bare `.toc-btn` (0,1,0), leaving the ☰ visible next to
+     the sidebar it's supposed to replace. Match its specificity to hide it. */
+  .fab button.toc-btn { display: none; }
+  .toc-backdrop { display: none; }
   /* A quiet index column in the gutter — NOT a card. One hairline rail runs
      down the whole list; the active entry colors and bolds its own segment of
      that rail. A rail cue, never a nested filled box (which reads as box-in-box
