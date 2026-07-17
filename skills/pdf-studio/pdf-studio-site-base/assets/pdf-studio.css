@@ -48,7 +48,8 @@ article { border-top: 3px solid var(--accent); padding-top: .6rem; }
    screens) this stays a drawer at every width — hence its own class, not
    .toc-panel. The list button rides in base.js's .fab; accent it like the ☰. */
 .fab button.pages-btn { border-color: var(--accent); color: var(--accent); }
-.fab button.pages-btn svg { width: 1.25rem; height: 1.25rem; display: block; }
+/* both nav FABs carry an inline-SVG icon (pages = flat lines, TOC = outline) */
+.fab button.pages-btn svg, .fab button.toc-btn svg { width: 1.25rem; height: 1.25rem; display: block; }
 
 /* Pull the whole FAB stack in from the viewport corner so it hugs the RIGHT
    EDGE of the centered article instead of floating far out in the wide-screen

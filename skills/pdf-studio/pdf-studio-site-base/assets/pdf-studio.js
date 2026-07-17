@@ -136,9 +136,20 @@
       backdrop.addEventListener("click", closePages);
       document.addEventListener("keydown", function (e) { if (e.key === "Escape") closePages(); });
 
-      fab.insertBefore(btn, fab.firstChild);   // 📖 sits above ☰ and ↑
+      fab.insertBefore(btn, fab.firstChild);   // list button sits above ☰ and ↑
       document.body.appendChild(backdrop);
       document.body.appendChild(panel);
+
+      // Give base.js's ☰ TOC button a distinct outline icon (a heading + two
+      // indented sub-items) so on narrow screens it doesn't read as a twin of
+      // this flat-lines list button: sections (indented outline) vs pages (list).
+      // Presentation only — the TOC behavior is untouched; skipped if absent.
+      var tocBtn = fab.querySelector(".toc-btn");
+      if (tocBtn) {
+        tocBtn.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" ' +
+          'stroke-width="2" stroke-linecap="round" aria-hidden="true">' +
+          '<path d="M4 6h16"/><path d="M8 12h12"/><path d="M8 18h12"/></svg>';
+      }
     }
 
     function navLabel(p) {
