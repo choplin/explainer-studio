@@ -1,0 +1,246 @@
+/* comments component — a Google-Docs-style review layer for an
+   understanding-html-docs document. All styling is driven by the base design
+   tokens (--bg/--fg/--muted/--card/--line/--edge/--accent/--accent-soft), so it
+   inherits the document's light/dark theme with no second palette. Nothing here
+   carries a semantic meaning-color: comments are an interaction chrome, not part
+   of the document's meaning. */
+
+/* ---------- the anchored highlight (CSS Custom Highlight API) -------------
+   The commented text is highlighted WITHOUT wrapping it in an element, so the
+   document DOM (and therefore its anchoring, its diff rendering, its selection)
+   is never mutated. Browsers without the API fall back to `.comment-anchored`
+   on the block (see below), so the comment is still discoverable. */
+::highlight(comment-highlight) {
+  background-color: var(--accent-soft);
+  text-decoration: underline;
+  text-decoration-color: var(--accent);
+  text-decoration-thickness: 2px;
+  text-underline-offset: 2px;
+}
+::highlight(comment-active) {
+  background-color: var(--accent);
+  color: var(--n-0);
+}
+/* Fallback marker when there is no text quote (a whole-block comment) or the
+   Custom Highlight API is unavailable: a quiet accent rail on the block. */
+.comment-anchored {
+  box-shadow: inset 3px 0 0 var(--accent);
+  border-radius: 2px;
+}
+.comment-anchored.comment-anchored-active {
+  background: var(--accent-soft);
+}
+
+/* ---------- the selection action button ("💬 コメント") ------------------- */
+.comments-selbtn {
+  position: absolute; z-index: 60;
+  display: inline-flex; align-items: center; gap: .3em;
+  font: inherit; font-size: .82rem; line-height: 1;
+  padding: .4rem .7rem; cursor: pointer;
+  color: var(--n-0); background: var(--accent);
+  border: 0; border-radius: 999px;
+  box-shadow: 0 2px 10px rgba(0,0,0,.25);
+  transform: translate(-50%, .4rem);
+}
+
+/* ---------- the right-click context menu --------------------------------- */
+.comments-cmenu {
+  position: fixed; z-index: 60; min-width: 12rem;
+  background: var(--bg); border: 1px solid var(--edge); border-radius: 10px;
+  padding: .3rem; box-shadow: 0 8px 30px rgba(0,0,0,.25);
+}
+.comments-cmenu button {
+  display: block; width: 100%; text-align: left;
+  font: inherit; font-size: .88rem; color: var(--fg);
+  background: none; border: 0; border-radius: 7px;
+  padding: .5rem .6rem; cursor: pointer;
+}
+.comments-cmenu button:hover { background: var(--accent-soft); color: var(--accent); }
+
+/* ---------- the composer popup ------------------------------------------- */
+.comments-composer {
+  position: fixed; z-index: 61; width: min(22rem, calc(100vw - 2rem));
+  background: var(--bg); border: 1px solid var(--edge); border-radius: 12px;
+  padding: .8rem; box-shadow: 0 10px 40px rgba(0,0,0,.3);
+}
+.comments-composer .composer-quote {
+  font-size: .78rem; color: var(--muted); margin: 0 0 .5rem;
+  padding-left: .6rem; border-left: 3px solid var(--accent);
+  display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
+}
+.comments-composer textarea {
+  display: block; width: 100%; box-sizing: border-box; min-height: 4.5rem; resize: vertical;
+  font: inherit; font-size: .9rem; color: var(--fg);
+  background: var(--card); border: 1px solid var(--edge); border-radius: 8px;
+  padding: .5rem .6rem;
+}
+.comments-composer textarea:focus { outline: none; border-color: var(--accent); }
+.composer-actions { display: flex; justify-content: flex-end; gap: .5rem; margin-top: .6rem; }
+.comments-btn {
+  font: inherit; font-size: .82rem; cursor: pointer;
+  padding: .4rem .8rem; border-radius: 8px;
+  border: 1px solid var(--edge); background: var(--card); color: var(--fg);
+}
+.comments-btn:hover { border-color: var(--accent); }
+.comments-btn.primary { background: var(--accent); border-color: var(--accent); color: var(--n-0); }
+.comments-btn.primary:disabled { opacity: .5; cursor: default; }
+.composer-hint { font-size: .72rem; color: var(--muted); margin-right: auto; align-self: center; }
+
+/* ---------- export fallback (when a[download] is blocked) ----------------- */
+.comments-export-backdrop {
+  position: fixed; inset: 0; z-index: 62; background: rgba(0,0,0,.5);
+  display: flex; align-items: center; justify-content: center; padding: 1rem;
+}
+.comments-export {
+  width: min(42rem, 100%); max-height: 82vh; display: flex; flex-direction: column;
+  background: var(--bg); border: 1px solid var(--edge); border-radius: 12px;
+  box-shadow: 0 12px 50px rgba(0,0,0,.35); padding: .8rem;
+}
+.comments-export-head { display: flex; align-items: center; gap: .5rem; margin-bottom: .4rem; }
+.comments-export-name { font-size: .78rem; color: var(--muted); margin-right: auto; overflow-wrap: anywhere; }
+.comments-export-hint { font-size: .75rem; color: var(--muted); margin: 0 0 .5rem; }
+.comments-export-hint.error { color: light-dark(#b91c1c, #f87171); }
+.comments-export textarea {
+  flex: 1; min-height: 15rem; box-sizing: border-box; resize: none;
+  font-size: .78rem; line-height: 1.6; color: var(--fg);
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  background: var(--card); border: 1px solid var(--edge); border-radius: 8px; padding: .6rem;
+}
+.comments-export textarea:focus { outline: none; border-color: var(--accent); }
+
+/* ---------- the comments panel (sidebar / overlay) ----------------------- */
+.comments-panel {
+  /* narrow default: a slide-in overlay from the right */
+  position: fixed; top: 0; right: 0; bottom: 0; z-index: 46;
+  width: min(20rem, 88vw); display: flex; flex-direction: column;
+  background: var(--bg); border-left: 1px solid var(--line);
+  box-shadow: -6px 0 30px rgba(0,0,0,.2);
+  transform: translateX(100%); transition: transform .25s ease;
+}
+.comments-panel.open { transform: none; }
+.comments-backdrop {
+  position: fixed; inset: 0; z-index: 45; background: rgba(0,0,0,.4);
+  opacity: 0; pointer-events: none; transition: opacity .25s ease;
+}
+.comments-backdrop.open { opacity: 1; pointer-events: auto; }
+
+.comments-head {
+  display: flex; align-items: center; gap: .5rem;
+  padding: .7rem .8rem; border-bottom: 1px solid var(--line);
+}
+.comments-title { font-size: .95rem; font-weight: 600; color: var(--fg); }
+.comments-count {
+  display: inline-flex; align-items: center; justify-content: center;
+  min-width: 1.4em; padding: 0 .35em; margin-left: .2em;
+  font-size: .72rem; font-weight: 700; line-height: 1.5;
+  color: var(--n-0); background: var(--accent); border-radius: 999px;
+}
+.comments-tools { display: flex; gap: .25rem; margin-left: auto; }
+.comments-tools button {
+  font: inherit; font-size: .95rem; line-height: 1; cursor: pointer;
+  background: none; border: 1px solid transparent; border-radius: 7px; padding: .3rem .4rem;
+  color: var(--muted);
+}
+.comments-tools button:hover { color: var(--accent); border-color: var(--edge); }
+.comments-close { display: inline-flex; }
+
+.comments-list { list-style: none; margin: 0; padding: .5rem; overflow-y: auto; flex: 1; }
+.comments-empty { margin: auto; padding: 2rem 1rem; text-align: center; color: var(--muted); font-size: .85rem; }
+
+.comment-card {
+  border: 1px solid var(--edge); border-radius: 10px; background: var(--card);
+  padding: .6rem .7rem; margin: 0 0 .5rem; cursor: pointer;
+  transition: border-color .15s ease;
+}
+.comment-card:hover { border-color: var(--accent); }
+.comment-card.active { border-color: var(--accent); box-shadow: 0 0 0 1px var(--accent); }
+.comment-card[data-resolved="1"] { opacity: .6; }
+.comment-card[data-resolved="1"] .comment-body { text-decoration: line-through; text-decoration-color: var(--muted); }
+.comment-card.orphaned { border-style: dashed; }
+.comment-quote {
+  font-size: .75rem; color: var(--muted); margin: 0 0 .4rem; padding-left: .5rem;
+  border-left: 2px solid var(--accent);
+  display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
+}
+.comment-quote.orphaned::after { content: " (対象が見つかりません)"; color: var(--warn, var(--muted)); }
+.comment-body { font-size: .88rem; color: var(--fg); margin: 0; white-space: pre-wrap; overflow-wrap: anywhere; }
+.comment-meta { font-size: .72rem; color: var(--muted); margin-top: .4rem; }
+.comment-actions { display: flex; gap: .3rem; margin-top: .5rem; }
+.comment-actions button {
+  font: inherit; font-size: .72rem; cursor: pointer;
+  color: var(--muted); background: none; border: 1px solid var(--edge); border-radius: 6px;
+  padding: .2rem .5rem;
+}
+.comment-actions button:hover { color: var(--accent); border-color: var(--accent); }
+.comment-actions button.primary { color: var(--n-0); background: var(--accent); border-color: var(--accent); }
+.comment-actions button.primary:hover { color: var(--n-0); }
+.comment-actions button.danger:hover { color: light-dark(#b91c1c, #f87171); border-color: light-dark(#b91c1c, #f87171); }
+
+/* inline editor inside a comment card (edit in place, not a floating popup) */
+.comment-edit {
+  display: block; width: 100%; box-sizing: border-box; min-height: 3.5rem; resize: vertical;
+  font: inherit; font-size: .88rem; color: var(--fg);
+  background: var(--bg); border: 1px solid var(--accent); border-radius: 8px;
+  padding: .4rem .5rem; margin: 0 0 .4rem;
+}
+.comment-edit:focus { outline: none; }
+
+/* brief flash when a card is focused from the body-side highlight */
+@keyframes comment-flash {
+  from { background: var(--accent-soft); }
+  to   { background: var(--card); }
+}
+.comment-card.flash { animation: comment-flash .9s ease; }
+@media (prefers-reduced-motion: reduce) { .comment-card.flash { animation: none; } }
+
+/* ---------- the toggle button (narrow screens) --------------------------- */
+.comments-fab {
+  position: fixed; right: 1rem; bottom: 1rem; z-index: 44;
+  display: inline-flex; align-items: center; gap: .3rem;
+  font: inherit; font-size: 1.1rem; cursor: pointer;
+  width: auto; height: 2.8rem; padding: 0 .9rem;
+  color: var(--fg); background: var(--card);
+  border: 1px solid var(--edge); border-radius: 999px;
+  box-shadow: 0 2px 12px rgba(0,0,0,.18);
+}
+.comments-fab .comments-fab-count {
+  font-size: .72rem; font-weight: 700; color: var(--n-0);
+  background: var(--accent); border-radius: 999px; padding: 0 .4em; min-width: 1.4em; text-align: center;
+}
+.comments-fab.hide-empty { display: none; }
+/* When base.js's .fab stack exists, the toggle mounts into that column instead
+   of overlapping it. Reset the fixed positioning and the base `.fab button`
+   hidden-until-`.show` defaults so it sits in the flex stack, always visible. */
+.fab .comments-fab.in-stack {
+  position: static; right: auto; bottom: auto;
+  opacity: 1; transform: none; pointer-events: auto;
+  width: auto; height: 2.8rem;
+}
+
+/* ---------- wide viewport: a persistent list in the RIGHT gutter ----------
+   OPT-IN. By default the panel is the slide-in overlay above (safe at any width,
+   never overlaps content). A document whose main column leaves a real gutter can
+   pin the list there — the mirror of base.js's left-gutter TOC — by adding
+   `class="comments-gutter"` to <html>. The gutter geometry mirrors base.css's
+   left TOC (14rem panel, 15rem offset), so a 48rem column pins cleanly at the
+   same 79rem breakpoint. A wider column sets `--comments-doc-width` to its own
+   max-width so the offset tracks it; that column only leaves gutter room on a
+   wider viewport, so a wide document should raise the breakpoint in its own
+   stylesheet (or stay on the default overlay). */
+@media (min-width: 79rem) {
+  html.comments-gutter .comments-panel {
+    left: auto;
+    right: max(1rem, calc((100vw - var(--comments-doc-width, 48rem)) / 2 - 15rem));
+    top: 3.4rem; bottom: auto; width: 14rem; max-height: calc(100vh - 4.6rem);
+    background: none; border: 0; box-shadow: none; transform: none; transition: none;
+  }
+  html.comments-gutter .comments-backdrop,
+  html.comments-gutter .comments-fab,
+  html.comments-gutter .comments-close { display: none; }
+  html.comments-gutter .comments-head { padding: .2rem .2rem .5rem; border-bottom: 1px solid var(--line); }
+  html.comments-gutter .comments-list { padding: .5rem 0; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .comments-panel, .comments-backdrop { transition: none; }
+}

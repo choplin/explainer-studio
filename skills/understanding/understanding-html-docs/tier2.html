@@ -1,5 +1,7 @@
 <!doctype html>
-<html lang="en">
+<!-- comments-gutter: main is 48rem, so the comment list pins in the right gutter
+     at ≥79rem (mirror of the left-gutter TOC); drop the class for overlay-only. -->
+<html lang="en" class="comments-gutter">
     <head>
         <meta charset="utf-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -43,6 +45,10 @@
             type="module"
             src="assets/components/diagram/diagram.js"
         ></script>
+        <!-- comments: no engine, no CDN — vanilla, offline. After base.js so
+             the 💬 toggle mounts into base.js's .fab stack. -->
+        <link rel="stylesheet" href="assets/components/comments/comments.css" />
+        <script src="assets/components/comments/comments.js" defer></script>
     </head>
     <body>
         <header class="site">
@@ -91,6 +97,11 @@
                                     <td><code>components/diagram/</code></td>
                                     <td><code>pre.mermaid</code></td>
                                     <td>mermaid v11</td>
+                                </tr>
+                                <tr>
+                                    <td><code>components/comments/</code></td>
+                                    <td>reader comments (no markup)</td>
+                                    <td>— none; vanilla &amp; offline</td>
                                 </tr>
                             </tbody>
                         </table>
@@ -181,6 +192,38 @@ flowchart LR
   classDef added   stroke:#3ca370,stroke-width:2px;
   classDef changed stroke:#e8a13c,stroke-width:2px;
 </pre>
+                </section>
+
+                <section>
+                    <h2>comments — a browser-side review layer</h2>
+                    <p>
+                        The odd one out: <strong>no engine, no CDN, no markup to
+                        author.</strong> It adds a Google-Docs-style review mode to any
+                        document — <strong>select text below</strong> and a
+                        <code>💬 コメント</code> button appears, or <strong>right-click a
+                        block</strong> for a menu. Each comment lands in the list panel in
+                        the right gutter (a 💬 toggle on narrow screens), and persists to
+                        this browser's <code>localStorage</code>.
+                    </p>
+                    <div class="callout tip">
+                        <span class="label">This page is the live demo</span> — it ships the
+                        <code>comments</code> bundle, so the commenting works right here.
+                        Highlight this sentence and leave yourself a note; reload, and it is
+                        still anchored to the text.
+                    </div>
+                    <p>
+                        Anchoring never mutates the document DOM — the highlight is painted
+                        over the text with the CSS Custom Highlight API. Comments stay in the
+                        browser until you export them: the panel's toolbar writes
+                        <strong>JSON</strong> (re-importable, for round-tripping) or
+                        <strong>Markdown</strong> (a readable list for a human author or an
+                        agent to act on).
+                    </p>
+                    <div class="callout warn">
+                        <span class="label">Local to one browser</span> — comments are not
+                        written back into the HTML and are not shared between viewers. A
+                        reviewer exports JSON/Markdown and sends it to the author out of band.
+                    </div>
                 </section>
             </article>
         </main>

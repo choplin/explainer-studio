@@ -96,6 +96,16 @@ not drift):
   paste `diagram.css` into `<style id="diagram-component">` and `diagram.js` into
   the mermaid init `<script type="module">`. Follow `components/diagram/include.md`
   for the markup contract and the palette hook. Omit if the document has no diagrams.
+- The **`comments` opt-in component** (`understanding-html-docs/assets/components/comments/`):
+  paste `comments.css` into `<style id="comments-component">` and `comments.js`
+  into the comments `<script>` at the end of `<body>`. This adds the reviewer's
+  **browser-side comment layer** — select text (or right-click a block) to leave a
+  comment, listed in a slide-in panel, persisted to `localStorage`, exportable as
+  JSON/Markdown. It has **no markup to author** and no engine (vanilla, offline);
+  follow `components/comments/include.md`. Keep it — a reviewer commenting on the
+  explanation is the whole point of the document. Do **not** add
+  `class="comments-gutter"`: this document's ~1080px column is too wide for a
+  pinned side gutter, so the list stays the 💬-toggle overlay.
 - The `<style id="explain-diff">` block is the **only** styling authored here —
   this skill's risk/change semantic axes and chunk/review-plan components. Keep it.
 - Do **not** inline `base.js`: the walkthrough puts multiple `article.chunk`
@@ -230,6 +240,9 @@ Verify before reporting completion; fix and re-check on any No:
       present — `<style id="diff-component">` / `<style id="diagram-component">`
       and the diff-render / mermaid-init `<script>` slots hold the unmodified
       component files (not the placeholder comments).
+- [ ] `<style id="comments-component">` and the comments `<script>` slot hold the
+      unmodified `components/comments/comments.css` / `comments.js` (not the
+      placeholder comments), so the reviewer's comment layer is present.
 - [ ] The file is a single self-contained HTML file (base.css and any used
       component assets inlined; only the diff2html and mermaid engines are
       external), and opens standalone in a browser.

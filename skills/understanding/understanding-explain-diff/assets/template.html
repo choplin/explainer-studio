@@ -10,8 +10,10 @@
     <style id="html-docs-base">      <- understanding-html-docs/assets/base.css
     <style id="diff-component">       <- assets/components/diff/diff.css       (opt-in: diffs)
     <style id="diagram-component">    <- assets/components/diagram/diagram.css (opt-in: diagrams)
+    <style id="comments-component">   <- assets/components/comments/comments.css
     diff render <script>              <- assets/components/diff/diff.js
     mermaid init <script type=module> <- assets/components/diagram/diagram.js
+    comments <script>                 <- assets/components/comments/comments.js
   See each component's include.md (understanding-html-docs/assets/components/) and
   SKILL.md "Generate the HTML". The <style id="explain-diff"> block is the ONLY
   styling explain-diff authors itself — its risk/change semantic axes and its
@@ -35,6 +37,7 @@
 <style id="html-docs-base">/* {{BASE_CSS}}: paste the entire contents of understanding-html-docs/assets/base.css here, unmodified. */</style>
 <style id="diff-component">/* {{DIFF_CSS}}: paste understanding-html-docs/assets/components/diff/diff.css here, unmodified. Opt-in — omit (with the diff2html tags above) if the document has no diffs. */</style>
 <style id="diagram-component">/* {{DIAGRAM_CSS}}: paste understanding-html-docs/assets/components/diagram/diagram.css here, unmodified. Opt-in — omit if the document has no diagrams. */</style>
+<style id="comments-component">/* {{COMMENTS_CSS}}: paste understanding-html-docs/assets/components/comments/comments.css here, unmodified. Gives the reviewer a browser-side comment layer (select text / right-click → comment, list in a slide-in panel). No markup to author. */</style>
 <style id="explain-diff">
   /* explain-diff context layer over understanding-html-docs. Two axes layered on top
      of the base's semantic color model:
@@ -311,5 +314,12 @@ flowchart LR
     refresh();
   });
 </script>
+<!-- comments (browser-side review layer). Paste understanding-html-docs/assets/
+     components/comments/comments.js here verbatim. No engine, no CDN — vanilla,
+     offline. Scope is `main`, so it works with this page's many article.chunk
+     under one main (no base.js). The list is a slide-in overlay opened by the 💬
+     toggle; this document's ~1080px column is too wide for a pinned side gutter,
+     so it is NOT given class="comments-gutter". -->
+<script>/* {{COMMENTS_JS}}: paste components/comments/comments.js here, unmodified. */</script>
 </body>
 </html>

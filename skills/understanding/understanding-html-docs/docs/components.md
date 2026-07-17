@@ -55,6 +55,13 @@ justified by a real inclusion cost** — a network-loaded engine, or JS that wou
 otherwise be forced on every document. Not by a component being large, or advanced,
 or new.
 
+The `comments` bundle is the worked example of the *second* clause without the
+first: it loads **no engine** and needs no network (its highlight, storage, and
+export are all vanilla), yet it is Tier 2 — because commenting is a mode most
+documents do not want, and its JS has no business being shipped to every document
+via `base.js`. Engine-free is not the same as costless; opt-in JS is a real
+inclusion cost, so the bundle is the right home.
+
 ### `base.js` is the enhancement kit, not a component runtime
 
 Two consequences that are invisible in the code and easy to violate:

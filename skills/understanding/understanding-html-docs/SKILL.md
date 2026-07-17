@@ -175,6 +175,11 @@ real `alt` and a `figcaption`, never a bare `<img>`).
 **Injected by `base.js` — never authored:** `.progress`, `.theme-btn`, `.fab`,
 `.toc-btn`, `.toc-backdrop`, `.toc-panel`.
 
+**Injected by the `comments` component (Tier 2) — never authored:**
+`.comments-panel`, `.comments-backdrop`, `.comments-fab`, `.comments-composer`,
+`.comments-cmenu`, `.comments-selbtn`, `.comment-card`, `.comment-anchored`, and
+their descendants. These exist only when the `comments` bundle is shipped.
+
 **Forbidden:** a class nothing defines; a raw color in a `style` attribute
 (`style="color:#e11"` — go through `var(--token)`); a primitive (`--n-*`,
 `--blue-strong`) read from a component rule; a `<table>` outside `.tablewrap`; a
@@ -215,6 +220,14 @@ document that renders no diffs never ships diff2html.
 | `components/highlight/` | syntax-highlighted code blocks (`pre code`, auto-detected or `language-xxx`) | highlight.js v11 |
 | `components/diff/` | git diffs (`pre.diff-source` + `div.diff-render` pairs, unified↔side-by-side) | diff2html v3 |
 | `components/diagram/` | mermaid diagrams (`pre.mermaid`) | mermaid v11 |
+| `components/comments/` | a browser-side review layer — select text / right-click a block to comment, list panel in the right gutter, localStorage + JSON/Markdown export (**no markup to author**) | — none; vanilla & offline |
+
+The `comments` bundle is the odd one out: it has **no third-party engine** and
+**no markup contract** (the reader creates comments at runtime; nothing is
+authored into the document). It is Tier 2 because commenting is a mode not every
+document wants — not because it needs an online viewer. It is independent of
+`base.js` (its scope is `main`, not `main article`), so it works both on a
+reading page and on an [[understanding-explain-diff]] page.
 
 Each bundle carries its own CSS/JS plus an **`include.md`** that is the source of
 truth for wiring it: the CDN tags (version-pinned; vendor locally for the offline
