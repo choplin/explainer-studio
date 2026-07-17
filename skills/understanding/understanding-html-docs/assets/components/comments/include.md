@@ -57,22 +57,22 @@ and the ☰ TOC button share one column on narrow screens); with `base.js` absen
 or not yet run, it creates its own standalone toggle. Two `defer` scripts run in
 document order, so listing `base.js` first is enough.
 
-### Where the list panel sits (overlay vs. pinned gutter)
+### Where the list panel sits (overlay vs. docked gutter)
 
 By default the list panel is a **slide-in overlay** opened by the 💬 toggle —
-safe at any width, it never overlaps the content. This is the right choice for a
-wide document (e.g. understanding-explain-diff's ~1080px column), where there is
-no room for a permanent side column.
+safe at any width, it never overlaps the content.
 
-To **pin the list in the right gutter** (always visible, Google-Docs-style, the
-mirror of base.js's left TOC), add `class="comments-gutter"` to `<html>`. The
-gutter geometry assumes a ~48rem main column and pins at the 79rem breakpoint,
-just like the TOC. If your main column is wider than 48rem, set
-`--comments-doc-width` to its `max-width` so the offset tracks it — but note a
-wider column only clears gutter room on a wider viewport, so either raise the
-79rem breakpoint in your own stylesheet or leave the class off and use the
-overlay. Below the breakpoint (or with the class absent) the overlay + 💬 toggle
-is always the fallback.
+To let the list **dock in the right gutter** (always visible, Google-Docs-style,
+the mirror of base.js's left TOC), add `class="comments-gutter"` to `<html>`.
+Then `comments.js` **measures the real gutter** to the right of the `main` column
+on load and on every resize: when at least ~16rem of clear space is there (the
+14rem panel + a 1rem gap from the column + 1rem from the viewport edge), it docks
+the panel there and sets `--comments-dock-right` so the panel hugs the column;
+when the window is too narrow it falls back to the 💬 slide-in overlay. Because
+the gutter is measured rather than assumed from a fixed breakpoint, one rule
+serves **any** column width — a 48rem base page or a ~1080px explain-diff column —
+with nothing per-document to tune. Leave the class off to force the overlay
+everywhere (the safe choice for a distraction-free reading page).
 
 ## Markup contract
 

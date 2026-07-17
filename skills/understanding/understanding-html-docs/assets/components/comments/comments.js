@@ -388,12 +388,37 @@
     if (scrollTo && c) {
       var target = c._el;
       if (target && target.scrollIntoView) target.scrollIntoView({ behavior: "smooth", block: "center" });
-      if (window.matchMedia && !window.matchMedia("(min-width: 79rem)").matches) closePanel();
+      if (!isDocked()) closePanel();   // overlay auto-closes after jumping; docked stays
     }
   }
 
   function openPanel() { panel.classList.add("open"); backdrop.classList.add("open"); }
   function closePanel() { panel.classList.remove("open"); backdrop.classList.remove("open"); }
+
+  /* ---------- docked vs. overlay: measure the gutter, don't guess ----------
+     When the document opts in (class="comments-gutter" on <html>), decide at
+     runtime whether the right gutter next to `main` has room for the panel and
+     dock it there persistently; otherwise fall back to the slide-in overlay.
+     Measuring the real column edge (rather than a fixed media-query breakpoint)
+     lets one rule serve any column width — a 48rem base page, explain-diff's
+     ~1080px column — and track it across window resizes. */
+  var wantDock = document.documentElement.classList.contains("comments-gutter");
+  function isDocked() { return document.documentElement.classList.contains("comments-docked"); }
+  function applyDockState() {
+    if (!wantDock) return;
+    var root = document.documentElement;
+    var rem = parseFloat(getComputedStyle(root).fontSize) || 16;
+    var gutterRight = window.innerWidth - scope.getBoundingClientRect().right;
+    if (gutterRight >= 16 * rem) {           // 14rem panel + 1rem gap + 1rem edge
+      root.classList.add("comments-docked");
+      root.style.setProperty("--comments-dock-right", (gutterRight - 15 * rem) + "px");
+      panel.classList.remove("open");        // a docked panel is always visible
+      backdrop.classList.remove("open");
+    } else {
+      root.classList.remove("comments-docked");
+      root.style.removeProperty("--comments-dock-right");
+    }
+  }
 
   /* ---------- composer -------------------------------------------------- */
   var composer = null;
@@ -689,6 +714,7 @@
     load();
     buildPanel();
     render();
+    applyDockState();
 
     // selection button
     document.addEventListener("mouseup", function (e) {
@@ -708,7 +734,7 @@
       if (sel && !sel.isCollapsed) return;            // a real selection, not a focus click
       var c = commentAtPoint(e.clientX, e.clientY, e.target);
       if (!c) return;
-      if (window.matchMedia && !window.matchMedia("(min-width: 79rem)").matches) openPanel();
+      if (!isDocked()) openPanel();   // overlay opens on a body click; docked is already visible
       activate(c.id, false);
       focusCardInSidebar(c.id);
     });
@@ -747,12 +773,13 @@
     document.addEventListener("keydown", function (e) {
       if (e.key === "Escape") { closeMenu(); hideSelBtn(); closeComposer(); }
     });
-    window.addEventListener("resize", function () { hideSelBtn(); closeMenu(); });
+    window.addEventListener("resize", function () { hideSelBtn(); closeMenu(); applyDockState(); });
     // keep highlights/ordering correct after layout shifts (e.g. diff expand)
     window.addEventListener("hashchange", render);
     // re-anchor once late-rendering engines (diff2html, mermaid) have run, so a
-    // comment whose target only exists after render is not left orphaned
-    window.addEventListener("load", render);
+    // comment whose target only exists after render is not left orphaned. The
+    // final layout also settles the column width, so re-measure the gutter too.
+    window.addEventListener("load", function () { render(); applyDockState(); });
   }
 
   if (document.readyState === "loading") {

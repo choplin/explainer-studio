@@ -25,7 +25,11 @@
   (vendor them for full offline — see the components' include.md).
   Component markup to copy: see the commented examples inside <main>.
 -->
-<html lang="{{LANG}}">
+<!-- comments-gutter: opt the comment layer into docked mode. On a wide window
+     the list pins in the right gutter (always visible); comments.js measures the
+     gutter and falls back to the 💬 slide-in overlay when the window is too
+     narrow. Drop the class to force the overlay everywhere. -->
+<html lang="{{LANG}}" class="comments-gutter">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -37,7 +41,7 @@
 <style id="html-docs-base">/* {{BASE_CSS}}: paste the entire contents of understanding-html-docs/assets/base.css here, unmodified. */</style>
 <style id="diff-component">/* {{DIFF_CSS}}: paste understanding-html-docs/assets/components/diff/diff.css here, unmodified. Opt-in — omit (with the diff2html tags above) if the document has no diffs. */</style>
 <style id="diagram-component">/* {{DIAGRAM_CSS}}: paste understanding-html-docs/assets/components/diagram/diagram.css here, unmodified. Opt-in — omit if the document has no diagrams. */</style>
-<style id="comments-component">/* {{COMMENTS_CSS}}: paste understanding-html-docs/assets/components/comments/comments.css here, unmodified. Gives the reviewer a browser-side comment layer (select text / right-click → comment, list in a slide-in panel). No markup to author. */</style>
+<style id="comments-component">/* {{COMMENTS_CSS}}: paste understanding-html-docs/assets/components/comments/comments.css here, unmodified. Gives the reviewer a browser-side comment layer (select text / right-click → comment). With class="comments-gutter" on <html> the list docks in the right gutter when the window is wide enough, else slides in as an overlay. No markup to author. */</style>
 <style id="explain-diff">
   /* explain-diff context layer over understanding-html-docs. Two axes layered on top
      of the base's semantic color model:
@@ -317,9 +321,10 @@ flowchart LR
 <!-- comments (browser-side review layer). Paste understanding-html-docs/assets/
      components/comments/comments.js here verbatim. No engine, no CDN — vanilla,
      offline. Scope is `main`, so it works with this page's many article.chunk
-     under one main (no base.js). The list is a slide-in overlay opened by the 💬
-     toggle; this document's ~1080px column is too wide for a pinned side gutter,
-     so it is NOT given class="comments-gutter". -->
+     under one main (no base.js). With class="comments-gutter" on <html>,
+     comments.js measures the gutter beside this ~1080px column and docks the list
+     there on a wide window (always visible); on a narrower window it falls back
+     to the 💬 slide-in overlay. -->
 <script>/* {{COMMENTS_JS}}: paste components/comments/comments.js here, unmodified. */</script>
 </body>
 </html>

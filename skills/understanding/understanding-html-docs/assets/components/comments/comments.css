@@ -217,29 +217,28 @@
   width: auto; height: 2.8rem;
 }
 
-/* ---------- wide viewport: a persistent list in the RIGHT gutter ----------
-   OPT-IN. By default the panel is the slide-in overlay above (safe at any width,
-   never overlaps content). A document whose main column leaves a real gutter can
-   pin the list there — the mirror of base.js's left-gutter TOC — by adding
-   `class="comments-gutter"` to <html>. The gutter geometry mirrors base.css's
-   left TOC (14rem panel, 15rem offset), so a 48rem column pins cleanly at the
-   same 79rem breakpoint. A wider column sets `--comments-doc-width` to its own
-   max-width so the offset tracks it; that column only leaves gutter room on a
-   wider viewport, so a wide document should raise the breakpoint in its own
-   stylesheet (or stay on the default overlay). */
-@media (min-width: 79rem) {
-  html.comments-gutter .comments-panel {
-    left: auto;
-    right: max(1rem, calc((100vw - var(--comments-doc-width, 48rem)) / 2 - 15rem));
-    top: 3.4rem; bottom: auto; width: 14rem; max-height: calc(100vh - 4.6rem);
-    background: none; border: 0; box-shadow: none; transform: none; transition: none;
-  }
-  html.comments-gutter .comments-backdrop,
-  html.comments-gutter .comments-fab,
-  html.comments-gutter .comments-close { display: none; }
-  html.comments-gutter .comments-head { padding: .2rem .2rem .5rem; border-bottom: 1px solid var(--line); }
-  html.comments-gutter .comments-list { padding: .5rem 0; }
+/* ---------- docked mode: a persistent list pinned in the RIGHT gutter ------
+   OPT-IN via `class="comments-gutter"` on <html>. By default the panel is the
+   slide-in overlay above (safe at any width, never overlaps content). When a
+   document opts in, comments.js MEASURES the real gutter to the right of the
+   `main` column — on load and on resize — and toggles `comments-docked` when at
+   least ~16rem of clear space is there (14rem panel + 1rem gap from the column +
+   1rem from the viewport edge). It also sets `--comments-dock-right` so the panel
+   hugs the column, the mirror of base.js's left-gutter TOC. Because the gutter is
+   measured rather than assumed from a fixed breakpoint, this adapts to ANY column
+   width — a 48rem base page or explain-diff's ~1080px column — and falls back to
+   the 💬 overlay whenever the window is too narrow to fit the panel. */
+html.comments-docked .comments-panel {
+  left: auto;
+  right: var(--comments-dock-right, 1rem);
+  top: 3.4rem; bottom: auto; width: 14rem; max-height: calc(100vh - 4.6rem);
+  background: none; border: 0; box-shadow: none; transform: none; transition: none;
 }
+html.comments-docked .comments-backdrop,
+html.comments-docked .comments-fab,
+html.comments-docked .comments-close { display: none; }
+html.comments-docked .comments-head { padding: .2rem .2rem .5rem; border-bottom: 1px solid var(--line); }
+html.comments-docked .comments-list { padding: .5rem 0; }
 
 @media (prefers-reduced-motion: reduce) {
   .comments-panel, .comments-backdrop { transition: none; }
