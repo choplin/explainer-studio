@@ -18,8 +18,10 @@ The idea:
 > The first three are here; the context layer (what the document is *about*, and
 > any heavy third-party libraries it needs) stays in the consuming skill.
 
-Consuming skills copy the asset files verbatim and add their own stylesheet and
-markup — they never edit these files per document.
+Consuming skills copy the asset files verbatim and add their own context stylesheet
+and content — the content as a semantic IR run through
+[[understanding-html-docs-generate]] (see *Consuming this base*) — and never edit
+these files per document.
 
 ## The reference site is the contract
 
@@ -100,46 +102,68 @@ At this skill's root, alongside the reference site:
   skeleton — several `article` elements under `main`, no `base.js` — is not in
   violation; it simply forgoes the parts of the kit it opted out of.
 - **Progressive enhancement, not dependence.** Everything `base.js` adds is a
-  layer on top of a page that already reads correctly. Author the semantic HTML
-  first; let the kit enrich it.
+  layer on top of a page that already reads correctly. The semantic markup comes
+  first (authored as IR, generated to HTML); the kit only enriches it.
 
 ## Consuming this base
 
-Two consumption modes; pick by the output shape:
+**The standard path is to generate pages from a semantic IR, not to hand-write
+HTML.** [[understanding-html-docs-generate]] takes Markdown + fenced divs that name
+only the *meaning* (`::: {.callout variant=danger}`) and deterministically emits the
+HTML: a pandoc template owns the structural boilerplate (head skeleton, theme-boot
+key, asset order, `header.site` / `main article`) and a Lua filter binds each meaning
+to its markup. So the mechanical work the author used to do by hand — steps 3–5 of the
+old checklist — is generated, and the wiring mistakes it was on the author to avoid
+become unrepresentable (an invented class, an inline color, an unwrapped table, an
+unknown callout variant). This is the route every consumer takes (pdf-studio,
+paper-studio, explain-diff); reach for it first.
 
-- **Copy mode** (multi-page sites): copy `base.css`/`base.js` into a shared
-  `assets/` directory and `<link>`/`<script src>` them from every page. One
-  stylesheet serves the whole site. This is the default, and what the reference
-  site itself does.
-- **Inline mode** (a single self-contained file): paste `base.css` into a
-  `<style>` element and, if the DOM fits the kit, `base.js` into a `<script>`.
-  Use this when the output must stay one portable file. The base stays the source
-  of truth — the file is re-inlined on each regeneration; never hand-tune the
-  inlined copy.
+That path introduces an **authoring-time build** (pandoc) — a deliberate reversal of
+the old "No build step" prohibition, recorded in
+[`docs/components.md`](docs/components.md). The build runs at authoring time only:
+**the output is still plain static HTML** that opens on a double-click, with no server
+and no build tooling.
 
-A copy-mode generation step should:
+Two output shapes, selected on the generator's command line:
 
-1. Copy `assets/base.css` and `assets/base.js` into the output's `assets/`.
-2. Add its own context stylesheet next to them and link both from each page,
-   base first:
-   ```html
-   <link rel="stylesheet" href="assets/base.css">
-   <link rel="stylesheet" href="assets/<context>.css">
-   ```
-3. Put the **theme boot snippet** inline in `<head>` (before first paint, so the
-   saved theme applies with no flash), and load `base.js` deferred. The boot
-   snippet's storage key must match `base.js`'s `THEME_KEY`:
-   ```html
-   <script>try{var t=localStorage.getItem('html-docs-theme');if(t==='dark')document.documentElement.classList.add('theme-dark');else if(t==='light')document.documentElement.classList.add('theme-light');}catch(e){}</script>
-   <script src="assets/base.js" defer></script>
-   ```
-4. Give the page the structure `base.js` wires from: a `header.site` (where the
-   theme button mounts), a `main article`, and `h2`/`h3` section headings. A page
-   with fewer than two `h2`s simply gets no TOC.
-5. Author the markup against the index below (the reference site has the detail).
-6. **Review every page produced** with [[understanding-html-docs-review]]. A generated
-   document nobody reads back against the contract is the failure this base exists to
-   prevent.
+- **Copy mode** (multi-page sites, the default): `base.css`/`base.js` and any context
+  assets are copied into a shared `assets/` directory and linked from every page. One
+  stylesheet serves the whole site — what the reference site itself does.
+  (`build-site.sh`, or `build.sh` without `--inline`.)
+- **Inline mode** (a single self-contained file): `base.css`/`base.js` are folded into
+  the page as `<style>`/`<script>` and the `assets/` dir is dropped, yielding one
+  portable file (remote CDN engines stay external). The base stays the source of
+  truth — the file is re-generated, never hand-tuned. (`build.sh --inline`;
+  [[understanding-explain-diff]] takes this route.)
+
+The generator owns the structural wiring the author used to hand-place: the asset link
+order (`base.css` → context CSS → `base.js` → context JS), the theme-boot snippet whose
+storage key must match `base.js`'s `THEME_KEY`, and the `header.site` / `main article` /
+`h2`–`h3` skeleton `base.js` wires from. See [[understanding-html-docs-generate]] for
+the IR dialect and how a consumer injects its own vocabulary (context stylesheet +
+filter directives + optional template variant).
+
+Whichever path produced it, **review every page** with
+[[understanding-html-docs-review]]. Determinism removes the *mechanical* half of the
+review (a class that does not exist, an unwrapped table — now impossible to emit); the
+*semantic* half (is this the right variant, is this actually the takeaway) remains a
+reading task and moves from the HTML to the compact IR. A document nobody reads back
+against the contract is the failure this base exists to prevent.
+
+### Hand-authoring HTML — the fallback route
+
+Writing the HTML directly, against the *Semantics → element / class* index below, is
+now the **exception, not the default** — an escape hatch for a one-off the generator
+cannot yet express, or an environment where pandoc is unavailable. It forfeits every
+guarantee the generator buys: nothing stops an invented class, an inline color, an
+unwrapped table, or an unknown callout variant, so each must be avoided by hand and
+caught only in review. If you take this route: copy `base.css`/`base.js` into
+`assets/`; link them base-first (`base.css` before the context stylesheet); inline the
+theme-boot snippet in `<head>` before first paint with a storage key matching
+`base.js`'s `THEME_KEY`, and load `base.js` deferred; give the page the `header.site` /
+`main article` / `h2`–`h3` structure `base.js` wires from (fewer than two `h2`s = no
+TOC); author against the index below; and lean harder on
+[[understanding-html-docs-review]], because the mechanical contract is back on you.
 
 ## Semantics → element / class (index)
 
@@ -195,14 +219,18 @@ as a perfectly good green box, and tells the reader the opposite of the truth.
 
 > Whether a class exists is not the question. Whether it was used as intended is.
 
-That is a reading task, so a generated document is **reviewed**, not linted. Run
+That is a reading task, so the work is **reviewed**, not linted. Run
 [[understanding-html-docs-review]] on every page produced — it reads the contract and
-the document and reports where the markup and the meaning have come apart: a callout
-whose variant contradicts its own text (or that should not have been a callout at
-all), a `.keypoints` that is not the takeaways, a meaning color spent on decoration,
-a class borrowed from another system (`warning`/`error`/`info` render as a plain
-note), a heading used to make a line bold, a Tier 2 marker whose bundle was never
-shipped.
+the **IR** (the standard path generates the HTML from IR, so the review moves to the
+compact source) and reports where the markup and the meaning have come apart: a
+callout whose variant contradicts its own text (or that should not have been a callout
+at all), a `.keypoints` that is not the takeaways, a meaning color spent on
+decoration, a heading used to make a line bold. The purely *mechanical* failures the
+old checklist watched for — a class that does not exist, a name borrowed from another
+system (`warning`/`error`/`info`), an unwrapped table — are no longer review findings:
+the generator makes them impossible to emit (an unknown variant fails the build). What
+remains is the semantic half, which no generator can settle. (Only on the
+hand-authored fallback route are those mechanical checks still the reviewer's job.)
 
 Under Claude Code the `understanding-html-docs-reviewer` subagent wraps it, so the
 review runs in a **fresh context** — the agent that just authored the page cannot

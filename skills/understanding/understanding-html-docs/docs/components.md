@@ -163,13 +163,34 @@ will helpfully add it back.
   authoring agent or police a foreign vocabulary the CSS still happily supports.
   *Reopen if* the documents come to need an application-UI vocabulary (nav bars,
   modals, forms); at that point the calculus genuinely changes.
-- **No build step.** The runtime floor is shell + jq and the distribution model is
-  *an agent copies files by instruction*. `core + bundle + include.md` already
-  achieves opt-in with plain file copies. *Reopen if* the substrate ever needs to be
-  tree-shaken per document.
+- **No build step — reversed (2026-07); authoring now builds, output still does
+  not.** The original rule: a runtime floor of shell + jq, distribution by *an agent
+  copies files by instruction*, and no build anywhere. It has been deliberately
+  overturned **for authoring** — the standard path is now to write a semantic IR
+  (Markdown + fenced divs) and run a **pandoc** build that emits the HTML
+  ([[understanding-html-docs-generate]]). What changed is only the *authoring* side: a
+  page is generated, not typed, and pandoc is a real runtime resolved by preflight, so
+  the shell+jq floor no longer holds for producing a page. What did **not** change is
+  the *output* — the generated site is still plain static HTML that opens on a
+  double-click, ships no build tooling, and needs no server. The no-build property that
+  actually mattered to a reader is intact; only the author builds now. Why it was worth
+  overturning: the copy-by-instruction model could never *guarantee* the mechanical
+  contract — an invented class, an inline color, an unwrapped table, an unknown callout
+  variant all rendered plausibly and shipped — and the generator makes those
+  structurally impossible (unknown variant = hard build error, every table wrapped, raw
+  HTML dropped). That is the trade the reversal makes: an authoring-time build in
+  exchange for a mechanical contract that cannot be gotten wrong. *Re-narrow* (drop the
+  build, return to hand-authoring) only if pandoc becomes unavailable at authoring time
+  and those guarantees are judged not worth the runtime.
 - **No linter.** `check.sh` is deliberately absent, not missing; SKILL.md gives the
   argument. The one line worth repeating: the errors that matter are well-formed, so
-  a class check proves almost nothing.
+  a class check proves almost nothing. **Reversing "No build step" did not reverse
+  this.** The generator is not a linter: it enforces the *mechanical* contract at
+  generation time (an unknown variant fails the build) — that is generation refusing to
+  emit malformed markup, not a checker passing judgment on a finished document. The
+  errors that matter are still well-formed — a `tip` wrapped around a hazard builds
+  cleanly and lies — so the semantic [[understanding-html-docs-review]] remains exactly
+  as needed, now reading the IR instead of the HTML.
 - **No new hue, and no color-coding by position.** SKILL.md's color principle is the
   rule; the design consequence is that **prose is preferred to another color**, and a
   component that needs a new hue to be legible is usually a component that needs a
