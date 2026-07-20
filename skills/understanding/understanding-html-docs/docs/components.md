@@ -106,13 +106,13 @@ But that set is expressed in three places, and they must not drift:
 | Artifact | Its role |
 |---|---|
 | `base.css` (or a bundle's CSS) | the component **exists** |
-| the reference site demo | the component is **known** — it is the catalog, and what a review judges documents against |
-| SKILL.md's *Semantics → element / class* index | the component is **permitted** — [[understanding-html-docs-review]] uses this index as its allowlist |
+| the reference site demo | the component is **known** — it is the catalog documenting what the component means |
+| SKILL.md's *Semantics → element / class* index | the component is **permitted** — the generator uses this index as its allowlist |
 
 A component present in one and absent from another is worse than absent from all
-three. A class in `base.css` but missing from the index is reported as a **forbidden
-class in every document that uses it**; a class with no demo cannot be judged at all.
-This is why "add a component" is never a one-file change.
+three. A class in `base.css` but missing from the index **cannot be authored into a
+document** (the generator emits only indexed markup); a class with no demo has nothing
+documenting what it means. This is why "add a component" is never a one-file change.
 
 ---
 
@@ -193,8 +193,10 @@ will helpfully add it back.
   generation time (an unknown variant fails the build) — that is generation refusing to
   emit malformed markup, not a checker passing judgment on a finished document. The
   errors that matter are still well-formed — a `tip` wrapped around a hazard builds
-  cleanly and lies — so the semantic [[understanding-html-docs-review]] remains exactly
-  as needed, now reading the IR instead of the HTML.
+  cleanly and lies — so the *semantic* gap the generator cannot close stays real. But
+  it earns no general review step: it is either low-stakes cosmetic (a reading site
+  skips it) or a consumer's own axis that the consuming skill internalizes (see
+  SKILL.md's *On reviewing a generated document*).
 - **No new hue, and no color-coding by position.** SKILL.md's color principle is the
   rule; the design consequence is that **prose is preferred to another color**, and a
   component that needs a new hue to be legible is usually a component that needs a

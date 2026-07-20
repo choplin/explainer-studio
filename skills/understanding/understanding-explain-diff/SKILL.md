@@ -141,8 +141,9 @@ Runtime is **pandoc**, resolved by the generator's preflight (PATH → bundled
 `nix develop` → fail). The default (inline) output is a single file with
 `base.css`, `explain-diff.css`, and the diff/diagram/comments components folded
 in; only the diff2html and mermaid **engines** load from a CDN. Review the result
-against the **Color language** section below (an inline self-check, not the full
-`understanding-html-docs-review` pass).
+against the **Color language** section below and the semantic-axis self-check in
+**Success criteria** (an inline self-check this skill owns — there is no separate
+design-system review pass).
 
 ### Color language
 
@@ -267,6 +268,19 @@ Verify before reporting completion; fix and re-check on any No:
 - [ ] The build produced a single self-contained HTML file (default inline mode —
       `base.css`, `explain-diff.css`, and the used components folded in; only the
       diff2html and mermaid engines external) that opens standalone in a browser.
+- [ ] **Each semantic-axis value matches the content it labels**, not merely that the
+      attribute is present (the generator already enforces presence and validity). Read
+      each chunk's directive back against its own prose — the "renders perfectly, means
+      the wrong thing" failure, which no build error and no color check catches:
+      - `risk=` matches the chunk's *actual* blast radius — a chunk marked `risk=low`
+        that in fact changes runtime behavior, or `risk=high` on a mechanical rename, is
+        a mislabel to fix.
+      - `tested=yes` only when the test named in `verify="…"` *actually covers this
+        chunk* — a real test that exercises other code is still `tested=no` here.
+      - `[…]{.verified}` only on claims confirmed by a command run this session (already
+        checked above) — never on a plausible inference.
+      - the `.inferred-note` is present exactly when the background was inferred, and
+        deleted when real context was given.
 - [ ] The risk / change / verify color axes were self-checked against the **Color
       language** section: every risk badge/border/budget line, every `.ba-before`/
       `.ba-after`, and every verify status carries
@@ -274,6 +288,4 @@ Verify before reporting completion; fix and re-check on any No:
       callout whose variant contradicts its text renders as a perfectly good box in the
       wrong color — and on this ephemeral document that mis-coloring is the one failure
       that matters, so read the semantic axes back against the contract. This is an
-      inline self-check, not a separate design-system review pass (the full
-      `understanding-html-docs-review` subagent is disproportionate for a throwaway
-      review artifact).
+      inline self-check this skill owns; there is no separate design-system review pass.

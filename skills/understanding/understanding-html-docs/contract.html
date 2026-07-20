@@ -89,7 +89,7 @@
                 </section>
 
                 <section>
-                    <h2>Reviewed, not linted</h2>
+                    <h2>Not linted — and no general review</h2>
                     <p>
                         There is deliberately <strong>no linter</strong>. A checker can tell
                         you that a class <em>exists</em> — and knowing that is worth almost
@@ -104,14 +104,20 @@
                         intended is.
                     </p>
                     <p>
-                        That question is answered by reading the markup against the prose, so
-                        a generated document is <strong>reviewed</strong> — see the
-                        <code>understanding-html-docs-review</code> skill. It runs in a fresh
-                        context on purpose: the agent that just wrote the page cannot read it
-                        independently of having written it.
+                        That question is a <em>semantic</em> one, and once the page is
+                        generated from the IR it splits in a way that leaves no general review
+                        step to run. The <strong>mechanical</strong> half — a nonexistent
+                        class, a name borrowed from another system, an unwrapped table, an
+                        inline color — is made <strong>impossible to emit</strong> by the
+                        generator, so there is nothing to review. The
+                        <strong>semantic</strong> half is either low-stakes cosmetic, which a
+                        reading site skips by policy, or a consuming skill's own axis, which
+                        that skill <strong>internalizes as its own completion check</strong>
+                        (as <code>understanding-explain-diff</code> does for its
+                        <code>risk</code>/<code>tested</code>/<code>verified</code> values).
                     </p>
                     <div class="keypoints">
-                        <h3>What the review looks for</h3>
+                        <h3>The semantic gap the generator cannot close</h3>
                         <ul>
                             <li>
                                 A callout whose variant does not match what it says — and one
@@ -120,15 +126,7 @@
                             <li>
                                 A <code>.keypoints</code> that is not the section's takeaways.
                             </li>
-                            <li>
-                                A meaning color spent on decoration, and any color reached for
-                                outside the token layer.
-                            </li>
-                            <li>
-                                A class borrowed from another system (<code>warning</code>,
-                                <code>error</code>, <code>info</code>) — it renders as a plain
-                                note.
-                            </li>
+                            <li>A meaning color spent on decoration.</li>
                             <li>
                                 A heading used to make a line bold, and a section with no
                                 heading, invisible to the table of contents.
@@ -155,8 +153,8 @@
                             </li>
                             <li>
                                 <strong>Demonstrated on one of these pages.</strong> This
-                                site is the living catalog, and it is what
-                                it is the worked example every generated document is reviewed against.
+                                site is the living catalog — the worked example that documents
+                                what every component means.
                             </li>
                         </ul>
                     </div>

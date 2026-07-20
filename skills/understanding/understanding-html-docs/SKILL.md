@@ -288,42 +288,45 @@ scripts/build-site.sh <ir-dir> <out-dir> \
 reference site links each page home from its `header.site` and lists the pages from
 the index; no manifest is needed for that shape.
 
-### Reviewing a document — [[understanding-html-docs-review]]
+### On reviewing a generated document
 
-**Review every page produced.** Determinism removes the *mechanical* half of the
-review (a class that does not exist, an unwrapped table — now impossible to emit); the
-*semantic* half (is this the right variant, is this actually the takeaway) remains a
-reading task and moves from the HTML to the compact IR. A document nobody reads back
-against the contract is the failure this base exists to prevent.
+There is deliberately **no general review pass and no linter** for these documents.
+That is a decision, and the reasoning is worth keeping.
 
-There is deliberately **no linter**. A checker can establish that a class *exists*,
-and that is worth almost nothing here: the errors that matter are **well-formed**. A
-`.callout.tip` wrapped around a hazard passes every conceivable class check, renders
-as a perfectly good green box, and tells the reader the opposite of the truth.
+A checker can establish that a class *exists*, and that is worth almost nothing here:
+the errors that matter are **well-formed**. A `.callout.tip` wrapped around a hazard
+passes every conceivable class check, renders as a perfectly good green box, and tells
+the reader the opposite of the truth.
 
 > Whether a class exists is not the question. Whether it was used as intended is.
 
-That is a reading task, so the work is **reviewed**, not linted. Run
-[[understanding-html-docs-review]] on every page produced — it reads the contract and
-the **IR** and reports where the markup and the meaning have come apart: a callout
-whose variant contradicts its own text (or that should not have been a callout at
-all), a `.keypoints` that is not the takeaways, a meaning color spent on decoration, a
-heading used to make a line bold. The purely *mechanical* failures — a class that does
-not exist, a name borrowed from another system (`warning`/`error`/`info`), an unwrapped
-table — are not review findings: the generator makes them impossible to emit (an
-unknown variant fails the build). What remains is the semantic half, which no generator
-can settle.
+So the review that would matter is a *semantic* reading task, not a mechanical one.
+But once the page is generated deterministically from the IR, that review splits, and
+neither half justifies a standalone review skill:
 
-Under Claude Code the `understanding-html-docs-reviewer` subagent wraps it, so the
-review runs in a **fresh context** — the agent that just authored the page cannot
-read it independently of having written it.
+- **The mechanical half** — a class that does not exist, a name borrowed from another
+  system (`warning`/`error`/`info`), an unwrapped table, an inline color — is made
+  **impossible to emit** by the generator (an unknown variant is a hard build error;
+  raw HTML is dropped). There is nothing left to review.
+- **The semantic half** — is this the right variant, is this actually the takeaway,
+  does `risk=high` match the change — is either **low-stakes and cosmetic** for a
+  reading site (pdf-studio / paper-studio deliberately skip it as YAGNI) or
+  **high-stakes but consumer-specific**, in which case the consuming skill
+  **internalizes it as its own completion check** — e.g. [[understanding-explain-diff]]
+  self-checks that each chunk's `risk` / `tested` / `verified` value matches its
+  content. A general reviewer blind to a consumer's own axes cannot do that check
+  anyway.
+
+Net: the mechanical review is absorbed by the generator and the high-stakes semantic
+review belongs to the consumer that defines the axes, so there is no general
+`understanding-html-docs` review step to run. A consumer that layers high-stakes
+semantic axes owns reviewing them; a low-stakes reading site skips review by policy.
 
 ## Semantics → element / class (index)
 
-This is the class vocabulary the generator emits and
-[[understanding-html-docs-review]] checks against — its allowlist. A class in
-`base.css` but missing from this index is reported as a **forbidden class** in every
-document that uses it (see [`docs/components.md`](docs/components.md) §2). It is not a
+This is the class vocabulary the generator emits — its allowlist. A class in
+`base.css` but missing from this index cannot appear in a document (see
+[`docs/components.md`](docs/components.md) §2). It is not a
 hand-authoring target — the author writes the IR dialect above, and the generator emits
 this markup — but it is the canonical map from *meaning* to the element/class it
 becomes.
@@ -407,12 +410,12 @@ component is for, what decides whether it belongs in the base at all, and where 
 model runs out are in **[`docs/components.md`](docs/components.md)** — read it first.
 
 Whatever you add exists in three places at once, and they must agree: the rule in
-`base.css` (or a bundle), a demo on the reference site (the catalog a review judges
-against), and a row in the *Semantics → element / class* index above. A class missing
-from that index is reported as a **forbidden class** by
-[[understanding-html-docs-review]] in every document that uses it. A new vocabulary
-item also needs its **IR-dialect** entry (above) and, if it is not a plain
-class/variant, a binding rule in `filters/htmldocs.lua`.
+`base.css` (or a bundle), a demo on the reference site (the catalog documenting what
+each component means), and a row in the *Semantics → element / class* index above. A
+class missing from that index cannot be authored into a document — the generator emits
+only the indexed markup. A new vocabulary item also needs its **IR-dialect** entry
+(above) and, if it is not a plain class/variant, a binding rule in
+`filters/htmldocs.lua`.
 
 ## Gotchas
 
@@ -429,5 +432,7 @@ class/variant, a binding rule in `filters/htmldocs.lua`.
   a supported choice, not a violation — the PE preconditions simply do not apply to it.
 - **Nothing here fails loudly at the *semantic* level.** The generator refuses a
   misspelled class or an unknown variant, but a callout whose variant contradicts its
-  own text builds cleanly and misleads. That is what [[understanding-html-docs-review]]
-  is for; run it on what you generate.
+  own text builds cleanly and misleads. There is no general review step to catch that
+  (see *On reviewing a generated document* above): a low-stakes reading site skips it,
+  and a consumer with high-stakes axes internalizes the check itself (as
+  [[understanding-explain-diff]] does for `risk`/`tested`/`verified`).

@@ -84,10 +84,10 @@ Run this **before** Step 6: the site pages are authored from `reports/`, so any 
 
 ## Step 6 — Site (unless "none" in Step 0)
 
-Follow **[[pdf-studio-generate-site]]** in full to build a browsable website under `<WORK_DIR>/site/` from `reports/` (and the `audio/` guides, played in-page): scaffold assets and figures, author one page per report in parallel, write the landing page, then run its own [[understanding-html-docs-review]] pass over every page and fix what it finds.
+Follow **[[pdf-studio-generate-site]]** in full to build a browsable website under `<WORK_DIR>/site/` from `reports/` (and the `audio/` guides, played in-page): scaffold assets and figures, author one page per report in parallel, then write the landing page.
 
 - **Build only — do not deploy here.** [[pdf-studio-generate-site]] deliberately keeps `site/` local so it can be reviewed before going public; publishing is [[pdf-studio-deploy-site]]'s job and is handled at Finalize as an offer, confirmed then.
-- Delegate the mechanics (scaffold, per-page authoring, index, review) to [[pdf-studio-generate-site]] — do not duplicate them here. If `understanding-html-docs` or `pdf-studio-site-base` is not installed, [[pdf-studio-generate-site]] stops; skip the site build and say so rather than working around it.
+- Delegate the mechanics (scaffold, per-page authoring, index) to [[pdf-studio-generate-site]] — do not duplicate them here. If `understanding-html-docs` or `pdf-studio-site-base` is not installed, [[pdf-studio-generate-site]] stops; skip the site build and say so rather than working around it.
 - If the site scope was "none", skip this step.
 
 ## Finalize
