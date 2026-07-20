@@ -77,13 +77,20 @@ Rules the generator enforces (so you cannot get them wrong):
 ### Consumer-specific vocabulary
 
 A consumer that needs its own components (e.g. the color page's `swatch` / `ramp`,
-or explain-diff's risk axis) adds:
+or [[understanding-explain-diff]]'s risk / verify axes) supplies:
 
-1. a **context stylesheet** referenced via the `context-css` frontmatter var, and
-2. **filter directives** for the new vocabulary (see the `ramp` / `swatch` rules in
-   `filters/htmldocs.lua` as the worked example).
+1. a **context stylesheet** referenced via the `context-css` frontmatter var;
+2. **filter directives** for the new vocabulary — a consumer Lua filter passed with
+   `--filter`, chained after `htmldocs.lua` so its rules bind on top of the base
+   (see the `ramp` / `swatch` rules in `filters/htmldocs.lua`, and explain-diff's
+   `filters/explain-diff.lua`, as worked examples); and, for a heavier consumer:
+3. a **template variant** via `--template`, when the page skeleton itself differs
+   from the default single `main > article` (e.g. explain-diff's multi-`article`
+   walkthrough with its own header and bottom scripts).
 
-This is how both the IR vocabulary *and* its rendering are injected per consumer.
+This is how the IR vocabulary, its rendering, *and* the page skeleton are injected
+per consumer. Both the base and consumer filters run in one `--lua-filter` chain,
+so `base vocabulary + consumer vocabulary` compose.
 
 The **pdf-studio** consumer adds these (their markup carries a raw `<audio>` / must
 point inside the site root, so the filter guarantees the structure the author cannot
@@ -110,8 +117,18 @@ One page:
 ```bash
 scripts/build.sh <ir.md> <out-dir> \
   --assets <understanding-html-docs/assets> \
-  [--context <dir-of-context-css>]
+  [--context <dir-of-context-css>] \
+  [--template <consumer-template>] [--filter <consumer-filter.lua>]... [--inline]
 ```
+
+By default the page is **copy-mode**: `base.css` / `base.js` and any context
+`*.css` / `*.js` are copied into `<out-dir>/assets/` and the page links them.
+`--inline` folds those local assets into the page as `<style>` / `<script>` and
+drops the `assets/` dir, yielding **one self-contained file** (remote CDN engines
+stay external). Inline is opt-in — a single-file consumer (explain-diff) asks for
+it; a multi-page site (pdf-studio) stays copy-mode so pages share one asset set.
+`--template` / `--filter` are the consumer hooks from *Consumer-specific
+vocabulary* above; both compose with `--inline`.
 
 A whole site (each `ir/*.md` → `out/<name>.html`, sharing one asset set):
 

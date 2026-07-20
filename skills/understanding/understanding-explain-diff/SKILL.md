@@ -1,7 +1,7 @@
 ---
 name: understanding-explain-diff
 description: This skill should be used when the user wants an HTML explanation document generated from a git diff — a reviewer-facing guide that layers background, mental model, diagrams, a guided walkthrough in understanding order with risk annotations, and review points. Triggers on "explain this diff", "diffの解説を作って", "この変更の解説HTMLを生成して", "generate an explanation page for these changes". Should NOT trigger for publishing an explanation for a PR (use git-helpers-explain-pr, which delegates here), writing a Markdown PR description (git-helpers-pr-description), or reviewing code for defects (code-review skills).
-allowed-tools: Bash(git *), Read, Write, Glob
+allowed-tools: Bash, Read, Write, Glob
 user-invocable: true
 ---
 
@@ -83,51 +83,66 @@ Then compute the **review plan**: aggregate the chunks into an attention budget
 — how many chunks need close reading vs. skimming vs. no review (mechanical),
 with a rough time estimate. This is the first thing the reviewer sees.
 
-### 3. Generate the HTML
+### 3. Author the IR and generate
 
-Copy `assets/template.html` (resolve relative to this skill's installed
-directory) and replace the placeholders. The document is assembled from the
-`understanding-html-docs` design system plus this skill's own content layer, and
-stays a single self-contained file by **inlining** each design-system piece from
-its source rather than linking it. Paste these in verbatim — never hand-tune them
-per document (edit the source or the component instead, so the shared system does
-not drift):
+Write a semantic **IR** (Markdown + fenced-div directives) and run this skill's
+build script; the generator ([[understanding-html-docs-generate]]) binds each
+meaning to markup, inlines the design system, and emits the single self-contained
+file. The author writes only meaning — never HTML, never a pasted `base.css` or
+component, so the shared design system cannot drift. An invalid risk/tested value
+is a **hard build error**, and diff content is HTML-escaped by the filter.
 
-- `<style id="html-docs-base">` ← the full contents of `assets/base.css` from the
-  `understanding-html-docs` skill (typography, color model, base components).
-- The **`diff` opt-in component** (`understanding-html-docs/assets/components/diff/`):
-  paste `diff.css` into `<style id="diff-component">` and `diff.js` into the diff
-  render `<script>`, and keep the two diff2html CDN tags in `<head>`. Follow
-  `components/diff/include.md` for the markup contract and the escaping /
-  valid-unified-diff rules. Omit all of this if the document has no diffs.
-- The **`diagram` opt-in component** (`understanding-html-docs/assets/components/diagram/`):
-  paste `diagram.css` into `<style id="diagram-component">` and `diagram.js` into
-  the mermaid init `<script type="module">`. Follow `components/diagram/include.md`
-  for the markup contract and the palette hook. Omit if the document has no diagrams.
-- The **`comments` opt-in component** (`understanding-html-docs/assets/components/comments/`):
-  paste `comments.css` into `<style id="comments-component">` and `comments.js`
-  into the comments `<script>` at the end of `<body>`. This adds the reviewer's
-  **browser-side comment layer** — select text (or right-click a block) to leave a
-  comment, listed in a slide-in panel, persisted to `localStorage`, exportable as
-  JSON/Markdown. It has **no markup to author** and no engine (vanilla, offline);
-  follow `components/comments/include.md`. Keep it — a reviewer commenting on the
-  explanation is the whole point of the document. Do **not** add
-  `class="comments-gutter"`: this document's ~1080px column is too wide for a
-  pinned side gutter, so the list stays the 💬-toggle overlay.
-- The `<style id="explain-diff">` block is the **only** styling authored here —
-  this skill's risk/change semantic axes and chunk/review-plan components. Keep it.
-- Do **not** inline `base.js`: the walkthrough puts multiple `article.chunk`
-  elements directly under `main`, which the base kit's `main article` assumption
-  would mis-target. The base CSS's `color-scheme: light dark` already gives
-  automatic light/dark; this skill's own read-progress script (kept in the
-  template) plus the diff/diagram components own the interactivity.
+**Frontmatter** — the page chrome:
 
-The template's commented `<article class="chunk">` / `.review-point` blocks show
-the exact component markup to repeat. For diff and diagram markup, follow the two
-components' `include.md` — e.g. each diff excerpt is a valid unified diff,
-HTML-escaped, in `<pre class="diff-source" hidden>` immediately followed by an
-empty `<div class="diff-render"></div>`, which the diff component renders at load
-time (GitHub-style view, syntax highlighting, unified ↔ side-by-side toggle).
+```yaml
+---
+title: <heading> — diff 解説
+lang: ja
+meta: "PR #123 · feature/foo → main · 12 files, +340 −85"   # the header meta line
+has-diffs: true        # emit the diff2html engine + renderer (omit if no diffs)
+has-diagrams: true     # emit the mermaid engine (omit if no diagrams)
+reviewed-label: 確認済み
+risk-labels: { high: 要精査, medium: 流し読み, low: 確認不要 }  # risk-badge text
+context-css: explain-diff.css
+toc-heading: 目次       # optional; omit to drop the TOC
+footer: "…"            # optional footer note (generator/truncation note)
+---
+```
+
+**Body directives** — the explain-diff vocabulary. The base
+[[understanding-html-docs-generate]] vocabulary (callouts, keypoints, plain
+tables — auto-wrapped in `.tablewrap`) is available too; these add the axes this
+skill owns:
+
+| To express | Author |
+|---|---|
+| The **review plan** (attention budget) | `::: {.review-plan heading="レビュー計画"}` wrapping `::: {.budget}` with one `::: {.budget-item risk=high}` **…** `:::` per tier present. The live progress line is injected for you. |
+| A **walkthrough chunk** | `::: {.chunk risk=high id=slug pattern="…" files="a.ts, b.ts" tested=no verify="…" title="…"}` … `:::`. The header (checkbox, risk badge, pattern tag, files, verify-status) is generated from the attributes; the div body is the prose + optional behavior table + diff. `pattern` is optional; `risk` must be high\|medium\|low and `tested` must be yes\|no (else the build fails). |
+| A **machine-verified claim** | `[claim]{.verified}` inline (see Machine-verified facts). |
+| An **inferred / low-confidence note** | `::: {.inferred-note}` … `:::` |
+| A **before/after shift** | `::: {.ba-pair}` wrapping `::: {.ba-before}` `**Before**` … `:::` and `::: {.ba-after}` `**After**` … `:::` |
+| A **diagram** | a ` ```mermaid ` fenced block (tag changed nodes with the `added`/`removed`/`changed` `classDef`s per `components/diagram/include.md`) |
+| A **diff excerpt** (inside a chunk) | a ` ```{.diff-source} ` fenced block holding the **raw** unified diff — the filter HTML-escapes it and emits the `<pre>` + empty renderer pair |
+| A **review point** | `::: {.review-point}` `**Title**` … `:::` |
+
+Chunk **order = source order = understanding order**: write the `.chunk` blocks in
+the order the reviewer should read them (there is no separate order attribute).
+Each `.chunk` needs a stable, unique `id` (the read-progress state key).
+
+**Generate** — run from this skill's directory (`examples/sample.md` is a worked
+IR example):
+
+```bash
+scripts/build.sh <ir.md> <out-dir>          # one self-contained file (default)
+scripts/build.sh <ir.md> <out-dir> --copy   # multi-file (external assets/) instead
+```
+
+Runtime is **pandoc**, resolved by the generator's preflight (PATH → bundled
+`nix develop` → fail). The default (inline) output is a single file with
+`base.css`, `explain-diff.css`, and the diff/diagram/comments components folded
+in; only the diff2html and mermaid **engines** load from a CDN. Review the result
+against the **Color language** section below (an inline self-check, not the full
+`understanding-html-docs-review` pass).
 
 ### Color language
 
@@ -177,19 +192,19 @@ Section-by-section rules:
   with the code one click away. Excerpt diffs to what supports the
   explanation (~200 lines max per chunk — beyond that the excerpt stops serving
   the explanation and starts mirroring the PR diff itself; see Gotchas); note
-  truncation in the chunk and in the footer. Per chunk:
-    - Give each `article.chunk` a stable `data-chunk-id` slug (used for the
-      reviewer's read-progress state — must be unique and not reorder-sensitive).
-    - Emit the `.verify-status` line: `data-tested="yes"` naming the covering
-      test, or `data-tested="no"` for untested. Always present.
-    - Add a `.pattern-tag` only when a change pattern was named in step 2;
-      otherwise delete the span.
-    - Mark claims that were confirmed by running a command with
-      `<span class="verified">…</span>` (see Machine-verified facts below);
-      leave inferences unmarked so the reviewer can tell them apart.
-    - When the chunk changes runtime behavior, include the before/after table;
-      a concrete input→old→new row lowers cognitive load far more than prose.
-      Delete the table for non-behavioral chunks.
+  truncation in the chunk and in the footer. Per `.chunk`:
+    - Give each a stable, unique `id=` slug (the read-progress state key — must
+      not be reorder-sensitive).
+    - Set `tested=yes` with a `verify="tested by …"` naming the covering test, or
+      `tested=no` for untested. Always present (an invalid value fails the build).
+    - Set `pattern="…"` only when a change pattern was named in step 2; omit the
+      attribute otherwise.
+    - Mark claims confirmed by running a command with `[…]{.verified}` (see
+      Machine-verified facts below); leave inferences unmarked so the reviewer can
+      tell them apart.
+    - When the chunk changes runtime behavior, include a plain Markdown behavior
+      table (a concrete input→old→new row lowers cognitive load more than prose);
+      omit it for non-behavioral chunks.
 - **Review points**: design decisions with rejected alternatives, untested areas,
   and concrete questions for the reviewer — items needing human judgment, not a
   restatement of the walkthrough.
@@ -198,7 +213,7 @@ Section-by-section rules:
 
 An AI-written explanation carries its own reviewer cost: "can I trust this
 summary?" Lower it by separating what was *checked* from what was *inferred*.
-Only wrap a claim in `<span class="verified">` after actually confirming it with
+Only wrap a claim in `[…]{.verified}` after actually confirming it with
 a command in this session — e.g. `rg` to prove "all 12 call sites updated", or
 running the test suite to prove "tests pass". Never mark a claim verified on the
 strength of the diff alone or a plausible guess; an unverified inference stays
@@ -206,12 +221,15 @@ unmarked. Over-marking destroys the signal, so when in doubt, leave it unmarked.
 
 ## Gotchas
 
-- **Diff and diagram rules live in their components.** HTML-escaping diff/code
-  content and keeping every excerpt a parseable unified diff are covered by
-  `understanding-html-docs/assets/components/diff/include.md`; the mermaid markup
-  and palette hook by `components/diagram/include.md`. Follow them — they are the
-  source of truth, not restated here. (Inline code in the prose still needs the
-  same `&`/`<`/`>` escaping to avoid swallowing the document.)
+- **Escaping and wrapping are the filter's job.** Put the **raw** unified diff in
+  a ` ```{.diff-source} ` block — the filter HTML-escapes it and emits the
+  `<pre class="diff-source" hidden>` + empty `<div class="diff-render">` pair the
+  diff component renders (GitHub-style, unified ↔ side-by-side). Inline code in
+  prose uses normal Markdown backticks (pandoc escapes it). The one content rule
+  that is yours: keep each excerpt a **parseable unified diff** (a
+  `diff --git` / `---` / `+++` header + intact `@@` hunks) — see
+  `components/diff/include.md`; the mermaid palette hook is in
+  `components/diagram/include.md`.
 - **Do not inline the full raw diff for large changes.** The document is an
   explanation, not a mirror of the diff — the PR itself remains the source of
   truth for exact content. Cap per-chunk excerpts and say what was omitted.
@@ -219,10 +237,13 @@ unmarked. Over-marking destroys the signal, so when in doubt, leave it unmarked.
   inlined (not a CDN dependency), so typography/color/layout work offline; only
   the diff2html and mermaid rendering needs the network (vendor them per each
   component's include.md for full offline).
-- **Inline the design-system pieces verbatim.** Paste `base.css` and each opt-in
-  component's `.css`/`.js` into their `<style>`/`<script>` slots unchanged — do
-  not hand-tune them per document (edit the base skill or the component instead).
-  A drifted copy diverges from the shared design system across future regenerations.
+- **The generator owns the design-system inlining — don't touch it.** `base.css`
+  and the components are folded in by the build (inline mode), unchanged. Never
+  edit generated CSS/JS by hand; to change presentation, edit `assets/explain-diff.css`
+  (this skill's context layer, its only styling), the base skill, or the component.
+  `assets/template-explain-diff.html` and `filters/explain-diff.lua` are the
+  skill's own template/vocabulary — the meaning→markup binding lives there, not in
+  the IR.
 
 ## Success criteria
 
@@ -232,31 +253,23 @@ Verify before reporting completion; fix and re-check on any No:
       (low-risk group chunks count as coverage).
 - [ ] Every chunk has a risk level *and* a stated reason for it.
 - [ ] The review-plan aggregate matches the actual chunks (tier counts add up).
-- [ ] Every chunk has a `data-chunk-id` and a `.verify-status` line
-      (`data-tested` = yes with a named test, or no).
-- [ ] Every `<span class="verified">` claim was actually confirmed by a command
-      run this session — no verified marks on unchecked inferences.
+- [ ] Every `.chunk` has an `id`, a `risk`, and a `tested` (yes with a `verify`
+      naming the test, or no).
+- [ ] Every `[…]{.verified}` claim was actually confirmed by a command run this
+      session — no verified marks on unchecked inferences.
 - [ ] Chunk order follows the narrative of understanding, not file path order.
 - [ ] Background section exists; if no context material was given, it is
       explicitly marked as inferred.
-- [ ] No unescaped `<` from code/diff content outside intended tags (spot-check
-      the generated file for known generic types or `->` arrows in the diff).
-- [ ] Every `pre.diff-source` starts with a `diff --git` (or `---`/`+++`) file
-      header and each is immediately followed by an empty `div.diff-render`.
-- [ ] `<style id="html-docs-base">` holds the full, unmodified contents of
-      `understanding-html-docs/assets/base.css`, and — when diffs/diagrams are
-      present — `<style id="diff-component">` / `<style id="diagram-component">`
-      and the diff-render / mermaid-init `<script>` slots hold the unmodified
-      component files (not the placeholder comments).
-- [ ] `<style id="comments-component">` and the comments `<script>` slot hold the
-      unmodified `components/comments/comments.css` / `comments.js` (not the
-      placeholder comments), so the reviewer's comment layer is present.
-- [ ] The file is a single self-contained HTML file (base.css and any used
-      component assets inlined; only the diff2html and mermaid engines are
-      external), and opens standalone in a browser.
+- [ ] Each `.diff-source` block holds a parseable unified diff (a `diff --git`,
+      `---`, or `+++` header + intact `@@` hunks).
+- [ ] The build ran without error (an invalid `risk`/`tested` value, an unknown
+      callout variant, or a `.chunk` missing its required attributes fails it).
+- [ ] The build produced a single self-contained HTML file (default inline mode —
+      `base.css`, `explain-diff.css`, and the used components folded in; only the
+      diff2html and mermaid engines external) that opens standalone in a browser.
 - [ ] The risk / change / verify color axes were self-checked against the **Color
       language** section: every risk badge/border/budget line, every `.ba-before`/
-      `.ba-after` and `col-before`/`col-after`, and every `data-tested` status carries
+      `.ba-after`, and every verify status carries
       the hue its own text implies. A design-system violation never breaks the page — a
       callout whose variant contradicts its text renders as a perfectly good box in the
       wrong color — and on this ephemeral document that mis-coloring is the one failure
