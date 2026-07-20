@@ -31,7 +31,12 @@ done
 page="$(basename "${src%.md}").html"
 mkdir -p "$out/assets"
 cp "$assets/base.css" "$assets/base.js" "$out/assets/"
-[[ -n "$context" && -d "$context" ]] && cp "$context/"*.css "$out/assets/" 2>/dev/null || true
+# context stylesheets (context-css) AND scripts (context-js) are copied verbatim,
+# so a page that references assets/<name>.css / assets/<name>.js resolves.
+if [[ -n "$context" && -d "$context" ]]; then
+  cp "$context/"*.css "$out/assets/" 2>/dev/null || true
+  cp "$context/"*.js  "$out/assets/" 2>/dev/null || true
+fi
 
 # -f markdown-raw_html closes the escape hatch: the AUTHOR cannot inject raw HTML
 # (invented classes / inline style), but the trusted filter still emits it.

@@ -33,10 +33,21 @@ Frontmatter carries the page chrome:
 ---
 title: Page title — Site name
 site-name: understanding-html-docs   # header.site link text
-context-css: color.css               # optional: a consumer context stylesheet
+context-css: color.css               # optional: one consumer stylesheet…
+# context-css:                       # …or a list, emitted after base.css in order
+#   - pdf-studio.css
+context-js:                          # optional: consumer scripts, emitted (defer)
+#   - nav-manifest.js                #   after base.js in list order — data first,
+#   - pdf-studio.js                  #   then the logic that reads it
 back-link: "← Back to the index"     # optional: footer link text (omit for none)
 ---
 ```
+
+`context-css` and `context-js` each accept **one value or a YAML list**; a scalar is
+just a one-element list (so an existing single `context-css:` is unchanged). Asset
+order in `<head>` is fixed: `base.css` → `context-css[]` → `base.js` → `context-js[]`.
+`build.sh --context <dir>` copies every `*.css` **and** `*.js` from that dir verbatim
+into the output `assets/`, so each referenced file resolves.
 
 Body vocabulary (everything the author reaches for):
 
@@ -73,6 +84,21 @@ or explain-diff's risk axis) adds:
    `filters/htmldocs.lua` as the worked example).
 
 This is how both the IR vocabulary *and* its rendering are injected per consumer.
+
+The **pdf-studio** consumer adds these (their markup carries a raw `<audio>` / must
+point inside the site root, so the filter guarantees the structure the author cannot
+hand-write under `-f markdown-raw_html`):
+
+| To express | Author | Emits |
+|---|---|---|
+| A source-PDF page anchor | `[p31]{.p}` | `<span class="p">p31</span>` (native span — no filter needed) |
+| An in-page audio-guide player | `::: {.player src=audio/ch-1.m4a}` `:::` (optional `label="…"`, default `🔊 音声ガイド`) | `<div class="player"><span>…</span><audio controls preload="none" src="…"></audio></div>` |
+| A harvested figure | `![caption](../ocr/figures/fig-p031-1.jpg)` | `<img src="figures/fig-p031-1.jpg" …>` — the `../ocr/figures/` prefix is rewritten to `figures/` at generation time, so no page points outside the site root (the caller's `grep '../'` review check becomes unnecessary) |
+
+`.player` without a `src=` is a **hard error at generation** (like an unknown callout
+variant). The page-to-page nav data (`window.__PDF_STUDIO_NAV`) is *not* the
+generator's concern — it is a per-site `nav-manifest.js` the consumer authors and
+loads as a `context-js` entry (before the script that reads it).
 
 ## Generating
 

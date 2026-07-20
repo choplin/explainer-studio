@@ -7,9 +7,10 @@
 <!-- no-flash theme boot: storage key must match base.js THEME_KEY ('html-docs-theme') -->
 <script>try{var t=localStorage.getItem('html-docs-theme');if(t==='dark')document.documentElement.classList.add('theme-dark');else if(t==='light')document.documentElement.classList.add('theme-light');}catch(e){}</script>
 <link rel="stylesheet" href="assets/base.css" />
-$if(context-css)$<link rel="stylesheet" href="assets/$context-css$" />
-$endif$<script src="assets/base.js" defer></script>
-</head>
+$for(context-css)$<link rel="stylesheet" href="assets/$context-css$" />
+$endfor$<script src="assets/base.js" defer></script>
+$for(context-js)$<script src="assets/$context-js$" defer></script>
+$endfor$</head>
 <body>
 <header class="site">
 <a href="index.html">$if(site-name)$$site-name$$else$Home$endif$</a>

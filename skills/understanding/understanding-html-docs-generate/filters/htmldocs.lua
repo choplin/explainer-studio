@@ -77,7 +77,33 @@ function Div(el)
     }))
   end
 
+  -- player: an in-page audio-guide widget. src=<audio path> [label=<caption>].
+  -- Emits the .player markup (which carries a raw <audio>, so the author cannot
+  -- write it directly under -f markdown-raw_html) as a structural guarantee.
+  if c:includes("player") then
+    local a = el.attributes
+    local src = a["src"]
+    if not src or src == "" then
+      error("htmldocs: .player requires a src= attribute (the audio file path)")
+    end
+    local label = a["label"] or "🔊 音声ガイド"
+    return pandoc.RawBlock("html", table.concat({
+      '<div class="player"><span>', esc(label), "</span>",
+      '<audio controls preload="none" src="', esc(src), '"></audio></div>',
+    }))
+  end
+
   -- keypoints, card, card-grid, aside: pass the class through unchanged.
+  return el
+end
+
+-- Figure path: a consumer's report embeds crops as ../ocr/figures/X (a path
+-- relative to reports/); on the generated site the crops are copied to figures/X.
+-- Rewrite the prefix so a page never points outside the site root — this makes
+-- the caller's "grep '../'" review check unnecessary (the guarantee is at
+-- generation time, not review time).
+function Image(el)
+  el.src = el.src:gsub("^%.%./ocr/figures/", "figures/")
   return el
 end
 
