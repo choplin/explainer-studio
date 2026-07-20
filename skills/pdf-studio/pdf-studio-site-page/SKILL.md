@@ -66,7 +66,7 @@ Everything mechanical is the generator's guarantee — you do **not** write HTML
 - **Keep every `[pNN]` anchor** from the source, written as `[pNN]{.p}` at the point it annotates. Do not drop them — they are the link back to the PDF.
 - **Write in the language of the source report.**
 - **Carry only the figures the source report actually embeds** — do not go hunting in `figures/` for extra crops. If the caller said `ocr/figures/` does not exist, the report has no figures; do not invent any. Never a bare figure: it appears where the prose discusses it, with the report's explanation intact, and the alt text says what it shows.
-- **Do not author prev/next links.** Page-to-page navigation is rendered at runtime by `pdf-studio.js` from the site's `nav-manifest.js` (loaded via the `context-js` frontmatter) — one source for the page order. Hand-authored neighbor links are exactly the drift that replaced.
+- **Do not author prev/next links.** Page-to-page navigation is rendered at runtime by `pdf-studio.js` from the site's `nav-manifest.js` (loaded via the `context-js` frontmatter) — one source for the page order. Hand-authored neighbor links are exactly the drift a single source removes.
 
 ## How to restructure (this is the point of this skill)
 

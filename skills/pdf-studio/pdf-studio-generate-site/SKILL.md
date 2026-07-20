@@ -79,7 +79,7 @@ After building `site/`, tell the user the site is ready under `<WORK_DIR>/site/`
 
 - **`site/` and `ir/` are disposable and rebuilt from source.** When they already exist the skill asks before clearing; a clean rebuild (recommended) drops files no longer produced so they don't linger as orphans. Never hand-edit `site/` — edit the source `reports/` (or, for a semantic fix, the `ir/`) and regenerate. A later [[pdf-studio-deploy-site]] run publishes whatever is on disk, so prefer a clean rebuild before redeploying.
 - **Restructuring is the deliverable.** An IR whose heading sequence mirrors the source Markdown is a conversion, not an authored page — re-author it with the instruction to restructure (the `pdf-studio-site-page` procedure states the same rule).
-- **A failed build points at one IR.** The generator fails loudly on an invalid IR (unknown variant, `.player` missing `src=`); the message names the file — fix that `ir/*.md` and re-run Phase 2b. The mechanical failures the old hand-authored flow could ship silently (invented class, unwrapped table, figure pointing outside the site) can no longer occur.
+- **A failed build points at one IR.** The generator fails loudly on an invalid IR (unknown variant, `.player` missing `src=`); the message names the file — fix that `ir/*.md` and re-run Phase 2b. The mechanical error classes — an invented class, an unwrapped table, a figure pointing outside the site — are structurally impossible here, not review-caught: the generator cannot emit them.
 
 ## Success criteria
 
