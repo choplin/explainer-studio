@@ -15,9 +15,10 @@
 <!-- theme boot: apply the saved theme before first paint (no flash). Keep verbatim; key must match base.js THEME_KEY. -->
 <script>try{var t=localStorage.getItem('html-docs-theme');if(t==='dark')document.documentElement.classList.add('theme-dark');else if(t==='light')document.documentElement.classList.add('theme-light');}catch(e){}</script>
 <script src="assets/base.js" defer></script>
-<!-- page-to-page nav manifest: same single source of truth every page loads (see page.html).
-     Must load before pdf-studio.js; defer keeps document order. -->
-<script src="nav-manifest.js" defer></script>
+<!-- page-to-page nav manifest: the single source of truth every page loads, written
+     to site/assets/ in Phase 3 (the generated report pages reference it the same way,
+     via their context-js frontmatter). Must load before pdf-studio.js; defer keeps order. -->
+<script src="assets/nav-manifest.js" defer></script>
 <script src="assets/pdf-studio.js" defer></script>
 </head>
 <body>
