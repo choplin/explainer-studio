@@ -86,7 +86,7 @@ with a rough time estimate. This is the first thing the reviewer sees.
 ### 3. Author the IR and generate
 
 Write a semantic **IR** (Markdown + fenced-div directives) and run this skill's
-build script; the generator ([[understanding-html-docs-generate]]) binds each
+build script; the generator ([[understanding-html-docs]]) binds each
 meaning to markup, inlines the design system, and emits the single self-contained
 file. The author writes only meaning — never HTML, never a pasted `base.css` or
 component, so the shared design system cannot drift. An invalid risk/tested value
@@ -110,7 +110,7 @@ footer: "…"            # optional footer note (generator/truncation note)
 ```
 
 **Body directives** — the explain-diff vocabulary. The base
-[[understanding-html-docs-generate]] vocabulary (callouts, keypoints, plain
+[[understanding-html-docs]] vocabulary (callouts, keypoints, plain
 tables — auto-wrapped in `.tablewrap`) is available too; these add the axes this
 skill owns:
 

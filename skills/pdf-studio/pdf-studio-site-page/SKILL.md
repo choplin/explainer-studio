@@ -1,12 +1,12 @@
 ---
 name: pdf-studio-site-page
-description: Internal procedure for the pdf-studio-generate-site skill — read one report Markdown and author a restructured, web-native page as a semantic IR (Markdown + fenced divs), NOT a 1:1 conversion and NOT hand-written HTML. The understanding-html-docs-generate generator binds the IR to the markup contract deterministically; this procedure writes only the meaning (which passage is a hazard, the key point, the takeaways) and the editorial restructuring. Applied once per report, in parallel, by the generate-site orchestrator (dispatched to a pdf-studio-site-page subagent under Claude Code, or applied inline otherwise). NOT a user-facing skill and NOT triggered directly by user requests.
+description: Internal procedure for the pdf-studio-generate-site skill — read one report Markdown and author a restructured, web-native page as a semantic IR (Markdown + fenced divs), NOT a 1:1 conversion and NOT hand-written HTML. The understanding-html-docs generator binds the IR to the markup contract deterministically; this procedure writes only the meaning (which passage is a hazard, the key point, the takeaways) and the editorial restructuring. Applied once per report, in parallel, by the generate-site orchestrator (dispatched to a pdf-studio-site-page subagent under Claude Code, or applied inline otherwise). NOT a user-facing skill and NOT triggered directly by user requests.
 user-invocable: false
 ---
 
 # Site page authoring
 
-You turn one report Markdown file into one **semantic IR file** (Markdown + fenced divs) that is *designed for the web*: restructured for scanning on a phone, not a mechanical rendering of the source. The [[understanding-html-docs-generate]] generator turns your IR into the final HTML page — you never write HTML, `<head>`, classes, or asset links, and you never rewrite figure paths or escape characters. Those are the generator's job and it cannot get them wrong. **Your whole job is meaning and structure**: which passage is a hazard vs the key point, what the takeaways are, and how to lay the material out for reading.
+You turn one report Markdown file into one **semantic IR file** (Markdown + fenced divs) that is *designed for the web*: restructured for scanning on a phone, not a mechanical rendering of the source. The [[understanding-html-docs]] generator turns your IR into the final HTML page — you never write HTML, `<head>`, classes, or asset links, and you never rewrite figure paths or escape characters. Those are the generator's job and it cannot get them wrong. **Your whole job is meaning and structure**: which passage is a hazard vs the key point, what the takeaways are, and how to lay the material out for reading.
 
 ## When this applies
 

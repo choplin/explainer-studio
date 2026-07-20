@@ -1,5 +1,5 @@
 {
-  description = "understanding-html-docs-generate runtime: pandoc. Renders a semantic IR (Markdown + fenced divs) into an understanding-html-docs page via a template + Lua filter. pandoc is the only dependency; nix supplies it so the generator works with no host setup.";
+  description = "understanding-html-docs runtime: pandoc. Renders a semantic IR (Markdown + fenced divs) into an understanding-html-docs page via a template + Lua filter. pandoc is the only dependency; nix supplies it so the generator works with no host setup.";
 
   # nixpkgs-weekly (flakehub): its pandoc is built WITH Lua on darwin. Plain
   # github NixOS/nixpkgs unstable ships a Lua-less pandoc on darwin at some revs,

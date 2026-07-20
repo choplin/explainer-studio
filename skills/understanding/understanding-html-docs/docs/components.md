@@ -164,24 +164,28 @@ will helpfully add it back.
   *Reopen if* the documents come to need an application-UI vocabulary (nav bars,
   modals, forms); at that point the calculus genuinely changes.
 - **No build step — reversed (2026-07); authoring now builds, output still does
-  not.** The original rule: a runtime floor of shell + jq, distribution by *an agent
-  copies files by instruction*, and no build anywhere. It has been deliberately
-  overturned **for authoring** — the standard path is now to write a semantic IR
-  (Markdown + fenced divs) and run a **pandoc** build that emits the HTML
-  ([[understanding-html-docs-generate]]). What changed is only the *authoring* side: a
-  page is generated, not typed, and pandoc is a real runtime resolved by preflight, so
-  the shell+jq floor no longer holds for producing a page. What did **not** change is
-  the *output* — the generated site is still plain static HTML that opens on a
-  double-click, ships no build tooling, and needs no server. The no-build property that
-  actually mattered to a reader is intact; only the author builds now. Why it was worth
+  not. The build is the one path — there is no hand-authoring route.** The original
+  rule: a runtime floor of shell + jq, distribution by *an agent copies files by
+  instruction*, and no build anywhere. It has been deliberately overturned **for
+  authoring** — every page is now written as a semantic IR (Markdown + fenced divs) and
+  run through a **pandoc** build that emits the HTML (the generator this skill owns; see
+  SKILL.md, *Producing a page*). What changed is only the *authoring* side: a page is
+  generated, not typed, and pandoc is a real runtime resolved by preflight, so the
+  shell+jq floor no longer holds for producing a page. What did **not** change is the
+  *output* — the generated site is still plain static HTML that opens on a double-click,
+  ships no build tooling, and needs no server. The no-build property that actually
+  mattered to a reader is intact; only the author builds now. Why it was worth
   overturning: the copy-by-instruction model could never *guarantee* the mechanical
   contract — an invented class, an inline color, an unwrapped table, an unknown callout
   variant all rendered plausibly and shipped — and the generator makes those
   structurally impossible (unknown variant = hard build error, every table wrapped, raw
   HTML dropped). That is the trade the reversal makes: an authoring-time build in
-  exchange for a mechanical contract that cannot be gotten wrong. *Re-narrow* (drop the
-  build, return to hand-authoring) only if pandoc becomes unavailable at authoring time
-  and those guarantees are judged not worth the runtime.
+  exchange for a mechanical contract that cannot be gotten wrong. The reversal went all
+  the way — hand-authoring was kept as a fallback for one release (2026-07) and then
+  **removed**, because a fallback that forfeits the mechanical contract is exactly the
+  hole the generator exists to close. *Reopen* the question only if pandoc becomes
+  unavailable at authoring time and those guarantees are judged not worth the runtime —
+  and that would mean re-introducing an authoring path, not flipping a switch.
 - **No linter.** `check.sh` is deliberately absent, not missing; SKILL.md gives the
   argument. The one line worth repeating: the errors that matter are well-formed, so
   a class check proves almost nothing. **Reversing "No build step" did not reverse

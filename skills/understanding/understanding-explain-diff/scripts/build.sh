@@ -4,7 +4,7 @@
 #
 # It assembles the context assets explain-diff always uses (its own
 # explain-diff.css plus the diff / diagram / comments components) and delegates
-# the actual generation to understanding-html-docs-generate's build.sh with the
+# the actual generation to understanding-html-docs's build.sh with the
 # explain-diff template variant and consumer filter.
 #
 # Usage:
@@ -19,8 +19,8 @@ set -euo pipefail
 HERE="$(cd "$(dirname "$0")" && pwd)"
 ED="$(cd "$HERE/.." && pwd)"
 UNDERSTANDING="$(cd "$ED/.." && pwd)"
-GEN="$UNDERSTANDING/understanding-html-docs-generate"
-BASE="$UNDERSTANDING/understanding-html-docs/assets"
+GEN="$UNDERSTANDING/understanding-html-docs"
+BASE="$GEN/assets"
 COMP="$BASE/components"
 
 src=""; out=""; inline="--inline"

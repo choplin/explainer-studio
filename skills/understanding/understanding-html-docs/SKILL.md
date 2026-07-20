@@ -1,15 +1,15 @@
 ---
 name: understanding-html-docs
-description: Shared resources for skills that explain something as a self-contained HTML document — the design system (typography, a meaning-only color model, callouts, chips), the progressive-enhancement kit (theme toggle, reading progress, table of contents, back-to-top), and the authoring contract that keeps the output deployable as static HTML. Other skills delegate to this skill to copy the base assets and follow the color/PE conventions, then layer their own context-specific markup on top. Use this skill when another skill asks to apply the understanding-html-docs design system or copy its base assets. Not typically invoked on its own.
+description: The design system AND the deterministic generator for skills that explain something as a self-contained HTML document. It owns the visual language (typography, a meaning-only color model, callouts, chips), the progressive-enhancement kit (theme toggle, reading progress, table of contents, back-to-top), and a pandoc-based generator that binds a semantic intermediate representation (Markdown + fenced divs that name only meaning, `::: {.callout variant=danger}`) to that markup — so an unknown callout variant is a hard build error, every table is wrapped in .tablewrap, and an invented class or inline style is unrepresentable. The author writes only the meaning; the mechanical layer cannot be gotten wrong. Other skills delegate here to generate their pages from a semantic IR and copy the base assets, then layer their own context stylesheet and vocabulary on top; the output is plain static HTML that opens with no server. Use this skill when another skill produces understanding-html-docs pages or applies its design system.
 ---
 
-# understanding-html-docs — shared HTML explanation-document resources
+# understanding-html-docs — design system + IR → page generator
 
 This skill owns the resources shared across skills that render an **explanation as
 a browsable web document** — [[understanding-explain-diff]] (a diff explained to a
-reviewer), pdf-studio's generate-site (reports as a reading site), and future
-skills of the same shape. It exists so each such skill inherits one design
-language and one interaction kit instead of re-deriving them.
+reviewer), pdf-studio's / paper-studio's generate-site (reports as a reading site),
+and future skills of the same shape. It exists so each such skill inherits one design
+language, one interaction kit, and one generator instead of re-deriving them.
 
 The idea:
 
@@ -18,10 +18,18 @@ The idea:
 > The first three are here; the context layer (what the document is *about*, and
 > any heavy third-party libraries it needs) stays in the consuming skill.
 
-Consuming skills copy the asset files verbatim and add their own context stylesheet
-and content — the content as a semantic IR run through
-[[understanding-html-docs-generate]] (see *Consuming this base*) — and never edit
-these files per document.
+And that design system is not authored by hand — it is **generated**. The skill
+factors the binding of *meaning* to *presentation* ("this is a hazard", never "make
+this box red") into two layers so the mechanical half is produced, not typed:
+
+- **The author writes a semantic IR** — Markdown with fenced divs that name only
+  the meaning (`::: {.callout variant=danger}`).
+- **The generator binds meaning → markup** — a pandoc template for the structural
+  boilerplate, a Lua filter for the component vocabulary.
+
+Consuming skills run their content (as a semantic IR) through this skill's generator
+and copy the asset files verbatim, adding their own context stylesheet and content —
+and never edit these files per document.
 
 ## The reference site is the contract
 
@@ -63,7 +71,22 @@ directory):
   (☰ FAB) on narrow screens, and a **persistent sidebar index** in the left
   gutter beside the article on wide screens (≥ 79rem) — same nav and scroll-spy,
   only the layout branches (in `base.css`, no logic duplicated).
+- **`assets/template.html`** — the pandoc template the generator uses for the
+  structural boilerplate (head skeleton, theme-boot key, asset link order,
+  `header.site` / `main article`).
 - **`assets/components/<name>/`** — the Tier 2 opt-in bundles (see below).
+
+The generator machinery, also under this skill's root:
+
+- **`filters/htmldocs.lua`** — the pandoc Lua filter that binds each meaning to its
+  markup, validates the vocabulary (an unknown callout variant is a hard error), and
+  wraps every table in `.tablewrap`.
+- **`scripts/build.sh`** — render one IR file into a page; **`scripts/build-site.sh`**
+  — render a whole `ir/*.md` dir into a multi-page site; plus `scripts/preflight.sh`
+  (resolves pandoc: PATH → bundled `nix develop` → fail) and `scripts/inline.awk`
+  (the inline-mode fold).
+- **`flake.nix` / `flake.lock`** — the pinned pandoc runtime the preflight falls back
+  to; see [`docs/skill-runtime-and-dependencies.md`](../../../docs/skill-runtime-and-dependencies.md).
 
 At this skill's root, alongside the reference site:
 
@@ -105,18 +128,30 @@ At this skill's root, alongside the reference site:
   layer on top of a page that already reads correctly. The semantic markup comes
   first (authored as IR, generated to HTML); the kit only enriches it.
 
-## Consuming this base
+## Producing a page — IR → HTML, deterministically
 
-**The standard path is to generate pages from a semantic IR, not to hand-write
-HTML.** [[understanding-html-docs-generate]] takes Markdown + fenced divs that name
-only the *meaning* (`::: {.callout variant=danger}`) and deterministically emits the
-HTML: a pandoc template owns the structural boilerplate (head skeleton, theme-boot
-key, asset order, `header.site` / `main article`) and a Lua filter binds each meaning
-to its markup. So the mechanical work the author used to do by hand — steps 3–5 of the
-old checklist — is generated, and the wiring mistakes it was on the author to avoid
-become unrepresentable (an invented class, an inline color, an unwrapped table, an
-unknown callout variant). This is the route every consumer takes (pdf-studio,
-paper-studio, explain-diff); reach for it first.
+**A page is generated from a semantic IR — this is the one route.** The generator
+takes Markdown + fenced divs that name only the *meaning* (`::: {.callout
+variant=danger}`) and deterministically emits the HTML: `assets/template.html` owns the
+structural boilerplate (head skeleton, theme-boot key, asset order, `header.site` /
+`main article`) and `filters/htmldocs.lua` binds each meaning to its markup. So the
+mechanical work — the asset link order, the theme-boot snippet whose storage key must
+match `base.js`'s `THEME_KEY`, the `header.site` / `main article` / `h2`–`h3` skeleton
+`base.js` wires from — is generated, and the wiring mistakes that used to be on the
+author become **unrepresentable** (an invented class, an inline color, an unwrapped
+table, an unknown callout variant). Every consumer takes this route (pdf-studio,
+paper-studio, explain-diff).
+
+What determinism buys, and what it does not:
+
+- **Buys:** the head/theme-boot/asset-order are always correct (the author never
+  writes them); an invented class or inline `style` is unrepresentable; an unknown
+  callout variant is a **hard error at generation**, not a silent unstyled box;
+  every `<table>` is wrapped in `.tablewrap`.
+- **Does not buy:** whether a passage *is* a hazard (`danger`) or the key point
+  (`key`) is a reading judgment no generator can make. That choice lives in the IR
+  and is still reviewed — see *Reviewing a document* below. Determinism guarantees
+  the IR→HTML mapping, not the correctness of the IR's meaning.
 
 That path introduces an **authoring-time build** (pandoc) — a deliberate reversal of
 the old "No build step" prohibition, recorded in
@@ -136,36 +171,162 @@ Two output shapes, selected on the generator's command line:
   truth — the file is re-generated, never hand-tuned. (`build.sh --inline`;
   [[understanding-explain-diff]] takes this route.)
 
-The generator owns the structural wiring the author used to hand-place: the asset link
-order (`base.css` → context CSS → `base.js` → context JS), the theme-boot snippet whose
-storage key must match `base.js`'s `THEME_KEY`, and the `header.site` / `main article` /
-`h2`–`h3` skeleton `base.js` wires from. See [[understanding-html-docs-generate]] for
-the IR dialect and how a consumer injects its own vocabulary (context stylesheet +
-filter directives + optional template variant).
+### The IR dialect
 
-Whichever path produced it, **review every page** with
-[[understanding-html-docs-review]]. Determinism removes the *mechanical* half of the
+Frontmatter carries the page chrome:
+
+```yaml
+---
+title: Page title — Site name
+site-name: understanding-html-docs   # header.site link text
+context-css: color.css               # optional: one consumer stylesheet…
+# context-css:                       # …or a list, emitted after base.css in order
+#   - pdf-studio.css
+context-js:                          # optional: consumer scripts, emitted (defer)
+#   - nav-manifest.js                #   after base.js in list order — data first,
+#   - pdf-studio.js                  #   then the logic that reads it
+back-link: "← Back to the index"     # optional: footer link text (omit for none)
+---
+```
+
+`context-css` and `context-js` each accept **one value or a YAML list**; a scalar is
+just a one-element list (so an existing single `context-css:` is unchanged). Asset
+order in `<head>` is fixed: `base.css` → `context-css[]` → `base.js` → `context-js[]`.
+`build.sh --context <dir>` copies every `*.css` **and** `*.js` from that dir verbatim
+into the output `assets/`, so each referenced file resolves.
+
+Body vocabulary (everything the author reaches for):
+
+| To express | Author |
+|---|---|
+| General information | `::: {.callout}` … `:::` (the bare note variant) |
+| Advice / caution / hazard / key insight | `::: {.callout variant=tip\|warn\|danger\|key}` |
+| A bold lead-in inside a callout | `[Label]{.label}` at the paragraph start |
+| What a section boils down to | `::: {.keypoints}` with `### Title` + a `- ` list |
+| A grid of peer blocks | `:::: {.card-grid}` wrapping `::: {.card}` blocks |
+| A small outlined / filled label | `[text]{.chip}` · `[text]{.chip .accent}` · `[text]{.badge}` |
+| Opening paragraph / eyebrow / louder line | `::: {.lede}` · `::: {.kicker}` · `::: {.pullquote}` (emitted as `<p class>`) |
+| A quiet remark | `::: {.aside}` |
+| A highlighted phrase | `[text]{.mark}` (emitted as `<mark>`) |
+| Tabular data | a plain Markdown table — **wrapped in `.tablewrap` automatically** |
+| A code sample | a ` ```{.nohighlight} ` fenced block |
+| Foundation (headings, prose, lists, blockquote, links, code, hr) | plain Markdown |
+
+Rules the generator enforces (so you cannot get them wrong):
+
+- `variant=` must be one of `tip` / `warn` / `danger` / `key` (or omitted for note).
+  Anything else — `warning`, `error`, a typo — **fails the build**.
+- Every table is wrapped; never hand-write `.tablewrap`.
+- `-f markdown-raw_html` is on: raw HTML in the IR is **not** passed through, so an
+  invented class or inline color cannot slip in.
+
+#### Consumer-specific vocabulary
+
+A consumer that needs its own components (e.g. the color page's `swatch` / `ramp`,
+or [[understanding-explain-diff]]'s risk / verify axes) supplies:
+
+1. a **context stylesheet** referenced via the `context-css` frontmatter var;
+2. **filter directives** for the new vocabulary — a consumer Lua filter passed with
+   `--filter`, chained after `htmldocs.lua` so its rules bind on top of the base
+   (see the `ramp` / `swatch` rules in `filters/htmldocs.lua`, and explain-diff's
+   `filters/explain-diff.lua`, as worked examples); and, for a heavier consumer:
+3. a **template variant** via `--template`, when the page skeleton itself differs
+   from the default single `main > article` (e.g. explain-diff's multi-`article`
+   walkthrough with its own header and bottom scripts).
+
+This is how the IR vocabulary, its rendering, *and* the page skeleton are injected
+per consumer. Both the base and consumer filters run in one `--lua-filter` chain,
+so `base vocabulary + consumer vocabulary` compose.
+
+The **pdf-studio** consumer adds these (their markup carries a raw `<audio>` / must
+point inside the site root, so the filter guarantees the structure the author cannot
+hand-write under `-f markdown-raw_html`):
+
+| To express | Author | Emits |
+|---|---|---|
+| A source-PDF page anchor | `[p31]{.p}` | `<span class="p">p31</span>` (native span — no filter needed) |
+| An in-page audio-guide player | `::: {.player src=audio/ch-1.m4a}` `:::` (optional `label="…"`, default `🔊 音声ガイド`) | `<div class="player"><span>…</span><audio controls preload="none" src="…"></audio></div>` |
+| A harvested figure | `![caption](../ocr/figures/fig-p031-1.jpg)` | `<img src="figures/fig-p031-1.jpg" …>` — the `../ocr/figures/` prefix is rewritten to `figures/` at generation time, so no page points outside the site root (the caller's `grep '../'` review check becomes unnecessary) |
+
+`.player` without a `src=` is a **hard error at generation** (like an unknown callout
+variant). The page-to-page nav data (`window.__PDF_STUDIO_NAV`) is *not* the
+generator's concern — it is a per-site `nav-manifest.js` the consumer authors and
+loads as a `context-js` entry (before the script that reads it).
+
+### Generating
+
+Runtime is **pandoc**, resolved by the preflight (PATH → bundled `nix develop` →
+fail); see [`docs/skill-runtime-and-dependencies.md`](../../../docs/skill-runtime-and-dependencies.md).
+
+One page:
+
+```bash
+scripts/build.sh <ir.md> <out-dir> \
+  --assets <understanding-html-docs/assets> \
+  [--context <dir-of-context-css>] \
+  [--template <consumer-template>] [--filter <consumer-filter.lua>]... [--inline]
+```
+
+By default the page is **copy-mode**: `base.css` / `base.js` and any context
+`*.css` / `*.js` are copied into `<out-dir>/assets/` and the page links them.
+`--inline` folds those local assets into the page as `<style>` / `<script>` and
+drops the `assets/` dir, yielding **one self-contained file** (remote CDN engines
+stay external). Inline is opt-in — a single-file consumer (explain-diff) asks for
+it; a multi-page site (pdf-studio) stays copy-mode so pages share one asset set.
+`--template` / `--filter` are the consumer hooks from *Consumer-specific
+vocabulary* above; both compose with `--inline`.
+
+A whole site (each `ir/*.md` → `out/<name>.html`, sharing one asset set):
+
+```bash
+scripts/build-site.sh <ir-dir> <out-dir> \
+  --assets <understanding-html-docs/assets> [--context <dir>]
+```
+
+`base.css` / `base.js` (and any context `*.css`) are copied verbatim into
+`<out-dir>/assets/`. Inter-page navigation is authored as links in the IR — the
+reference site links each page home from its `header.site` and lists the pages from
+the index; no manifest is needed for that shape.
+
+### Reviewing a document — [[understanding-html-docs-review]]
+
+**Review every page produced.** Determinism removes the *mechanical* half of the
 review (a class that does not exist, an unwrapped table — now impossible to emit); the
 *semantic* half (is this the right variant, is this actually the takeaway) remains a
 reading task and moves from the HTML to the compact IR. A document nobody reads back
 against the contract is the failure this base exists to prevent.
 
-### Hand-authoring HTML — the fallback route
+There is deliberately **no linter**. A checker can establish that a class *exists*,
+and that is worth almost nothing here: the errors that matter are **well-formed**. A
+`.callout.tip` wrapped around a hazard passes every conceivable class check, renders
+as a perfectly good green box, and tells the reader the opposite of the truth.
 
-Writing the HTML directly, against the *Semantics → element / class* index below, is
-now the **exception, not the default** — an escape hatch for a one-off the generator
-cannot yet express, or an environment where pandoc is unavailable. It forfeits every
-guarantee the generator buys: nothing stops an invented class, an inline color, an
-unwrapped table, or an unknown callout variant, so each must be avoided by hand and
-caught only in review. If you take this route: copy `base.css`/`base.js` into
-`assets/`; link them base-first (`base.css` before the context stylesheet); inline the
-theme-boot snippet in `<head>` before first paint with a storage key matching
-`base.js`'s `THEME_KEY`, and load `base.js` deferred; give the page the `header.site` /
-`main article` / `h2`–`h3` structure `base.js` wires from (fewer than two `h2`s = no
-TOC); author against the index below; and lean harder on
-[[understanding-html-docs-review]], because the mechanical contract is back on you.
+> Whether a class exists is not the question. Whether it was used as intended is.
+
+That is a reading task, so the work is **reviewed**, not linted. Run
+[[understanding-html-docs-review]] on every page produced — it reads the contract and
+the **IR** and reports where the markup and the meaning have come apart: a callout
+whose variant contradicts its own text (or that should not have been a callout at
+all), a `.keypoints` that is not the takeaways, a meaning color spent on decoration, a
+heading used to make a line bold. The purely *mechanical* failures — a class that does
+not exist, a name borrowed from another system (`warning`/`error`/`info`), an unwrapped
+table — are not review findings: the generator makes them impossible to emit (an
+unknown variant fails the build). What remains is the semantic half, which no generator
+can settle.
+
+Under Claude Code the `understanding-html-docs-reviewer` subagent wraps it, so the
+review runs in a **fresh context** — the agent that just authored the page cannot
+read it independently of having written it.
 
 ## Semantics → element / class (index)
+
+This is the class vocabulary the generator emits and
+[[understanding-html-docs-review]] checks against — its allowlist. A class in
+`base.css` but missing from this index is reported as a **forbidden class** in every
+document that uses it (see [`docs/components.md`](docs/components.md) §2). It is not a
+hand-authoring target — the author writes the IR dialect above, and the generator emits
+this markup — but it is the canonical map from *meaning* to the element/class it
+becomes.
 
 **Foundation — carried by the element alone**, no class: `main > article` (the
 document body), `header.site` / `footer` (page chrome), `h1` (title), `h2`/`h3`
@@ -208,33 +369,8 @@ their descendants. These exist only when the `comments` bundle is shipped.
 (`style="color:#e11"` — go through `var(--token)`); a primitive (`--n-*`,
 `--blue-strong`) read from a component rule; a `<table>` outside `.tablewrap`; a
 meaning color used as decoration; a new ad-hoc hue; a Tier 2 marker without its
-bundle.
-
-## Reviewing a document — [[understanding-html-docs-review]]
-
-There is deliberately **no linter**. A checker can establish that a class *exists*,
-and that is worth almost nothing here: the errors that matter are **well-formed**. A
-`.callout.tip` wrapped around a hazard passes every conceivable class check, renders
-as a perfectly good green box, and tells the reader the opposite of the truth.
-
-> Whether a class exists is not the question. Whether it was used as intended is.
-
-That is a reading task, so the work is **reviewed**, not linted. Run
-[[understanding-html-docs-review]] on every page produced — it reads the contract and
-the **IR** (the standard path generates the HTML from IR, so the review moves to the
-compact source) and reports where the markup and the meaning have come apart: a
-callout whose variant contradicts its own text (or that should not have been a callout
-at all), a `.keypoints` that is not the takeaways, a meaning color spent on
-decoration, a heading used to make a line bold. The purely *mechanical* failures the
-old checklist watched for — a class that does not exist, a name borrowed from another
-system (`warning`/`error`/`info`), an unwrapped table — are no longer review findings:
-the generator makes them impossible to emit (an unknown variant fails the build). What
-remains is the semantic half, which no generator can settle. (Only on the
-hand-authored fallback route are those mechanical checks still the reviewer's job.)
-
-Under Claude Code the `understanding-html-docs-reviewer` subagent wraps it, so the
-review runs in a **fresh context** — the agent that just authored the page cannot
-read it independently of having written it.
+bundle. The generator makes these unrepresentable from the IR; the index keeps them
+nameable so the review can still speak of them.
 
 ## Opt-in components (Tier 2)
 
@@ -274,22 +410,24 @@ Whatever you add exists in three places at once, and they must agree: the rule i
 `base.css` (or a bundle), a demo on the reference site (the catalog a review judges
 against), and a row in the *Semantics → element / class* index above. A class missing
 from that index is reported as a **forbidden class** by
-[[understanding-html-docs-review]] in every document that uses it.
+[[understanding-html-docs-review]] in every document that uses it. A new vocabulary
+item also needs its **IR-dialect** entry (above) and, if it is not a plain
+class/variant, a binding rule in `filters/htmldocs.lua`.
 
 ## Gotchas
 
 - **Copy, don't reference.** The assets must be copied into each output so the
   document stays self-contained. Never link to this skill's install path.
-- **Boot key must match.** If the inline `<head>` snippet's storage key drifts
-  from `base.js`'s `THEME_KEY`, the saved theme silently stops applying and the
-  page flashes on load.
+- **Boot key must match.** The generator inlines the theme-boot snippet, but if its
+  storage key ever drifts from `base.js`'s `THEME_KEY`, the saved theme silently stops
+  applying and the page flashes on load — keep `template.html` and `base.js` in sync.
 - **`base.js` targets the first `main article`.** A page that puts several
   `article` elements directly under `main` would mis-target the first one — so such
   a page should not load `base.js`, and keeps its own scripts instead
   (`base.css`'s design system and auto light/dark still work with no JS).
-  [[understanding-explain-diff]] takes that route. This is a supported choice, not a
-  violation — the PE preconditions simply do not apply to it.
-- **Nothing here fails loudly.** A misspelled class, an inline hex color, a callout
-  whose variant contradicts its own text — each renders plausibly and is never
-  noticed. That is what [[understanding-html-docs-review]] is for; run it on what you
-  generate.
+  [[understanding-explain-diff]] takes that route (its own template variant). This is
+  a supported choice, not a violation — the PE preconditions simply do not apply to it.
+- **Nothing here fails loudly at the *semantic* level.** The generator refuses a
+  misspelled class or an unknown variant, but a callout whose variant contradicts its
+  own text builds cleanly and misleads. That is what [[understanding-html-docs-review]]
+  is for; run it on what you generate.
