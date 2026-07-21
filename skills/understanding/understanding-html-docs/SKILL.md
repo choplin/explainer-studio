@@ -34,10 +34,11 @@ and never edit these files per document.
 ## The reference site is the contract
 
 **The normative source is the reference site at this skill's root** — `index.html`
-and the six pages it links. It is written in the design system it documents, so the
-contract and the worked example are the same artifact and cannot drift apart. It is
-also the living catalog — every component, in both themes — and the worked example a
-generated document is reviewed against.
+and the six pages it links. It is itself **generated from `ir/*.md` by this skill's
+own generator** (dogfood): the contract is written in the design system it documents,
+from the same IR any consumer writes, so the contract and the worked example are the
+same artifact and cannot drift apart. It is also the living catalog — every component,
+in both themes — and the worked example a generated document mirrors.
 
 | Page | Covers |
 |---|---|
@@ -47,10 +48,19 @@ generated document is reviewed against.
 | `components.html` | The classes you opt into: callout, keypoints, card, chip, aside… |
 | `enhancement.html` | What `base.js` adds, and the preconditions it needs |
 | `tier2.html` | The opt-in bundles: highlight, diff, diagram |
-| `contract.html` | The rules, and how a generated document is reviewed against them |
+| `contract.html` | The rules, and why generation needs no general review |
 
 Serve it over HTTP (`python3 -m http.server`) — the diagram component is an ES
 module and will not render over `file://`.
+
+**Regenerating it:** `scripts/build-reference-site.sh <out-dir>` rebuilds all seven
+pages from `ir/*.md`, then copy the `<out-dir>/*.html` back to the skill root. The six
+base pages build with the default template and filter; `tier2.html` is the one page
+whose Tier 2 component markup the base dialect cannot express, so it builds with
+`assets/template-tier2.html` (adds the `comments-gutter` class + the component `<head>`
+tags) and `filters/tier2.lua` (emits the `pre.mermaid` / `pre.diff-source` / highlight
+contracts from plain fenced code blocks). Editing a page means editing its IR and
+regenerating — never hand-editing the generated HTML.
 
 The table below is an index into that site, not a second source of truth. When the
 two disagree, the site wins — it is the one written in the system it describes.

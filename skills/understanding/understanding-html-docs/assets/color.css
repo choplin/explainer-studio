@@ -1,0 +1,32 @@
+/* page-local: swatches for displaying the palette. Not part of the design
+   system — a page that shows the colors needs a way to show them. */
+.swatch {
+  border: 1px solid var(--edge);
+  border-radius: 10px;
+  padding: 0.7rem 0.8rem;
+  font-size: 0.82rem;
+}
+.swatch .name {
+  font-weight: 600;
+}
+.swatch .val {
+  color: var(--muted);
+  font-size: 0.74rem;
+  font-family: ui-monospace, monospace;
+}
+.swatch .bar {
+  height: 1.6rem;
+  border-radius: 6px;
+  margin: 0.4rem 0 0.5rem;
+}
+.ramp {
+  display: flex;
+  overflow: hidden;
+  border: 1px solid var(--edge);
+  border-radius: 10px;
+  margin: 0.8rem 0;
+}
+.ramp > i {
+  flex: 1;
+  height: 2.6rem;
+}

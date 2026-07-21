@@ -1,92 +1,65 @@
 <!doctype html>
 <html lang="en">
-    <head>
-        <meta charset="utf-8" />
-        <meta name="viewport" content="width=device-width, initial-scale=1" />
-        <title>Writing an explanation document — understanding-html-docs</title>
-        <!-- no-flash theme boot: must match base.js THEME_KEY ('html-docs-theme') -->
-        <script>
-            try {
-                var t = localStorage.getItem("html-docs-theme");
-                if (t === "dark")
-                    document.documentElement.classList.add("theme-dark");
-                else if (t === "light")
-                    document.documentElement.classList.add("theme-light");
-            } catch (e) {}
-        </script>
-        <link rel="stylesheet" href="assets/base.css" />
-        <script src="assets/base.js" defer></script>
-    </head>
-    <body>
-        <header class="site">
-            <a href="index.html">understanding-html-docs</a>
-            <!-- theme button (auto→light→dark) is mounted here by base.js -->
-        </header>
-
-        <main>
-            <article>
-                <p class="kicker">REFERENCE</p>
-                <h1>Writing an explanation document</h1>
-                <p class="lede">
-                    A design system and a progressive-enhancement kit for writing an
-                    explanation as a readable web document. This site is itself written
-                    in it — <strong>what you see here is everything there is</strong>.
-                </p>
-
-                <section>
-                    <h2>Wire it in</h2>
-                    <p>Two modes; pick by the shape of the output.</p>
-                    <div class="card-grid">
-                        <div class="card">
-                            <strong>Copy — a multi-page site</strong>
-                            <p>
-                                Put <code>base.css</code> / <code>base.js</code> in a
-                                shared <code>assets/</code> directory and reference them
-                                from every page. This site uses this mode.
-                            </p>
-                        </div>
-                        <div class="card">
-                            <strong>Inline — one file</strong>
-                            <p>
-                                Paste <code>base.css</code> into a
-                                <code>&lt;style&gt;</code> and <code>base.js</code> into a
-                                <code>&lt;script&gt;</code>, and ship a single portable
-                                HTML file.
-                            </p>
-                        </div>
-                    </div>
-                    <p>
-                        Either way, <strong>copy the assets</strong>. Never link to the
-                        base's install path — the document would stop being
-                        self-contained.
-                    </p>
-                </section>
-
-                <section>
-                    <h2>The skeleton</h2>
-                    <p>
-                        The minimum copy-mode page. The theme button mounts into
-                        <code>header.site</code>, and the table of contents and the
-                        reading-progress bar are built from the
-                        <code>h2</code> / <code>h3</code> headings inside
-                        <code>main &gt; article</code>.
-                    </p>
-                    <pre><code class="nohighlight">&lt;!doctype html&gt;
-&lt;html lang="en"&gt;
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Writing an explanation document — understanding-html-docs</title>
+<!-- no-flash theme boot: storage key must match base.js THEME_KEY ('html-docs-theme') -->
+<script>try{var t=localStorage.getItem('html-docs-theme');if(t==='dark')document.documentElement.classList.add('theme-dark');else if(t==='light')document.documentElement.classList.add('theme-light');}catch(e){}</script>
+<link rel="stylesheet" href="assets/base.css" />
+<script src="assets/base.js" defer></script>
+</head>
+<body>
+<header class="site">
+<a href="index.html">understanding-html-docs</a>
+</header>
+<main>
+<article>
+<p class="kicker">REFERENCE</p>
+<h1 id="writing-an-explanation-document">Writing an explanation
+document</h1>
+<p class="lede">A design system and a progressive-enhancement kit for writing an
+explanation as a readable web document. This site is itself written in
+it — <strong>what you see here is everything there is</strong>.</p>
+<h2 id="wire-it-in">Wire it in</h2>
+<p>Two modes; pick by the shape of the output.</p>
+<div class="card-grid">
+<div class="card">
+<p><strong>Copy — a multi-page site</strong></p>
+<p>Put <code>base.css</code> / <code>base.js</code> in a shared
+<code>assets/</code> directory and reference them from every page. This
+site uses this mode.</p>
+</div>
+<div class="card">
+<p><strong>Inline — one file</strong></p>
+<p>Paste <code>base.css</code> into a <code>&lt;style&gt;</code> and
+<code>base.js</code> into a <code>&lt;script&gt;</code>, and ship a
+single portable HTML file.</p>
+</div>
+</div>
+<p>Either way, <strong>copy the assets</strong>. Never link to the
+base’s install path — the document would stop being self-contained.</p>
+<h2 id="the-skeleton">The skeleton</h2>
+<p>The minimum copy-mode page. The theme button mounts into
+<code>header.site</code>, and the table of contents and the
+reading-progress bar are built from the <code>h2</code> /
+<code>h3</code> headings inside <code>main &gt; article</code>.</p>
+<pre class="nohighlight"><code>&lt;!doctype html&gt;
+&lt;html lang=&quot;en&quot;&gt;
 &lt;head&gt;
-  &lt;meta charset="utf-8"&gt;
-  &lt;meta name="viewport" content="width=device-width, initial-scale=1"&gt;
+  &lt;meta charset=&quot;utf-8&quot;&gt;
+  &lt;meta name=&quot;viewport&quot; content=&quot;width=device-width, initial-scale=1&quot;&gt;
   &lt;title&gt;…&lt;/title&gt;
-  &lt;script&gt;try{var t=localStorage.getItem('html-docs-theme');if(t==='dark')document.documentElement.classList.add('theme-dark');else if(t==='light')document.documentElement.classList.add('theme-light');}catch(e){}&lt;/script&gt;
-  &lt;link rel="stylesheet" href="assets/base.css"&gt;
-  &lt;script src="assets/base.js" defer&gt;&lt;/script&gt;
+  &lt;script&gt;try{var t=localStorage.getItem(&#39;html-docs-theme&#39;);if(t===&#39;dark&#39;)document.documentElement.classList.add(&#39;theme-dark&#39;);else if(t===&#39;light&#39;)document.documentElement.classList.add(&#39;theme-light&#39;);}catch(e){}&lt;/script&gt;
+  &lt;link rel=&quot;stylesheet&quot; href=&quot;assets/base.css&quot;&gt;
+  &lt;script src=&quot;assets/base.js&quot; defer&gt;&lt;/script&gt;
 &lt;/head&gt;
 &lt;body&gt;
-  &lt;header class="site"&gt;&lt;a href="index.html"&gt;Site name&lt;/a&gt;&lt;/header&gt;
+  &lt;header class=&quot;site&quot;&gt;&lt;a href=&quot;index.html&quot;&gt;Site name&lt;/a&gt;&lt;/header&gt;
   &lt;main&gt;
     &lt;article&gt;
       &lt;h1&gt;Document title&lt;/h1&gt;
-      &lt;p class="lede"&gt;One opening paragraph.&lt;/p&gt;
+      &lt;p class=&quot;lede&quot;&gt;One opening paragraph.&lt;/p&gt;
       &lt;section&gt;
         &lt;h2&gt;A section&lt;/h2&gt;
         &lt;p&gt;Body text.&lt;/p&gt;
@@ -95,55 +68,36 @@
   &lt;/main&gt;
 &lt;/body&gt;
 &lt;/html&gt;</code></pre>
-                    <div class="callout danger">
-                        <span class="label">The boot key must match</span> — the storage
-                        key in the <code>&lt;head&gt;</code> snippet has to be the same as
-                        <code>base.js</code>'s <code>THEME_KEY</code>. If they drift, the
-                        saved theme silently stops applying and the page flashes on load.
-                    </div>
-                </section>
-
-                <section>
-                    <h2>Write it</h2>
-                    <div class="keypoints">
-                        <h3>The pages</h3>
-                        <ul>
-                            <li>
-                                <a href="foundation.html">Foundation</a> — what works with
-                                no class at all: headings, prose, tables, code, quotes.
-                            </li>
-                            <li>
-                                <a href="color.html">Color model</a> — color carries
-                                meaning and nothing else. The token layers.
-                            </li>
-                            <li>
-                                <a href="components.html">Components</a> — the parts you
-                                opt into with a class: callout, keypoints, card.
-                            </li>
-                            <li>
-                                <a href="enhancement.html">Progressive enhancement</a> —
-                                what <code>base.js</code> adds, and what it needs from
-                                your markup.
-                            </li>
-                            <li>
-                                <a href="tier2.html">Tier 2 components</a> — optional
-                                bundles with a heavy engine: highlighting, diffs,
-                                diagrams.
-                            </li>
-                            <li>
-                                <a href="contract.html">Contract &amp; review</a> —
-                                the rules, and how a generated document is reviewed against them.
-                            </li>
-                        </ul>
-                    </div>
-                    <div class="aside">
-                        There is no inter-page navigation yet. Come back to this index
-                        from each page.
-                    </div>
-                </section>
-            </article>
-        </main>
-
-        <footer>understanding-html-docs</footer>
-    </body>
+<div class="callout danger">
+<span class="label">The boot key must match</span> — the storage key in
+the <code>&lt;head&gt;</code> snippet has to be the same as
+<code>base.js</code>’s <code>THEME_KEY</code>. If they drift, the saved
+theme silently stops applying and the page flashes on load.
+</div>
+<h2 id="write-it">Write it</h2>
+<section id="the-pages" class="keypoints">
+<h3>The pages</h3>
+<ul>
+<li><a href="foundation.html">Foundation</a> — what works with no class
+at all: headings, prose, tables, code, quotes.</li>
+<li><a href="color.html">Color model</a> — color carries meaning and
+nothing else. The token layers.</li>
+<li><a href="components.html">Components</a> — the parts you opt into
+with a class: callout, keypoints, card.</li>
+<li><a href="enhancement.html">Progressive enhancement</a> — what
+<code>base.js</code> adds, and what it needs from your markup.</li>
+<li><a href="tier2.html">Tier 2 components</a> — optional bundles with a
+heavy engine: highlighting, diffs, diagrams.</li>
+<li><a href="contract.html">Contract &amp; review</a> — the rules, and
+how a generated document is reviewed against them.</li>
+</ul>
+</section>
+<div class="aside">
+<p>There is no inter-page navigation yet. Come back to this index from
+each page.</p>
+</div>
+</article>
+</main>
+<footer></footer>
+</body>
 </html>
