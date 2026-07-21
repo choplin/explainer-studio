@@ -53,9 +53,9 @@ fixes the color and the icon. The bare `.callout` class is itself the note
 five are the only variants — `warning` and `error` do not exist, and writing one renders a plain note instead of failing.
 
 ```{.nohighlight}
-<div class="callout danger">
-  <span class="label">Danger</span> — body text.
-</div>
+::: {.callout variant=danger}
+[Danger]{.label} — body text.
+:::
 ```
 
 ## Keypoints — what a section boils down to
@@ -72,10 +72,11 @@ should say, so this box takes no meaning color — it is drawn in the accent.
 :::
 
 ```{.nohighlight}
-<div class="keypoints">
-  <h3>This section in short</h3>
-  <ul><li>A takeaway</li></ul>
-</div>
+::: {.keypoints}
+### This section in short
+
+- A takeaway
+:::
 ```
 
 ## Card / Card grid — things that are peers
@@ -102,10 +103,14 @@ The grid changes its column count with the width.
 ::::
 
 ```{.nohighlight}
-<div class="card-grid">
-  <div class="card">…</div>
-  <div class="card">…</div>
-</div>
+:::: {.card-grid}
+::: {.card}
+…
+:::
+::: {.card}
+…
+:::
+::::
 ```
 
 ## Chip / Badge — small labels
@@ -119,9 +124,9 @@ filled counterpart, for a status or a count that should carry weight.
 [3]{.badge}
 
 ```{.nohighlight}
-<span class="chip">a tag</span>
-<span class="chip accent">a louder tag</span>
-<span class="badge">NEW</span>
+[a tag]{.chip}
+[a louder tag]{.chip .accent}
+[NEW]{.badge}
 ```
 
 ## Setting the rhythm of the prose
@@ -153,9 +158,21 @@ the class, not the bare `<aside>` element.
 :::
 
 ```{.nohighlight}
-<p class="kicker">KICKER</p>
-<h2>A heading</h2>
-<p class="lede">The opening paragraph.</p>
-<p class="pullquote">One line, said louder.</p>
-<div class="aside">A quiet remark.</div>
+::: {.kicker}
+KICKER
+:::
+
+## A heading
+
+::: {.lede}
+The opening paragraph.
+:::
+
+::: {.pullquote}
+One line, said louder.
+:::
+
+::: {.aside}
+A quiet remark.
+:::
 ```

@@ -1,20 +1,21 @@
 #!/usr/bin/env bash
-# build-reference-site.sh — regenerate this skill's own reference site (the 7
-# pages at the skill root) from ir/*.md into <out-dir>. The six base pages build
-# with the default template/filter; tier2 is the one page that needs the Tier 2
-# component wiring, so it builds with the tier2 template + filter and the
-# components/ tree is copied in for its <head> references.
+# build-reference-site.sh — regenerate this skill's own reference site from
+# src/*.md into site/ (the committed artifact). The six base pages build with the
+# default template/filter; tier2 is the one page that needs the Tier 2 component
+# wiring, so it builds with the tier2 template + filter and the components/ tree is
+# copied in for its <head> references.
 #
-# Usage: scripts/build-reference-site.sh <out-dir>
-# The generated <out-dir>/*.html are the committed pages (copied to the skill
-# root); <out-dir>/assets/ is the self-contained asset set for previewing.
+# Usage: scripts/build-reference-site.sh [out-dir]
+# Defaults to <skill>/site — the self-contained, committed pages plus site/assets/.
+# Pass an out-dir only to render a throwaway preview elsewhere.
 set -euo pipefail
 
 SKILL_DIR="$(cd "$(dirname "$0")/.." && pwd)"
-out="${1:?usage: build-reference-site.sh <out-dir>}"
+out="${1:-$SKILL_DIR/site}"
+rm -rf "$out"
 mkdir -p "$out"
 
-for md in "$SKILL_DIR"/ir/*.md; do
+for md in "$SKILL_DIR"/src/*.md; do
   name="$(basename "$md" .md)"
   if [[ "$name" == "tier2" ]]; then
     bash "$SKILL_DIR/scripts/build.sh" "$md" "$out" \

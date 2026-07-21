@@ -1,0 +1,3 @@
+/* diagram component (Tier 2) — mermaid presentation over the base design system.
+   Include only in documents that render diagrams; see include.md. */
+pre.mermaid { background: transparent; text-align: center; }

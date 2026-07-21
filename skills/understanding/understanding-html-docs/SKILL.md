@@ -33,8 +33,8 @@ and never edit these files per document.
 
 ## The reference site is the contract
 
-**The normative source is the reference site at this skill's root** — `index.html`
-and the six pages it links. It is itself **generated from `ir/*.md` by this skill's
+**The normative source is the reference site under this skill's `site/`** — `site/index.html`
+and the six pages it links. It is itself **generated from `src/*.md` by this skill's
 own generator** (dogfood): the contract is written in the design system it documents,
 from the same IR any consumer writes, so the contract and the worked example are the
 same artifact and cannot drift apart. It is also the living catalog — every component,
@@ -42,19 +42,19 @@ in both themes — and the worked example a generated document mirrors.
 
 | Page | Covers |
 |---|---|
-| `index.html` | The two consumption modes, the skeleton, the page index |
-| `foundation.html` | What works with no class: headings, prose, tables, code, quotes |
-| `color.html` | The meaning-only color model and the token layers |
-| `components.html` | The classes you opt into: callout, keypoints, card, chip, aside… |
-| `enhancement.html` | What `base.js` adds, and the preconditions it needs |
-| `tier2.html` | The opt-in bundles: highlight, diff, diagram |
-| `contract.html` | The rules, and why generation needs no general review |
+| `site/index.html` | The two consumption modes, the skeleton, the page index |
+| `site/foundation.html` | What works with no class: headings, prose, tables, code, quotes |
+| `site/color.html` | The meaning-only color model and the token layers |
+| `site/components.html` | The classes you opt into: callout, keypoints, card, chip, aside… |
+| `site/enhancement.html` | What `base.js` adds, and the preconditions it needs |
+| `site/tier2.html` | The opt-in bundles: highlight, diff, diagram |
+| `site/contract.html` | The rules, and why generation needs no general review |
 
-Serve it over HTTP (`python3 -m http.server`) — the diagram component is an ES
-module and will not render over `file://`.
+Serve `site/` over HTTP (`cd site && python3 -m http.server`) — the diagram
+component is an ES module and will not render over `file://`.
 
-**Regenerating it:** `scripts/build-reference-site.sh <out-dir>` rebuilds all seven
-pages from `ir/*.md`, then copy the `<out-dir>/*.html` back to the skill root. The six
+**Regenerating it:** `scripts/build-reference-site.sh` rebuilds all seven pages from
+`src/*.md` into `site/` (the committed artifact — no manual copy step). The six
 base pages build with the default template and filter; `tier2.html` is the one page
 whose Tier 2 component markup the base dialect cannot express, so it builds with
 `assets/template-tier2.html` (adds the `comments-gutter` class + the component `<head>`
@@ -98,7 +98,7 @@ The generator machinery, also under this skill's root:
 - **`flake.nix` / `flake.lock`** — the pinned pandoc runtime the preflight falls back
   to; see [`docs/skill-runtime-and-dependencies.md`](../../../docs/skill-runtime-and-dependencies.md).
 
-At this skill's root, alongside the reference site:
+At this skill's root:
 
 - **`docs/components.md`** — the **design of the component system**: what a component
   is for, the rules that decide where one lives and who owns it, and where the model

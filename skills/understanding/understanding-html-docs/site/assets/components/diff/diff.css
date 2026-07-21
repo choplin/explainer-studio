@@ -1,0 +1,14 @@
+/* diff component (Tier 2) — diff2html presentation tweaks over the base design
+   system. Include only in documents that render diffs; see include.md.
+
+   base.css styles every <table> cell (padding, borders, min-width). That leaks
+   into diff2html's own <table>, whose absolutely-positioned line-number cells
+   assume zero cell padding. Reset the layout bits here; do NOT touch background
+   (it drives d2h-ins/d2h-del row colors). */
+.d2h-diff-table { margin: 0; min-width: 0; }
+.d2h-diff-table th, .d2h-diff-table td { border: 0; padding: 0; }
+.diff-render { margin-top: 0.5rem; }
+.d2h-wrapper { font-size: 0.8125rem; }
+.d2h-file-header { font-size: 0.8125rem; }
+.diff-format-toggle button { cursor: pointer; width: auto; display: inline-block; margin-right: 0.5rem; padding: 0.25rem 0.875rem; font-size: 0.8125rem; background: var(--card); color: var(--fg); border: 1px solid var(--edge); border-radius: 999px; }
+.diff-format-toggle button:hover { border-color: var(--accent); }

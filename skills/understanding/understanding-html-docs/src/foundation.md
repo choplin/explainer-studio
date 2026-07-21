@@ -68,10 +68,7 @@ Every `<table>` goes inside `.tablewrap`. Without it, a wide table breaks out of
 An illustration is a `figure` holding an `img` and a `figcaption` — never a bare `img`. `img`, `svg` and `video` are clamped to the text column, so an asset authored at any pixel width cannot push the page into horizontal scroll on a phone. They are never scaled *up*: a small crop stays small rather than being stretched soft.
 
 ```{.nohighlight}
-<figure>
-  <img src="figures/fig-p031-1.jpg" alt="what the figure shows">
-  <figcaption>The caption.</figcaption>
-</figure>
+![The caption.](figures/fig-p031-1.jpg)
 ```
 
 ::: {.callout}

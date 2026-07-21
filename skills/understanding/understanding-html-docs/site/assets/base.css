@@ -1,0 +1,351 @@
+/* understanding-html-docs base design system.
+   The shared substrate for self-contained explanatory HTML documents: typography,
+   layout, a meaning-only color model, base components, and the styles the
+   progressive-enhancement kit (base.js) toggles. Consuming skills copy this file
+   verbatim and layer their own context-specific stylesheet on top — do not edit
+   this file per document; keep the selectors stable so base.js stays in sync.
+
+   Color model — color carries MEANING, and nothing else:
+   1. Semantic colors. Callout variants (note/tip/warn/danger/key) and inline
+      <mark> map a fixed hue to a fixed meaning, so a reader learns the code once
+      and reads faster everywhere. Never reuse a semantic hue for decoration.
+   2. One accent. Everything that is colored but means nothing in particular —
+      links, the reading-progress bar, the TOC's current entry, a keypoints box —
+      uses the single global accent. There is no per-section or per-chapter tint:
+      color-coding a document by position competes with the semantic hues (the
+      reader cannot tell "chapter 5" red from "danger" red), and navigation, not
+      color, is what answers "where am I".
+
+   Light/dark: every color is a light-dark() pair resolved against `color-scheme`.
+   The theme toggle (base.js) sets color-scheme to `light dark` (auto/OS), `light`,
+   or `dark` via the .theme-* classes below — no duplicated palettes. To re-theme,
+   change the variables in :root only. */
+
+:root {
+  color-scheme: light dark;                 /* auto: follow the OS */
+
+  /* ============================================================
+     PRIMITIVE PALETTE — the raw color ramps. Theme-agnostic; NEVER used
+     directly in component rules — only the SEMANTIC tokens below reference
+     them. Re-theme the whole document by editing this block alone.
+     ============================================================ */
+
+  /* neutral ramp: white -> near-black (surfaces, text, borders) */
+  --n-0:#ffffff; --n-50:#f8fafc; --n-100:#eef1f6; --n-200:#e5e7eb;
+  --n-300:#cbd5e1; --n-400:#9ca3af; --n-500:#6b7280;
+  --n-650:#3a3f47; --n-700:#30343b; --n-800:#23262d; --n-850:#1e2127;
+  --n-900:#1c1e21; --n-950:#16181d;
+
+  /* chromatic ramp: each hue has a STRONG step (reads on light surfaces: text,
+     icons, borders) and a BRIGHT step (the same role on dark surfaces). Every hue
+     here is spoken for by exactly one meaning below — the ramp is deliberately no
+     longer than the meanings it serves, so a color can never say two things. */
+  --blue-strong:#2563eb;   --blue-bright:#7aa2ff;    /* accent + note */
+  --green-strong:#15803d;  --green-bright:#4ade80;   /* tip */
+  --amber-strong:#b45309;  --amber-bright:#fbbf24;   /* warn */
+  --red-strong:#b91c1c;    --red-bright:#f87171;     /* danger */
+  --violet-strong:#7c3aed; --violet-bright:#c4b5fd;  /* key */
+  --mark-band:#ffe08a; --mark-band-dark:#8a6a12;     /* <mark> */
+
+  /* soft fills — ONE recipe for every tint: tint the theme's identity step toward
+     the page (strong->white in light, bright->darkest-neutral in dark). Uniform
+     amounts => harmonized. */
+  --blue-soft:   light-dark(color-mix(in srgb, var(--blue-strong)   12%, #fff), color-mix(in srgb, var(--blue-bright)   16%, var(--n-950)));
+  --green-soft:  light-dark(color-mix(in srgb, var(--green-strong)  12%, #fff), color-mix(in srgb, var(--green-bright)  16%, var(--n-950)));
+  --amber-soft:  light-dark(color-mix(in srgb, var(--amber-strong)  12%, #fff), color-mix(in srgb, var(--amber-bright)  16%, var(--n-950)));
+  --red-soft:    light-dark(color-mix(in srgb, var(--red-strong)    12%, #fff), color-mix(in srgb, var(--red-bright)    16%, var(--n-950)));
+  --violet-soft: light-dark(color-mix(in srgb, var(--violet-strong) 12%, #fff), color-mix(in srgb, var(--violet-bright) 16%, var(--n-950)));
+
+  /* ============================================================
+     SEMANTIC TOKENS — role-based, theme-aware. Component rules use ONLY these;
+     each maps to primitives above. Change a role here, or a color in the ramp.
+     ============================================================ */
+  --bg:    light-dark(var(--n-0),   var(--n-950));
+  --fg:    light-dark(var(--n-900), var(--n-200));
+  --muted: light-dark(var(--n-500), var(--n-400));
+  --card:  light-dark(var(--n-50),  var(--n-850));
+  --code:  light-dark(var(--n-50),  var(--n-800));   /* code-block (pre) surface */
+  /* Two border tiers. --line is a hairline SEPARATOR (heading rules, hr,
+     blockquote, the sidebar rail) — kept intentionally faint. --edge is the
+     visible OUTLINE of a filled/bordered SHAPE (card, chip, table cell, aside,
+     buttons); --line is too faint to define a shape edge on near-white light
+     surfaces, so outlined shapes use --edge instead. */
+  --line:  light-dark(var(--n-200), var(--n-700));
+  --edge:  light-dark(var(--n-300), var(--n-650));
+
+  --accent: light-dark(var(--blue-strong), var(--blue-bright));
+  --accent-soft: var(--blue-soft);
+
+  /* semantic (meaning) — keep hue↔meaning fixed across every document */
+  --note: var(--accent);                                          --note-soft: var(--blue-soft);
+  --tip:  light-dark(var(--green-strong),  var(--green-bright));   --tip-soft:  var(--green-soft);
+  --warn: light-dark(var(--amber-strong),  var(--amber-bright));   --warn-soft: var(--amber-soft);
+  --bad:  light-dark(var(--red-strong),    var(--red-bright));     --bad-soft:  var(--red-soft);
+  --key:  light-dark(var(--violet-strong), var(--violet-bright));  --key-soft:  var(--violet-soft);
+  --mark: light-dark(var(--mark-band), var(--mark-band-dark));   /* highlighter-pen band (dark: deep so white text stays legible) */
+}
+:root.theme-light { color-scheme: light; }
+:root.theme-dark  { color-scheme: dark; }
+
+/* --- foundation --- */
+* { box-sizing: border-box; }
+body {
+  margin: 0; background: var(--bg); color: var(--fg);
+  font-family: -apple-system, BlinkMacSystemFont, "Hiragino Sans", "Noto Sans JP", sans-serif;
+  line-height: 1.9; -webkit-text-size-adjust: 100%;
+}
+main { max-width: 48rem; margin: 0 auto; padding: 1rem 1.25rem 4rem; }
+header.site {
+  position: sticky; top: 0; z-index: 10; background: var(--bg);
+  border-bottom: 1px solid var(--line); padding: .6rem 1.25rem; font-size: .9rem;
+  display: flex; align-items: center; justify-content: space-between; gap: 1rem;
+}
+header.site a { color: var(--muted); text-decoration: none; }
+a { color: var(--accent); }
+h1 { font-size: 1.55rem; line-height: 1.4; margin: 1rem 0 .6rem; }
+h2 { font-size: 1.2rem; margin: 2.2rem 0 .6rem; padding-bottom: .25rem; border-bottom: 1px solid var(--line); scroll-margin-top: 3.4rem; }
+h3 { font-size: 1.05rem; margin: 1.6rem 0 .4rem; scroll-margin-top: 3.4rem; }
+p { margin: .7rem 0; }
+hr { border: 0; border-top: 1px solid var(--line); margin: 2rem 0; }
+blockquote { margin: 1rem 0; padding: .1rem 1rem; border-left: 3px solid var(--line); color: var(--muted); }
+/* media never exceeds its container: `main` is 48rem, but an embedded asset
+   (a harvested figure crop, a screenshot) is whatever pixel width it was made
+   at — typically wider — and would push the page into horizontal scroll on a
+   phone. `height: auto` keeps the aspect ratio while the width is clamped. */
+img, svg, video { max-width: 100%; height: auto; }
+/* figure: an illustration with its caption. Capped at the text column and
+   centered, but never scaled UP — a small crop stays small rather than being
+   stretched to the column and going soft. */
+figure { margin: 1.4rem 0; }
+/* the plate stays light in BOTH themes: a figure is usually a crop off a white
+   page (or a transparent PNG of dark strokes), so a dark backing would erase it.
+   The border is what seats it against the dark surface. */
+figure img { display: block; margin: 0 auto; border: 1px solid var(--edge); border-radius: 8px; background: light-dark(var(--n-0), var(--n-100)); }
+figcaption { margin-top: .5rem; color: var(--muted); font-size: .85rem; line-height: 1.7; text-align: center; }
+/* explicit monospace stack: don't leave code/pre to the platform's default
+   `monospace` keyword, which is often an indistinct face — so inline code reads
+   clearly as code, not just a tinted chip in the body sans-serif. */
+code, pre { font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, "Liberation Mono", monospace; }
+/* inline code: a light chip delineated by a hairline border (border darker than
+   the fill, so the edge reads on white without a heavy background). */
+code { background: light-dark(var(--n-100), var(--n-800)); border: 1px solid var(--edge); border-radius: 4px; padding: .1em .35em; font-size: .88em; }
+pre { background: var(--code); border: 1px solid var(--edge); border-radius: 8px; padding: .8rem 1rem; overflow-x: auto; }
+pre code { background: none; padding: 0; border: 0; }
+/* highlighter-pen underline: a color band under the lower part of the glyphs,
+   not a full background — keeps the text on the page surface and readable. */
+mark {
+  background: linear-gradient(transparent 56%, var(--mark) 56%);
+  color: inherit; padding: 0 .05em;
+}
+footer { max-width: 48rem; margin: 0 auto; padding: 0 1.25rem 2rem; color: var(--muted); font-size: .8rem; }
+
+/* --- tables --- */
+.tablewrap { overflow-x: auto; margin: 1rem 0; }
+table { border-collapse: collapse; font-size: .92rem; min-width: 60%; }
+th, td { border: 1px solid var(--edge); padding: .35rem .6rem; text-align: left; }
+th { background: var(--card); }
+
+/* --- callout: semantic message box. Base class = note (blue/info); add a
+   variant class (tip/warn/danger/key) to change meaning + color + icon. --- */
+.callout {
+  --c: var(--note); --c-soft: var(--note-soft);
+  /* icon: a monochrome line glyph, masked so it inherits the semantic hue (--c).
+     No emoji — those render inconsistently across platforms and read off-register
+     against the system. The SVG's own stroke color is irrelevant (alpha-masked);
+     --c does the coloring, so icon hue always matches the callout's meaning. */
+  --icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='12' cy='12' r='9'/%3E%3Cpath d='M12 11v5'/%3E%3Cpath d='M12 8h.01'/%3E%3C/svg%3E");
+  position: relative; background: var(--c-soft);
+  /* border tinted by the semantic hue (not neutral --line), so the box edge is
+     visible against a white page in light theme — where --line and the pale
+     --c-soft fill both sit too close to white — and reinforces the meaning color. */
+  border: 1px solid color-mix(in srgb, var(--c) 40%, transparent);
+  border-left: 4px solid var(--c); border-radius: 8px;
+  padding: .6rem 1rem .6rem 2.7rem; margin: 1.2rem 0; font-size: .95rem;
+}
+.callout::before {
+  content: ""; position: absolute; left: .8rem; top: .72rem;
+  width: 1.1rem; height: 1.1rem; background: var(--c);
+  -webkit-mask: var(--icon) no-repeat center / contain;
+          mask: var(--icon) no-repeat center / contain;
+}
+.callout.tip    { --c: var(--tip);  --c-soft: var(--tip-soft);
+  --icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M9 18h6'/%3E%3Cpath d='M10 21h4'/%3E%3Cpath d='M12 3a6 6 0 0 0-4 10c.7.7 1 1.4 1 2h6c0-.6.3-1.3 1-2a6 6 0 0 0-4-10z'/%3E%3C/svg%3E"); }
+.callout.warn   { --c: var(--warn); --c-soft: var(--warn-soft);
+  --icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M12 3 2 20h20z'/%3E%3Cpath d='M12 10v4'/%3E%3Cpath d='M12 17h.01'/%3E%3C/svg%3E"); }
+.callout.danger { --c: var(--bad);  --c-soft: var(--bad-soft);
+  --icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='12' cy='12' r='9'/%3E%3Cpath d='M6 6 18 18'/%3E%3C/svg%3E"); }
+.callout.key    { --c: var(--key);  --c-soft: var(--key-soft);
+  --icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='8.5' cy='8.5' r='4.5'/%3E%3Cpath d='M11.7 11.7 20 20'/%3E%3Cpath d='M16 15l2 2'/%3E%3C/svg%3E"); }
+/* optional bold lead-in inside a callout, colored to match */
+.callout .label { color: var(--c); font-weight: 700; }
+
+/* --- pullquote: an emphatic single line; the quote marks take the accent --- */
+.pullquote {
+  margin: 1.8rem 0; padding: 0 1.2rem; border: 0;
+  font-size: 1.15rem; line-height: 1.9; color: var(--fg); text-align: center;
+}
+.pullquote::before { content: "“"; color: var(--accent); font-size: 1.6rem; }
+.pullquote::after { content: "”"; color: var(--accent); font-size: 1.6rem; }
+
+/* --- chip: a small label. Base is muted; consumers add meaning-carrying
+   variants (e.g. .chip.accent) in their own stylesheet. --- */
+.chip {
+  display: inline-flex; align-items: center; gap: .25em; font-size: .78rem; color: var(--muted);
+  background: var(--card); border: 1px solid var(--edge); border-radius: 999px;
+  padding: .05rem .7rem; white-space: nowrap;
+}
+.chip.accent { color: var(--accent); border-color: var(--accent); }
+
+/* --- kicker: an eyebrow/label above a heading; takes the accent.
+   The negative bottom margin pulls the following heading up against it. --- */
+.kicker { color: var(--accent); font-size: .82rem; font-weight: 700; letter-spacing: .06em; margin: 1.2rem 0 -0.4rem; }
+
+/* --- lede: an introductory/standfirst paragraph, larger and muted. --- */
+.lede { font-size: 1.05rem; color: var(--muted); line-height: 2; }
+
+/* --- keypoints: a "key takeaways" box tinted by the accent.
+   Author an <h2>/<h3> title plus a <ul> inside. --- */
+.keypoints {
+  background: var(--accent-soft); border: 1px solid var(--edge); border-left: 4px solid var(--accent);
+  border-radius: 12px; padding: .4rem 1.1rem .7rem; margin: 1.4rem 0;
+}
+.keypoints h2 { font-size: .95rem; border: 0; margin: .7rem 0 .2rem; color: var(--accent); }
+.keypoints ul { margin: .3rem 0; padding-left: 1.2rem; }
+.keypoints li { margin: .3rem 0; }
+
+/* --- card / card-grid: a generic bordered content block, and a responsive grid
+   that lays a set of them out. Neutral containers — author any content inside;
+   Neutral containers — author any content inside. --- */
+.card { background: var(--card); border: 1px solid var(--edge); border-radius: 12px; padding: 1rem 1.1rem; }
+.card-grid { display: grid; gap: .8rem; margin: 1.2rem 0; grid-template-columns: repeat(auto-fit, minmax(14rem, 1fr)); }
+
+/* --- badge: a small FILLED status/count marker. Distinct from .chip (an
+   outlined muted pill): a badge is solid-filled for emphasis. Base = accent;
+   a consumer may add semantic-colored variants in its own stylesheet. --- */
+.badge {
+  display: inline-flex; align-items: center; gap: .25em; font-size: .72rem; font-weight: 600;
+  line-height: 1.4; color: var(--n-0); background: var(--accent);
+  border-radius: 999px; padding: .05rem .5rem; white-space: nowrap;
+}
+
+/* --- aside: a quiet supplementary/tangential note. Lighter than a .callout
+   (no icon, no semantic hue) and not a quotation (blockquote) — supporting
+   context set slightly apart. Class-based so it never captures a bare <aside>
+   used for layout (e.g. a sidebar index). --- */
+.aside {
+  background: var(--card); border: 1px solid var(--edge); border-radius: 8px;
+  padding: .5rem .9rem; margin: 1.2rem 0; font-size: .9rem; color: var(--muted);
+}
+
+/* ==========================================================================
+   Progressive enhancement (base.js). Everything below is injected/toggled by
+   JS; the page is fully readable without it. Keep these class names in sync
+   with base.js.
+   ========================================================================== */
+
+/* reading-progress bar (top of viewport) */
+.progress { position: fixed; top: 0; left: 0; right: 0; height: 3px; z-index: 20; background: transparent; }
+.progress > i { display: block; height: 100%; width: 0; background: var(--accent); transition: width .1s linear; }
+
+/* theme toggle button (mounted in header.site, or floating if none) */
+.theme-btn {
+  border: 1px solid var(--edge); background: var(--card); color: var(--fg);
+  border-radius: 999px; padding: .15rem .7rem; font-size: .82rem; cursor: pointer;
+  display: inline-flex; align-items: center; gap: .3em;
+}
+.theme-btn:hover { border-color: var(--accent); }
+.theme-btn.floating { position: fixed; top: .7rem; right: .8rem; z-index: 20; box-shadow: 0 2px 8px rgba(0,0,0,.15); }
+
+/* floating action buttons (bottom-right): TOC + back-to-top */
+.fab { position: fixed; right: 1rem; bottom: 1rem; z-index: 18; display: flex; flex-direction: column; gap: .5rem; }
+.fab button {
+  width: 2.8rem; height: 2.8rem; border-radius: 50%; border: 1px solid var(--edge);
+  background: var(--card); color: var(--fg); font-size: 1.1rem; cursor: pointer;
+  box-shadow: 0 2px 8px rgba(0,0,0,.18); display: flex; align-items: center; justify-content: center;
+  opacity: 0; transform: translateY(.4rem); transition: opacity .2s, transform .2s; pointer-events: none;
+}
+.fab button.show { opacity: 1; transform: none; pointer-events: auto; }
+.fab button.toc-btn { border-color: var(--accent); color: var(--accent); }
+
+/* table-of-contents panel (slides up from the bottom on mobile) */
+.toc-backdrop {
+  position: fixed; inset: 0; z-index: 21; background: rgba(0,0,0,.4);
+  opacity: 0; pointer-events: none; transition: opacity .2s;
+}
+.toc-backdrop.open { opacity: 1; pointer-events: auto; }
+.toc-panel {
+  position: fixed; left: 0; right: 0; bottom: 0; z-index: 22; max-height: 70vh; overflow-y: auto;
+  background: var(--bg); border-top: 3px solid var(--accent);
+  border-radius: 16px 16px 0 0; padding: .8rem 1.1rem 1.4rem;
+  transform: translateY(100%); transition: transform .25s ease;
+}
+.toc-panel.open { transform: none; }
+.toc-panel h2 { font-size: .95rem; border: 0; margin: .2rem 0 .6rem; color: var(--accent); }
+.toc-panel ol { list-style: none; margin: 0; padding: 0; }
+.toc-panel li { margin: 0; }
+.toc-panel li.sub a { padding-left: 1.6rem; font-size: .9rem; color: var(--muted); }
+.toc-panel a {
+  display: block; padding: .5rem .6rem; text-decoration: none; color: var(--fg);
+  border-radius: 8px; border-left: 3px solid transparent; line-height: 1.5;
+}
+.toc-panel a.active { color: var(--accent); border-left-color: var(--accent); background: var(--accent-soft); font-weight: 600; }
+
+/* --- wide viewport: TOC as a persistent sidebar index ---------------------
+   On wide screens the same TOC nav (built and scroll-spied by base.js) is laid
+   out as a persistent sidebar column in the left gutter, beside the centered
+   article; the overlay affordances (☰ FAB, backdrop) are hidden. Only layout
+   branches here — no TOC/scroll-spy logic is duplicated. The 79rem breakpoint
+   is the width at which a 14rem sidebar + 1rem gap fits in the gutter to the
+   left of the 48rem `main`; below it, the overlay panel + FAB stay. */
+@media (min-width: 79rem) {
+  /* .fab button.toc-btn, not .toc-btn: `.fab button { display: flex }` is (0,1,1)
+     and would out-specify a bare `.toc-btn` (0,1,0), leaving the ☰ visible next to
+     the sidebar it's supposed to replace. Match its specificity to hide it. */
+  .fab button.toc-btn { display: none; }
+  .toc-backdrop { display: none; }
+  /* A quiet index column in the gutter — NOT a card. One hairline rail runs
+     down the whole list; the active entry colors and bolds its own segment of
+     that rail. A rail cue, never a nested filled box (which reads as box-in-box
+     against the article's real cards). */
+  .toc-panel {
+    left: max(1rem, calc((100vw - 48rem) / 2 - 15rem)); right: auto; bottom: auto;
+    top: 3.4rem; width: 14rem; max-height: calc(100vh - 4.6rem);
+    background: none; border: 0; border-radius: 0;
+    padding: .4rem 0 1rem; transform: none; transition: none;
+  }
+  .toc-panel h2 { margin: .2rem 0 .6rem; padding-left: .9rem; }
+  .toc-panel a {
+    border-radius: 0; border-left: 2px solid var(--line);
+    padding: .28rem .9rem; line-height: 1.45;
+  }
+  .toc-panel a:hover { color: var(--accent); border-left-color: var(--muted); background: none; }
+  .toc-panel a.active {
+    background: none; color: var(--accent); border-left-color: var(--accent); font-weight: 600;
+  }
+  .toc-panel li.sub a { padding-left: 1.7rem; }
+  /* Quiet index: show only the active section's sub-entries. base.js toggles
+     `.reveal` on the h3 links in the active h2 group; the rest collapse so the
+     sidebar isn't a wall of every subsection at once. (Sidebar-only — the
+     mobile overlay keeps all subs visible.) Entries slide open/closed via
+     max-height + opacity (overflow clipped on the li, so the link's padding
+     collapses too) instead of popping. The 5rem cap clears the tallest wrapped
+     entry; real entries are shorter, so the li tracks its own content height. */
+  .toc-panel li.sub {
+    overflow: hidden; max-height: 0; opacity: 0;
+    transition: max-height .2s ease, opacity .2s ease;
+  }
+  .toc-panel li.sub.reveal { max-height: 5rem; opacity: 1; }
+  /* Scrollbar stays quiet until pointed at: reserve the gutter but keep the
+     thumb transparent when idle, tint it on hover. Reserving width (rather than
+     toggling scrollbar-width on hover) avoids a reflow when the bar appears. */
+  .toc-panel { scrollbar-width: thin; scrollbar-color: transparent transparent; }
+  .toc-panel:hover { scrollbar-color: var(--line) transparent; }
+  .toc-panel::-webkit-scrollbar { width: 8px; }
+  .toc-panel::-webkit-scrollbar-thumb { background: transparent; border-radius: 4px; }
+  .toc-panel:hover::-webkit-scrollbar-thumb { background: var(--line); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .progress > i, .fab button, .toc-backdrop, .toc-panel, .toc-panel li.sub { transition: none; }
+  html { scroll-behavior: auto; }
+}

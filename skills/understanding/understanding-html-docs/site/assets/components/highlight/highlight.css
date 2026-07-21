@@ -1,0 +1,36 @@
+/* highlight component (Tier 2) — highlight.js token theme over the base design
+   system. GitHub-flavored, authored as light-dark() pairs so it follows the
+   document theme with no JS and no second stylesheet to swap. Colors only — the
+   code panel (background, border, padding, monospace) stays owned by base.css's
+   `pre`/`code`; this file must never set a background or padding on `.hljs`. */
+.hljs { color: var(--fg); background: none; }
+
+.hljs-comment, .hljs-quote { color: light-dark(#6e7781, #8b949e); font-style: italic; }
+
+/* keywords, storage, literals, markup tags */
+.hljs-keyword, .hljs-selector-tag, .hljs-doctag, .hljs-literal,
+.hljs-type, .hljs-tag { color: light-dark(#cf222e, #ff7b72); }
+
+/* entity names — function/class titles, sections */
+.hljs-title, .hljs-title.function_, .hljs-title.class_,
+.hljs-section { color: light-dark(#8250df, #d2a8ff); }
+
+/* identifiers — built-ins, names, attributes, variables, params */
+.hljs-built_in, .hljs-name, .hljs-attr, .hljs-attribute,
+.hljs-variable, .hljs-template-variable, .hljs-params,
+.hljs-selector-attr, .hljs-selector-pseudo { color: light-dark(#953800, #ffa657); }
+
+/* strings and string-like literals */
+.hljs-string, .hljs-regexp, .hljs-symbol, .hljs-bullet,
+.hljs-meta .hljs-string { color: light-dark(#0a3069, #a5d6ff); }
+
+/* constants — numbers, booleans */
+.hljs-number, .hljs-boolean { color: light-dark(#0550ae, #79c0ff); }
+
+/* preprocessor / annotations */
+.hljs-meta, .hljs-meta .hljs-keyword { color: light-dark(#116329, #7ee787); }
+
+.hljs-emphasis { font-style: italic; }
+.hljs-strong { font-weight: 700; }
+.hljs-addition { color: light-dark(#116329, #aff5b4); }
+.hljs-deletion { color: light-dark(#82071e, #ffa198); }
