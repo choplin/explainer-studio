@@ -4,118 +4,67 @@ description: This skill should be used when the user wants paper-studio reports 
 user-invocable: true
 ---
 
-# Generate Site — paper reports as an authored website
+# Generate Site — paper-studio reports as an authored website
 
-Turn a paper-studio work dir into a **reading-guide website** under `<WORK_DIR>/site/`: a landing page with report cards, and one authored page per report (overview + the in-scope perspective reports) with the matching audio guide playable in-page. This skill only *builds* the site; putting it on the internet is [[pdf-studio-deploy-site]]'s job — keeping the two apart lets the generated site be reviewed before it goes public.
+Turn a **paper-studio** work dir (`<dir>/<slug>/`, at least one report under
+`reports/` — typically `overview.md` plus the perspective reports) into a
+reading-guide website under `<WORK_DIR>/site/`: a landing page with report cards and
+one authored page per report, the overview's audio guide playable in-page.
 
-paper-studio and pdf-studio share the same work-dir conventions and the same site design system, so this skill is the **paper-tuned sibling** of [[pdf-studio-generate-site]]: it reuses the generic per-page authoring worker ([[pdf-studio-site-page]]), the context-layer assets ([[pdf-studio-site-base]]), and the base substrate ([[understanding-html-docs]] and its generator) unchanged, and differs only in what a paper's report set needs — a **fixed perspective order** (not chapter numbering) and **perspective kicker labels** (背景 / 手法 / … instead of 第N章). Do not re-derive the shared mechanics here; follow the referenced skills for them.
-
-> **Sync note:** the scaffold (Phase 1), the semantic-Markdown author-then-generate build (Phase 2), the landing page + nav manifest (Phase 3), Gotchas, and Success criteria below are deliberately kept identical in shape to [[pdf-studio-generate-site]] — the only paper-specific delta is the report order and the kicker labels. If the shared site pipeline changes (a new phase, a nav change, an asset added, the generator's semantic-Markdown vocabulary), update **both** skills so they don't drift.
-
-The pages are **authored, not converted** — and authored as **semantic Markdown**, not hand-written HTML. The `pdf-studio-site-page` procedure rewrites each report for web reading (lede, key-points box, scannable sections) as Markdown + fenced divs that name only *meaning*; the [[understanding-html-docs]] generator then binds that semantic Markdown to the markup deterministically. Rendering the Markdown 1:1 into HTML is explicitly NOT the deliverable. What the generator guarantees, so the authoring worker cannot get it wrong: the `<head>`/theme-boot/asset order is always correct, an invented class or inline style is unrepresentable, an unknown callout variant is a hard build error, every table is wrapped in `.tablewrap`, and figure paths are rewritten to point inside the site root. What stays a reading judgment (is this passage a hazard or the key point) lives in the source and is the author's call, guided by the `pdf-studio-site-page` rules.
-
-The output is a **no-server static site** (openable by double-click, no build step) that bundles its design system locally as progressive enhancement, so every page stays fully readable if JS is disabled. Bundling the substrate is for portability and durability (the artifact doesn't rot on external dependencies), not a ban on external references: a page may pull in web fonts, remote images, or report-embedded links where it needs them.
-
-The design system is layered: the **base substrate** (`base.css` / `base.js`) and the reading-site navigation widgets (the `reading-nav` component — `reading-nav.css` / `reading-nav.js`) are both owned by the **[[understanding-html-docs]]** skill — paper-studio consumes the base as the generator's `--assets` and pulls the widgets in with `--component reading-nav`. The **content context layer** (`pdf-studio.css`) is owned by **[[pdf-studio-site-base]]**, passed to the generator as `--context` (the deploy library index uses the same layers, which is why paper-studio reuses them rather than forking a parallel set). This skill's own `assets/` holds only the paper-tuned `index.html` landing-page template. If either `understanding-html-docs` or `pdf-studio-site-base` is not installed, stop and say so rather than guessing an asset path.
+The whole build pipeline — scaffold, parallel semantic-Markdown authoring, the single
+generator build, the semantic landing page, the nav manifest, the gotchas, and the
+success criteria — is the **shared reading-site pipeline** owned by
+[[understanding-reading-site-base]]. **Delegate the build to that skill.** This skill
+adds only what is paper-specific: the page-ordering profile and the landing vocabulary
+below. Do not re-derive the pipeline here; follow the base skill for every phase.
 
 ## When this applies
 
-The input is a paper-studio work dir (`<dir>/<slug>/`) with at least one report under `reports/` — typically `overview.md` plus the perspective reports produced by [[paper-studio-summarize]]. `audio/` is optional — pages without audio simply get no player. If no report exists yet, run [[paper-studio-summarize]] first; for the overview audio on the page, run [[pdf-studio-audio-dialogue]] (pointed at `reports/overview.md`) → [[pdf-studio-audio-narrate]] first.
+The input is a paper-studio work dir with reports under `reports/`. `audio/` is
+optional (pages without audio get no player). If no report exists yet, run
+[[paper-studio-summarize]] first; for the overview audio on the page, run
+[[pdf-studio-audio-dialogue]] (pointed at `reports/overview.md`) →
+[[pdf-studio-audio-narrate]] first. This skill only *builds* the site; publishing it
+is [[pdf-studio-deploy-site]]'s job.
 
-Because the work-dir layout is identical to pdf-studio's, [[pdf-studio-generate-site]] would also *build* on these artifacts — but it would order the pages by `chapter-N` natural sort and label them 第N章, which is wrong for a paper's perspective report set. This skill exists to fix exactly that: the report order and the kicker labels. Everything else is delegated to the shared skills above.
+## paper-studio profile (the only paper-specific part)
 
-The generator's runtime is **pandoc**, resolved by its own preflight (PATH → bundled `nix develop` → fail). It runs once, in Phase 2, over the whole `src/` dir.
+### Ordered page list — `[{ slug, kicker }]`
 
-## Report order and kicker labels (the paper-specific part)
+A paper's reports are not chapters; they are **fixed perspectives**. Resolve
+`reports/*.md` into the base skill's ordered list with this canonical table, keeping
+only the reports that exist and preserving this order:
 
-A paper's reports are not chapters; they are **fixed perspectives**. Order the pages by this canonical sequence and label each with its perspective kicker:
+| report slug (`reports/<slug>.md`) | kicker |
+|-----------------------------------|--------|
+| `overview`      | 全体レポート |
+| `background`    | 背景 |
+| `method`        | 手法 |
+| `experiments`   | 実験 |
+| `discussion`    | 議論 |
+| `related-work`  | 関連研究 |
 
-| report slug (`reports/<slug>.md`) | page order | kicker label |
-|-----------------------------------|-----------|--------------|
-| `overview`      | 1 | 全体レポート |
-| `background`    | 2 | 背景 |
-| `method`        | 3 | 手法 |
-| `experiments`   | 4 | 実験 |
-| `discussion`    | 5 | 議論 |
-| `related-work`  | 6 | 関連研究 |
+- `overview` is always first and is the landing hero CTA / home. Do not renumber when
+  a subset is present — keep the canonical order for whichever exist.
+- Any report whose slug is **not** in the table (a hand-added or deep-dived report,
+  e.g. a `pdf-studio-deep-dive` output) is **appended last** in natural sort, with a
+  kicker derived from a readable title-case of its slug. Do not drop it.
 
-- `overview` is always first and is the landing-page hero CTA.
-- Include only the reports that actually exist under `reports/` (the run may have produced a subset — "overview only", or a chosen subset of perspectives). Keep the canonical order for whichever are present; do not renumber.
-- Any report whose slug is **not** in the table (a hand-added or deep-dived report, e.g. a `pdf-studio-deep-dive` output) is appended **after** the canonical ones, in natural sort, with a kicker derived from its slug (e.g. a readable title-case of the slug). Do not drop it.
-- This order is the **single source of truth for the page navigation** — it becomes the `nav-manifest.js` (Phase 3) from which prev/next and the page list are rendered at runtime. Reports are **not** color-coded: color carries meaning in this design system, so a per-report hue would collide with it. Which report you are on is answered by the nav, the title, and the index — not by a color.
+This satisfies the base contract (overview first; every existing report once;
+deterministic order; non-empty kicker). Reports are **not** color-coded — which report
+you are on is answered by the nav, the title, and the index.
 
-## Phase 1 — Scaffold
+### Landing document-type vocabulary
 
-1. Inventory `reports/*.md`, `audio/*` (`.m4a`, also `.mp3`/`.wav` for hand-added files), and `ocr/figures/*` if the OCR figure harvest ran (paper-studio always runs MinerU, so `ocr/figures/` normally exists). Fix the page order now per the canonical table above — this order is the single source of truth for the nav (`nav-manifest.js`, Phase 3).
-2. **If `<WORK_DIR>/site/` already exists, ask the user before clearing it** (no prompt is needed when it doesn't exist yet). A clean rebuild (recommended) does `rm -rf <WORK_DIR>/site <WORK_DIR>/src` first so that anything no longer produced (renamed/removed reports, stale narration, superseded assets) leaves no orphan behind — which matters because a later [[pdf-studio-deploy-site]] run publishes whatever is on disk. If the user declines, build over the existing tree instead and warn that orphaned files may remain and would be published on the next deploy. Clearing is safe: everything under `site/` and `src/` is reproducible from `reports/`, `audio/`, and `ocr/figures/`, and hand-added audio lives in the **source** `audio/` (not `site/`), so it is never touched. Then create `<WORK_DIR>/src/` (the semantic layer Phase 2 writes) and `<WORK_DIR>/site/audio/`, and copy the audio files into `site/audio/`. **You do NOT copy the design-system assets here** — the generator copies `base.css`/`base.js` (from `--assets`), `pdf-studio.css` (from `--context`), and `reading-nav.css`/`reading-nav.js` (from `--component reading-nav`) into `site/assets/` when it runs in Phase 2. `site/` and `src/` are disposable — never hand-edit `site/` (edit `reports/` and regenerate); the editable semantic layer is `src/`.
-3. **Copy the figures into the site** — if `<WORK_DIR>/ocr/figures/` exists, copy it **whole** to `site/figures/` (`cp -R <WORK_DIR>/ocr/figures site/figures`). Copy every crop, not only the ones the reports embed: the pages are authored in parallel by workers that each see one report, so at this point nobody knows the union of referenced figures; a handful of unreferenced crops is harmless. **This is what makes the site self-contained.** The reports embed figures as `../ocr/figures/…` (a path relative to `reports/`); the generator's filter rewrites that prefix to `figures/…` at generation time, so this step is what puts a file there for the rewritten path to point at.
+- **guide kicker** (hero eyebrow): `論文ガイド`
+- **cards-section heading**: `レポート`
+- **count-chip unit**: `レポート` (hero chip reads `全Nレポート`)
 
-## Phase 2 — Author semantic Markdown, then generate (parallel authoring + one build)
+Site title = the paper title (from `reports/overview.md`'s `<h1>`).
 
-**2a — Author one source file per report** by applying the **[[pdf-studio-site-page]]** procedure (its restructuring rules and semantic-Markdown vocabulary live in that skill; it is the same generic worker pdf-studio uses). It writes semantic Markdown (`<WORK_DIR>/src/<slug>.md`), NOT HTML. Run the reports **in parallel**:
+## Build
 
-- **Under Claude Code**, dispatch one `pdf-studio-site-page` subagent per report (multiple Agent calls in one message) so each page is authored in an isolated context and they run concurrently.
-- **Otherwise**, apply the `pdf-studio-site-page` skill once per report.
-
-Pass only the per-page inputs, all absolute paths:
-
-- source report path; output source path `<WORK_DIR>/src/<slug>.md`
-- site title (= the paper title, from `reports/overview.md`'s `<h1>`); **kicker label** = the perspective label from the canonical table (全体レポート / 背景 / 手法 / 実験 / 議論 / 関連研究, or the derived label for an appended report)
-- whether `<WORK_DIR>/ocr/figures/` exists (from Phase 1 step 3) — the worker carries the report's `../ocr/figures/X` references as-is and the generator rewrites them
-- matching audio file name under `site/audio/` (or "none") — for a paper this is usually just `overview.m4a` for the overview page
-
-The worker does **not** author prev/next links, `<head>`, classes, or figure-path rewrites: navigation is rendered at runtime by `reading-nav.js` (the html-docs reading-nav component) from the `nav-manifest.js` you write in Phase 3 (loaded via each source's `context-js` frontmatter), and the mechanical markup is the generator's guarantee. Each returns only the source path, the page title, and a 2–3 line card summary. Do not read the finished source back for the card — trust the replies. (Optionally estimate reading time from the report's length — `wc -m` (character count, not `wc -w`: Japanese isn't space-delimited) at ~500 Japanese chars/min — to put a ⏱ chip on the card in Phase 3.)
-
-**2b — Generate the pages.** Once every source is written, build them all in one pass with the generator's site builder:
-
-```bash
-understanding-html-docs/scripts/build-site.sh <WORK_DIR>/src <WORK_DIR>/site \
-  --assets understanding-html-docs/assets \
-  --context pdf-studio-site-base/assets \
-  --component reading-nav
-```
-
-This renders each `src/<slug>.md` → `site/<slug>.html`, and copies the design-system assets (`base.css`/`base.js` from `--assets`, `pdf-studio.css` from `--context`, `reading-nav.css`/`reading-nav.js` from `--component reading-nav`) verbatim into `site/assets/`. A bad source (unknown callout variant, `.player` without `src=`) **fails the build loudly** — fix the offending source and re-run. Resolve the skill directories the same way the rest of the skill does (siblings under the skills root); if `understanding-html-docs` or `pdf-studio-site-base` is missing, stop and say so.
-
-## Phase 3 — Landing page + nav manifest (orchestrator, inline)
-
-Write `site/index.html` from this skill's `assets/index.html` (hand-authored HTML — the landing page is composed by you from the card replies, not generated from a report): hero (site title = the paper title, a 2–3 sentence lede composed from the overview card summary, report/audio count chips, CTA to `overview.html`), then one card per page in canonical order — kicker, returned title, returned summary. Give each card a ⏱ reading-time chip and a 🔊 chip when they apply. Audio files with no matching report get inline players under 音声ガイド.
-
-**Then write `site/assets/nav-manifest.js`** — the single source of truth for page-to-page navigation, from the fixed canonical order. It lives under `site/assets/` (next to the copied assets) because every generated page references it as a `context-js` asset (`assets/nav-manifest.js`); it is data, not one of the copied design-system assets, so neither the generator's `--context` nor `--component` copy produces it — you write it here directly. `reading-nav.js` (the html-docs reading-nav component) reads `window.__HTMLDOCS_NAV` to render prev/next and highlight the current page. It is the whole reason no page carries hand-authored neighbor links: to add or remove a page you regenerate **only this one file**. Emit one entry per report page in reading order (the landing page is not an entry — it is home, reached via each page's `← SITE_TITLE` header link):
-
-```js
-/* paper-studio page navigation manifest — generated. Single source of truth for this
-   site's page list; regenerate THIS FILE ONLY when pages are added or removed. */
-window.__HTMLDOCS_NAV = {
-  "pages": [
-    { "slug": "overview",   "href": "overview.html",   "kicker": "全体レポート", "title": "RETURNED_TITLE" },
-    { "slug": "background", "href": "background.html", "kicker": "背景",       "title": "RETURNED_TITLE" }
-  ]
-};
-```
-
-`slug` = the page basename without `.html`; `href` = `<slug>.html`; `kicker` = the same perspective label passed to that page in Phase 2; `title` = the title the Phase 2 worker returned. It must be valid JavaScript — quote strings as JSON (the assignment is plain data, no logic). Keep the `window.__HTMLDOCS_NAV` global name verbatim — it is what the shared `reading-nav.js` component reads. Then verify (see Success criteria).
-
-## Hand off to deployment
-
-After building `site/`, tell the user the site is ready under `<WORK_DIR>/site/` and that [[pdf-studio-deploy-site]] can put it on the internet (as a subpath of the shared Cloudflare Pages library, Access-protected) — or offer to run it. If nothing has been deployed before, the one-time [[pdf-studio-initialize-site]] setup must run first. Do not deploy here: the split lets the user review the generated site before it goes public.
-
-## Gotchas
-
-- **`site/` and `src/` are disposable and rebuilt from source.** When they already exist the skill asks before clearing; a clean rebuild (recommended) drops files no longer produced so they don't linger as orphans. Never hand-edit `site/` — edit the source `reports/` (or, for a semantic fix, the `src/`) and regenerate. A later [[pdf-studio-deploy-site]] run publishes whatever is on disk, so prefer a clean rebuild before redeploying.
-- **Restructuring is the deliverable.** A source whose heading sequence mirrors the source Markdown is a conversion, not an authored page — re-author it with the instruction to restructure (the `pdf-studio-site-page` procedure states the same rule).
-- **A failed build points at one source.** The generator fails loudly on an invalid source (unknown variant, `.player` missing `src=`); the message names the file — fix that `src/*.md` and re-run Phase 2b. The mechanical error classes — an invented class, an unwrapped table, a figure pointing outside the site — are structurally impossible here, not review-caught: the generator cannot emit them.
-- **Reuse, don't fork, the shared assets.** The content context layer (`pdf-studio.css`) comes from `pdf-studio-site-base` (the name is the shared context layer, not a pdf-studio-only dependency) and is passed as `--context`; the reading-site nav widgets come from understanding-html-docs' `reading-nav` component via `--component reading-nav`. Only this skill's own `index.html` template is paper-tuned.
-
-## Success criteria
-
-- [ ] Every `reports/*.md` present has a `src/<slug>.md` and a generated `site/<slug>.html`, and `index.html` has a card for each with a composed (not copied) summary; `overview` is the hero CTA and the first page.
-- [ ] Pages are ordered by the canonical perspective sequence (overview → background → method → experiments → discussion → related-work → any appended reports), and each carries its perspective kicker (全体レポート / 背景 / 手法 / 実験 / 議論 / 関連研究), not 第N章.
-- [ ] Each page carries a `lede` and a `keypoints` box (present in the source, rendered by the generator).
-- [ ] **`site/` is self-contained — nothing points outside it.** The generator's figure-path rewrite guarantees no page keeps a `../ocr/figures/…` reference (the old `grep '\.\./'` review catch is now a generation-time guarantee, not a check). Every `<img src>` resolves to a file under `site/figures/`.
-- [ ] Reports with a matching audio slug have an in-page player (from the source's `.player` directive); unmatched audio is listed on the index; every referenced audio file exists in `site/audio/`.
-- [ ] The design system is bundled locally: all of `site/assets/base.css`, `site/assets/base.js`, `site/assets/pdf-studio.css`, `site/assets/reading-nav.css`, `site/assets/reading-nav.js` exist (copied by the generator), plus `site/assets/nav-manifest.js` (written in Phase 3). Every generated page's `<head>` carries the theme-boot inline script and loads `assets/base.js`, `assets/nav-manifest.js`, `assets/reading-nav.js` in that order (guaranteed by the template + the `context-js` frontmatter order). (External references — web fonts, CDN libraries, remote images — are allowed where a page needs them; they are not checked.)
-- [ ] **Page navigation has a single source.** `site/assets/nav-manifest.js` exists, assigns `window.__HTMLDOCS_NAV` with one `pages` entry per report page in reading order, and is valid JS (loads without a console error). No page hand-authors a `<nav class="chapnav">` (verify: `grep -n 'class="chapnav"' site/*.html` → no hits; prev/next is rendered at runtime). Opening a middle page shows working ← prev / next → links; the first page has no prev and the last has no next.
-- [ ] The user was told the site is built under `<WORK_DIR>/site/` and pointed to [[pdf-studio-deploy-site]] for putting it online.
-</content>
-</invoke>
+Hand the profile above to [[understanding-reading-site-base]] and run its pipeline
+(Phase 1 scaffold → Phase 2 author reports + landing → Phase 3 build + nav manifest →
+hand off to [[pdf-studio-deploy-site]]). The base skill's Success criteria are the
+acceptance for this skill.
