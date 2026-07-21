@@ -32,4 +32,23 @@ done
 # copies only flat css/js, so bring the components tree over for tier2's head.
 cp -R "$SKILL_DIR/assets/components" "$out/assets/"
 
+# Page-nav data for the reading-nav live demo on the tier2 showcase page. Only the
+# tier2 template loads it (assets/nav-manifest.js), so page-to-page nav is shown on
+# that one page — like every other Tier 2 bundle, which is live only on tier2. The
+# landing (index) is home and is not listed.
+cat > "$out/assets/nav-manifest.js" <<'EOF'
+/* reference-site page navigation manifest — demonstrates the reading-nav component's
+   page-to-page nav on the tier2 showcase page. */
+window.__HTMLDOCS_NAV = {
+  "pages": [
+    { "slug": "foundation",  "href": "foundation.html",  "kicker": "Foundation",  "title": "Foundation" },
+    { "slug": "color",       "href": "color.html",       "kicker": "Color",       "title": "Color model" },
+    { "slug": "components",   "href": "components.html",  "kicker": "Components",  "title": "Components" },
+    { "slug": "enhancement",  "href": "enhancement.html", "kicker": "Enhancement", "title": "Enhancement kit" },
+    { "slug": "tier2",        "href": "tier2.html",       "kicker": "Tier 2",      "title": "Tier 2 components" },
+    { "slug": "contract",     "href": "contract.html",    "kicker": "Contract",    "title": "The contract" }
+  ]
+};
+EOF
+
 echo "Reference site built under $out (7 pages)"

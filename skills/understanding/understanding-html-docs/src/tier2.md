@@ -22,6 +22,7 @@ The base substrate is offline and always present. A document that needs a **heav
 | `components/diff/` | `pre.diff-source` + `div.diff-render` | diff2html v3 |
 | `components/diagram/` | `pre.mermaid` | mermaid v11 |
 | `components/comments/` | reader comments (no markup) | — none; vanilla & offline |
+| `components/reading-nav/` | `data-reading-filter` index + `__HTMLDOCS_NAV` page nav | — none; vanilla & offline |
 
 Each bundle carries its own CSS and JS plus an `include.md`, which is the source of truth for wiring it: the version-pinned CDN tags, the markup contract, and the escaping rules the engine needs. **Follow the bundle's `include.md`** — do not reconstruct the wiring from memory.
 
@@ -98,4 +99,31 @@ Anchoring never mutates the document DOM — the highlight is painted over the t
 
 ::: {.callout variant=warn}
 [Local to one browser]{.label} — comments are not written back into the HTML and are not shared between viewers. A reviewer exports JSON/Markdown and sends it to the author out of band.
+:::
+
+## reading-nav — a multi-page reading site's navigation
+
+Also engine-free and offline, for a **multi-page reading site** (a landing index plus report pages, as pdf-studio / paper-studio generate). It adds two runtime aids on top of `base.js`, and hardcodes no document-type vocabulary.
+
+**A live index filter.** Mark any card index with `filter=` and the bundle inserts a search box above it; typing hides non-matching cards. The target and the placeholder are authored in the notation — `:::: {.card-grid filter="Filter…"}` — so nothing is hand-written in HTML. Try it on this index:
+
+:::: {.card-grid filter="Filter…"}
+::: {.card}
+**Foundation** — headings, prose, tables, code, quotes: everything that reads correctly with no class at all.
+:::
+::: {.card}
+**Color** — the meaning-only color model and the token layers behind it.
+:::
+::: {.card}
+**Components** — the classes you opt into: callout, keypoints, card, chip, aside.
+:::
+::: {.card}
+**Enhancement** — what `base.js` adds: the theme toggle, the table of contents, the reading-progress bar, back-to-top.
+:::
+::::
+
+**Manifest-driven page-to-page navigation.** From one per-site `window.__HTMLDOCS_NAV` data file, the bundle renders **prev/next** links at the foot of this page and a **list FAB** (the three-lines button in the corner stack) opening an all-pages drawer — a different axis from `base.js`'s ☰ section TOC: pages vs. sections. Both are shown live here; this page is one entry in the reference site's manifest.
+
+::: {.callout variant=tip}
+[Injected, not authored]{.label} — like `comments`, reading-nav writes its own UI; you author only the `filter=` marker (for the filter) and the per-site `nav-manifest.js` data (for the page nav). The neighbor labels come from that data, so one bundle serves a book's chapters, a paper's perspectives, or any reading site unchanged.
 :::

@@ -4,13 +4,14 @@
 #
 # Usage:
 #   build-site.sh <src-dir> <out-dir> --assets <base-assets-dir> [--context <dir>]
+#                 [--component <name>]...
 set -euo pipefail
 SKILL_DIR="$(cd "$(dirname "$0")/.." && pwd)"
 
 srcdir=""; out=""; passthru=()
 while [[ $# -gt 0 ]]; do
   case "$1" in
-    --assets|--context) passthru+=("$1" "$2"); shift 2 ;;
+    --assets|--context|--component) passthru+=("$1" "$2"); shift 2 ;;
     *) if [[ -z "$srcdir" ]]; then srcdir="$1"; elif [[ -z "$out" ]]; then out="$1"; fi; shift ;;
   esac
 done

@@ -9,6 +9,11 @@
 #   <out-dir>            site output root; the page lands at <out-dir>/<name>.html
 #   --assets <dir>       dir holding base.css / base.js (understanding-html-docs/assets)
 #   --context <dir>      optional dir of consumer context stylesheets/scripts (*.css/*.js)
+#   --component <name>   optional Tier 2 opt-in bundle to copy in; repeatable. Copies
+#                        the flat css/js from <assets>/components/<name>/ into
+#                        <out>/assets/, so a copy-mode site can consume an html-docs
+#                        component the same way it references a context asset. The page
+#                        still selects it via context-css/context-js frontmatter.
 #   --template <file>    optional consumer template variant (default: assets/template.html)
 #   --filter <file>      optional extra Lua filter, chained AFTER htmldocs.lua;
 #                        repeatable (a consumer registers its own vocabulary this way)
@@ -22,14 +27,15 @@ set -euo pipefail
 SKILL_DIR="$(cd "$(dirname "$0")/.." && pwd)"
 
 src=""; out=""; assets=""; context=""; template=""; inline=""
-filters=()
+filters=(); components=()
 while [[ $# -gt 0 ]]; do
   case "$1" in
-    --assets)   assets="$2"; shift 2 ;;
-    --context)  context="$2"; shift 2 ;;
-    --template) template="$2"; shift 2 ;;
-    --filter)   filters+=("$2"); shift 2 ;;
-    --inline)   inline=1; shift ;;
+    --assets)    assets="$2"; shift 2 ;;
+    --context)   context="$2"; shift 2 ;;
+    --component) components+=("$2"); shift 2 ;;
+    --template)  template="$2"; shift 2 ;;
+    --filter)    filters+=("$2"); shift 2 ;;
+    --inline)    inline=1; shift ;;
     *) if [[ -z "$src" ]]; then src="$1"; elif [[ -z "$out" ]]; then out="$1"; fi; shift ;;
   esac
 done
@@ -49,6 +55,18 @@ if [[ -n "$context" && -d "$context" ]]; then
   cp "$context/"*.css "$out/assets/" 2>/dev/null || true
   cp "$context/"*.js  "$out/assets/" 2>/dev/null || true
 fi
+
+# Tier 2 opt-in bundles (--component <name>): copy the flat css/js from
+# <assets>/components/<name>/ into <out>/assets/. build.sh --context copies only a
+# consumer's own flat dir, so a copy-mode site consumes an html-docs-owned component
+# through this flag instead; the page still opts in via its context-css/js frontmatter.
+for c in "${components[@]:-}"; do
+  [[ -z "$c" ]] && continue
+  cdir="$assets/components/$c"
+  [[ -d "$cdir" ]] || { echo "build.sh: --component not found: $cdir" >&2; exit 2; }
+  cp "$cdir/"*.css "$out/assets/" 2>/dev/null || true
+  cp "$cdir/"*.js  "$out/assets/" 2>/dev/null || true
+done
 
 # Chain the base filter first, then any consumer filters (so consumer vocabulary
 # is bound on top of the base binding, and base rules like .tablewrap still run).

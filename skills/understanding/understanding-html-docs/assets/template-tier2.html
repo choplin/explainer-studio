@@ -15,7 +15,7 @@
 <link rel="stylesheet" href="assets/base.css" />
 <script src="assets/base.js" defer></script>
 
-<!-- This page uses all four Tier 2 components, so it ships all four. A page that
+<!-- This page uses all five Tier 2 components, so it ships all five. A page that
      renders no diffs must not ship the diff bundle. -->
 <!-- highlight: the highlight.js bundle first, then the glue -->
 <script src="https://cdn.jsdelivr.net/npm/@highlightjs/cdn-assets@11/highlight.min.js" defer></script>
@@ -33,6 +33,12 @@
      toggle mounts into base.js's .fab stack. -->
 <link rel="stylesheet" href="assets/components/comments/comments.css" />
 <script src="assets/components/comments/comments.js" defer></script>
+<!-- reading-nav: no engine, vanilla. After base.js so the pages FAB mounts into the
+     .fab stack. nav-manifest.js (the page-nav data) must load before reading-nav.js;
+     it is written by build-reference-site.sh so this showcase page has a page list. -->
+<link rel="stylesheet" href="assets/components/reading-nav/reading-nav.css" />
+<script src="assets/nav-manifest.js" defer></script>
+<script src="assets/components/reading-nav/reading-nav.js" defer></script>
 </head>
 <body>
 <header class="site">

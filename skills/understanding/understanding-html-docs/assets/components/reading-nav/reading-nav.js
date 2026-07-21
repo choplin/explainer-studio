@@ -1,40 +1,53 @@
-/* pdf-studio site — context-specific progressive enhancement (owned by
-   pdf-studio-site-base). Loads alongside understanding-html-docs base.js (which
-   provides the theme toggle, reading-progress bar, TOC with scroll-spy, and
-   back-to-top). This file adds the pdf-studio-specific enhancements: the live
-   filter over chapter/book cards, and the manifest-driven page-to-page
-   navigation. Both enhance the generate-site landing page and every report page.
-   Vanilla JS, no dependencies, no network. Each block is independent and the page
-   is fully readable if this file never loads; wire the class names here to
-   pdf-studio.css. */
+/* reading-nav — reading-site navigation widgets (Tier 2 opt-in component of
+   understanding-html-docs). Loads alongside base.js (which provides the theme
+   toggle, reading-progress bar, TOC with scroll-spy, and back-to-top). This bundle
+   adds the multi-page reading-site aids: a live filter over an index the consumer
+   marks with `data-reading-filter`, and manifest-driven page-to-page navigation
+   (prev/next + an all-pages drawer). Both enhance a site's landing/index page and
+   every report page.
+
+   Document-type-neutral: it hardcodes no chapter/section/book vocabulary and no
+   consumer class name. The filter target is opted in per element; its wording
+   defaults to a generic string (overridable via the attribute value); the neighbor
+   labels come from the per-site manifest data (window.__HTMLDOCS_NAV), which the
+   consumer authors. Vanilla JS, no dependencies,
+   no network. Each block is independent and the page is fully readable if this file
+   never loads; wire the class names here to reading-nav.css. */
 (function () {
   "use strict";
 
-  /* ---------- index: live filter over chapter cards ---------- */
+  /* ---------- index: live filter over an opted-in index ----------
+     The consumer decides WHICH element is filtered by marking it with a
+     `data-reading-filter` attribute — the component assumes no class name of its
+     own. The attribute's value, if any, is the placeholder; otherwise a
+     document-type-neutral default is used. Each direct child of the marked element
+     is one filterable item; a non-match gets the component's `.rn-hidden` class.
+     No marked element → no-op, like the page nav below. */
   (function indexFilter() {
-    var cards = document.querySelector("ol.cards");
+    var cards = document.querySelector("[data-reading-filter]");
     if (!cards) return;
 
-    var items = Array.prototype.slice.call(cards.querySelectorAll("li"));
+    var label = (cards.getAttribute("data-reading-filter") || "").trim() || "絞り込む…";
+    var items = Array.prototype.slice.call(cards.children);
     var input = document.createElement("input");
     input.type = "search";
     input.className = "filter";
-    input.placeholder = "章を絞り込む…";
-    input.setAttribute("aria-label", "章を絞り込む");
+    input.placeholder = label;
+    input.setAttribute("aria-label", label.replace(/…+$/, "") || label);
     cards.parentNode.insertBefore(input, cards);
 
     var empty = document.createElement("p");
     empty.className = "filter-empty";
-    empty.textContent = "一致する章がありません。";
+    empty.textContent = "一致する項目がありません。";
     empty.hidden = true;
     cards.parentNode.insertBefore(empty, cards.nextSibling);
 
     input.addEventListener("input", function () {
       var q = input.value.trim().toLowerCase();
       var shown = 0;
-      items.forEach(function (li) {
-        var hit = q === "" || li.textContent.toLowerCase().indexOf(q) !== -1;
-        li.classList.toggle("hidden", !hit);
+      items.forEach(function (item) {
+        var hit = q === "" || item.textContent.toLowerCase().indexOf(q) !== -1;
+        item.classList.toggle("rn-hidden", !hit);
         if (hit) shown++;
       });
       empty.hidden = shown !== 0;
@@ -42,7 +55,7 @@
   })();
 
   /* ---------- page-to-page navigation (manifest-driven) ----------
-     Single source of truth: window.__PDF_STUDIO_NAV, assigned by the generated
+     Single source of truth: window.__HTMLDOCS_NAV, assigned by the generated
      nav-manifest.js that every page loads. The list lives in ONE file, so adding
      or removing a page updates every page's nav at once — no per-page markup to
      keep in sync. This block renders the prev/next links at the foot of a report
@@ -50,7 +63,7 @@
      carries no per-page state and stays identical across the whole site.
      Missing manifest (e.g. the library index) → no-op, like the filter above. */
   (function pageNav() {
-    var nav = window.__PDF_STUDIO_NAV;
+    var nav = window.__HTMLDOCS_NAV;
     if (!nav || !nav.pages || !nav.pages.length) return;
     var pages = nav.pages;
 
@@ -63,7 +76,7 @@
     }
 
     // Everything here is for a report page that is itself in the manifest.
-    // (The landing page is the whole-book view — it already lists every page as
+    // (The landing page is the whole-site view — it already lists every page as
     // cards — so it gets neither prev/next nor the drawer.)
     if (idx === -1) return;
 
@@ -153,8 +166,9 @@
     }
 
     function navLabel(p) {
-      // kicker (第N章 / 全体レポート) is the compact neighbor label; fall back to
-      // the title when a page has no kicker.
+      // kicker (the compact neighbor label the consumer supplies per page in the
+      // manifest — e.g. a section number or a perspective name) is preferred; fall
+      // back to the title when a page has no kicker.
       return p.kicker || p.title || p.href;
     }
   })();

@@ -12,9 +12,10 @@ Layout:
   └── public/                   the deploy root (uploaded whole by wrangler)
       ├── index.html            library index, rebuilt from library.json
       ├── assets/base.css       shared base design system (from understanding-html-docs)
-      ├── assets/pdf-studio.css pdf-studio context layer (from pdf-studio-site-base)
+      ├── assets/pdf-studio.css pdf-studio content layer (from pdf-studio-site-base)
+      ├── assets/reading-nav.css reading-nav widget chrome (from understanding-html-docs component)
       ├── assets/base.js        base PE kit: theme toggle, back-to-top (from understanding-html-docs)
-      ├── assets/pdf-studio.js  card live filter (from pdf-studio-site-base)
+      ├── assets/reading-nav.js card live filter + page nav (from understanding-html-docs component)
       └── <slug>/               one book's authored site (copied from a work dir)
 
 Subcommands:
@@ -105,11 +106,34 @@ def base_js_source():
     )
 
 
-def context_js_source():
-    # This skill's own pdf-studio enhancement (the card live filter), shared by
-    # the generate-site landing page and this library index:
-    # pdf-studio-site-base/scripts/library.py -> pdf-studio-site-base/assets/pdf-studio.js
-    return Path(__file__).resolve().parents[1] / "assets" / "pdf-studio.js"
+def reading_nav_css_source():
+    # The reading-nav widget chrome, owned by the sibling understanding-html-docs
+    # skill as an opt-in component (the card filter / page-nav styling):
+    # <root>/pdf-studio-site-base/scripts/library.py
+    #   -> <root>/understanding-html-docs/assets/components/reading-nav/reading-nav.css
+    return (
+        Path(__file__).resolve().parents[2]
+        / "understanding-html-docs"
+        / "assets"
+        / "components"
+        / "reading-nav"
+        / "reading-nav.css"
+    )
+
+
+def reading_nav_js_source():
+    # The reading-nav enhancement (the card live filter; the page nav no-ops on the
+    # index, which carries no nav manifest), shared by the generate-site landing page
+    # and this library index. Owned by understanding-html-docs as an opt-in component:
+    #   -> <root>/understanding-html-docs/assets/components/reading-nav/reading-nav.js
+    return (
+        Path(__file__).resolve().parents[2]
+        / "understanding-html-docs"
+        / "assets"
+        / "components"
+        / "reading-nav"
+        / "reading-nav.js"
+    )
 
 
 def today():
@@ -119,16 +143,17 @@ def today():
 # ---------------------------------------------------------------- index render
 
 # Progressive-enhancement scripts for the index (theme toggle from base.js, card
-# live filter from pdf-studio.js). Passed to INDEX as a preformatted value so its
-# `{`/`}` JS braces never reach str.format(). The boot snippet's storage key must
-# match base.js's THEME_KEY; it applies the saved theme before first paint.
+# live filter from the reading-nav component's reading-nav.js). Passed to INDEX as a
+# preformatted value so its `{`/`}` JS braces never reach str.format(). The boot
+# snippet's storage key must match base.js's THEME_KEY; it applies the saved theme
+# before first paint.
 INDEX_SCRIPTS = (
     "<script>try{var t=localStorage.getItem('html-docs-theme');"
     "if(t==='dark')document.documentElement.classList.add('theme-dark');"
     "else if(t==='light')document.documentElement.classList.add('theme-light');}"
     "catch(e){}</script>\n"
     '<script src="assets/base.js" defer></script>\n'
-    '<script src="assets/pdf-studio.js" defer></script>'
+    '<script src="assets/reading-nav.js" defer></script>'
 )
 
 INDEX = """\
@@ -141,6 +166,7 @@ INDEX = """\
 <title>{title}</title>
 <link rel="stylesheet" href="assets/base.css">
 <link rel="stylesheet" href="assets/pdf-studio.css">
+<link rel="stylesheet" href="assets/reading-nav.css">
 {scripts}
 </head>
 <body>
@@ -164,7 +190,9 @@ def render_index(meta):
     title = html.escape(meta.get("title") or "Reading Library")
     if books:
         lede = "これまでに読んだ本のガイド。各カードから本文と音声ガイドを開けます。"
-        cards = ['<ol class="cards">']
+        # data-reading-filter opts this index into the reading-nav live filter
+        # (empty attribute = neutral placeholder).
+        cards = ['<ol class="cards" data-reading-filter>']
         for b in books:
             slug = html.escape(b["slug"])
             bt = html.escape(b.get("title") or b["slug"])
@@ -211,10 +239,17 @@ def write_public_scaffold(meta):
         # The context layer is optional styling; an empty file keeps the link valid.
         (assets / "pdf-studio.css").write_text("", encoding="utf-8")
 
+    rn_css = reading_nav_css_source()
+    if rn_css.exists():
+        shutil.copy2(rn_css, assets / "reading-nav.css")
+    else:
+        # The widget chrome is optional styling; an empty file keeps the link valid.
+        (assets / "reading-nav.css").write_text("", encoding="utf-8")
+
     # Progressive-enhancement scripts. They are optional (the index is fully
     # readable without them), so a missing source is simply skipped — the tag
     # 404s silently rather than breaking the page.
-    for src, name in ((base_js_source(), "base.js"), (context_js_source(), "pdf-studio.js")):
+    for src, name in ((base_js_source(), "base.js"), (reading_nav_js_source(), "reading-nav.js")):
         if src.exists():
             shutil.copy2(src, assets / name)
 

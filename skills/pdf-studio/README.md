@@ -49,7 +49,7 @@ chunk-*.md   outline.md   reports/overview.md
 | `pdf-studio-pdf-stitch` | Phase 2 worker — single instance. Read+Write+Glob. |
 | `pdf-studio-pdf-detail` | Section drill-down worker (deep-dive / full-guide). |
 | `pdf-studio-site-page` | Site page author — one per report, in parallel. |
-| `pdf-studio-site-base` | Shared resources, delegated to by name (not invoked directly): the Cloudflare Pages library manager (`library.py`) and the pdf-studio site context layer (`pdf-studio.css` + `pdf-studio.js`), layered on the `understanding-html-docs` base design system. |
+| `pdf-studio-site-base` | Shared resources, delegated to by name (not invoked directly): the Cloudflare Pages library manager (`library.py`) and the pdf-studio content context layer (`pdf-studio.css`), layered on the `understanding-html-docs` base design system. The reading-site nav widgets are `understanding-html-docs`' `reading-nav` opt-in component (pulled in via `--component reading-nav`). |
 
 The four worker skills carry their own constraints and output format, so the orchestrators only choose *when* and *with what inputs* to run them. Under Claude Code each is wrapped by a thin subagent (see `opts/claude/agents/pdf-studio-*`) so it runs in an isolated context and cannot install software or shell out to PDF converters; on any other agent the same skill is applied inline. This graceful fallback is written into each orchestrator.
 

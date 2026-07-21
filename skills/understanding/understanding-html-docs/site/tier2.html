@@ -15,7 +15,7 @@
 <link rel="stylesheet" href="assets/base.css" />
 <script src="assets/base.js" defer></script>
 
-<!-- This page uses all four Tier 2 components, so it ships all four. A page that
+<!-- This page uses all five Tier 2 components, so it ships all five. A page that
      renders no diffs must not ship the diff bundle. -->
 <!-- highlight: the highlight.js bundle first, then the glue -->
 <script src="https://cdn.jsdelivr.net/npm/@highlightjs/cdn-assets@11/highlight.min.js" defer></script>
@@ -33,6 +33,12 @@
      toggle mounts into base.js's .fab stack. -->
 <link rel="stylesheet" href="assets/components/comments/comments.css" />
 <script src="assets/components/comments/comments.js" defer></script>
+<!-- reading-nav: no engine, vanilla. After base.js so the pages FAB mounts into the
+     .fab stack. nav-manifest.js (the page-nav data) must load before reading-nav.js;
+     it is written by build-reference-site.sh so this showcase page has a page list. -->
+<link rel="stylesheet" href="assets/components/reading-nav/reading-nav.css" />
+<script src="assets/nav-manifest.js" defer></script>
+<script src="assets/components/reading-nav/reading-nav.js" defer></script>
 </head>
 <body>
 <header class="site">
@@ -80,6 +86,12 @@ a page that uses one ships it.</strong></p>
 <tr>
 <td><code>components/comments/</code></td>
 <td>reader comments (no markup)</td>
+<td>— none; vanilla &amp; offline</td>
+</tr>
+<tr>
+<td><code>components/reading-nav/</code></td>
+<td><code>data-reading-filter</code> index + <code>__HTMLDOCS_NAV</code>
+page nav</td>
 <td>— none; vanilla &amp; offline</td>
 </tr>
 </tbody>
@@ -176,6 +188,52 @@ agent to act on).</p>
 <span class="label">Local to one browser</span> — comments are not
 written back into the HTML and are not shared between viewers. A
 reviewer exports JSON/Markdown and sends it to the author out of band.
+</div>
+<h2 id="reading-nav-a-multi-page-reading-sites-navigation">reading-nav —
+a multi-page reading site’s navigation</h2>
+<p>Also engine-free and offline, for a <strong>multi-page reading
+site</strong> (a landing index plus report pages, as pdf-studio /
+paper-studio generate). It adds two runtime aids on top of
+<code>base.js</code>, and hardcodes no document-type vocabulary.</p>
+<p><strong>A live index filter.</strong> Mark any card index with
+<code>filter=</code> and the bundle inserts a search box above it;
+typing hides non-matching cards. The target and the placeholder are
+authored in the notation —
+<code>:::: {.card-grid filter="Filter…"}</code> — so nothing is
+hand-written in HTML. Try it on this index:</p>
+<div class="card-grid" data-reading-filter="Filter…">
+<div class="card">
+<p><strong>Foundation</strong> — headings, prose, tables, code, quotes:
+everything that reads correctly with no class at all.</p>
+</div>
+<div class="card">
+<p><strong>Color</strong> — the meaning-only color model and the token
+layers behind it.</p>
+</div>
+<div class="card">
+<p><strong>Components</strong> — the classes you opt into: callout,
+keypoints, card, chip, aside.</p>
+</div>
+<div class="card">
+<p><strong>Enhancement</strong> — what <code>base.js</code> adds: the
+theme toggle, the table of contents, the reading-progress bar,
+back-to-top.</p>
+</div>
+</div>
+<p><strong>Manifest-driven page-to-page navigation.</strong> From one
+per-site <code>window.__HTMLDOCS_NAV</code> data file, the bundle
+renders <strong>prev/next</strong> links at the foot of this page and a
+<strong>list FAB</strong> (the three-lines button in the corner stack)
+opening an all-pages drawer — a different axis from
+<code>base.js</code>’s ☰ section TOC: pages vs. sections. Both are shown
+live here; this page is one entry in the reference site’s manifest.</p>
+<div class="callout tip">
+<span class="label">Injected, not authored</span> — like
+<code>comments</code>, reading-nav writes its own UI; you author only
+the <code>filter=</code> marker (for the filter) and the per-site
+<code>nav-manifest.js</code> data (for the page nav). The neighbor
+labels come from that data, so one bundle serves a book’s chapters, a
+paper’s perspectives, or any reading site unchanged.
 </div>
 </article>
 </main>

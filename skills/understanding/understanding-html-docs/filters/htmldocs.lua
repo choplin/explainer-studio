@@ -93,6 +93,19 @@ function Div(el)
     }))
   end
 
+  -- card-grid with a filter= attribute is the reading-nav filter target: strip the
+  -- author-facing `filter` key and emit `data-reading-filter` (its value is the
+  -- filter placeholder; an empty value uses reading-nav.js's neutral default). This
+  -- is the semantic-notation way to author a filterable card index — the reading-nav
+  -- bundle injects the search box and hides non-matching `.card` children at runtime.
+  -- No-op unless the reading-nav bundle is shipped on the page.
+  if c:includes("card-grid") and el.attributes["filter"] ~= nil then
+    local placeholder = el.attributes["filter"]
+    el.attributes["filter"] = nil
+    el.attributes["data-reading-filter"] = placeholder
+    return el
+  end
+
   -- keypoints, card, card-grid, aside: pass the class through unchanged.
   return el
 end

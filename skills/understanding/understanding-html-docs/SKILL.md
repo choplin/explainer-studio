@@ -47,7 +47,7 @@ in both themes — and the worked example a generated document mirrors.
 | `site/color.html` | The meaning-only color model and the token layers |
 | `site/components.html` | The classes you opt into: callout, keypoints, card, chip, aside… |
 | `site/enhancement.html` | What `base.js` adds, and the preconditions it needs |
-| `site/tier2.html` | The opt-in bundles: highlight, diff, diagram |
+| `site/tier2.html` | The opt-in bundles: highlight, diff, diagram, comments, reading-nav |
 | `site/contract.html` | The rules, and why generation needs no general review |
 
 Serve `site/` over HTTP (`cd site && python3 -m http.server`) — the diagram
@@ -194,7 +194,7 @@ context-css: color.css               # optional: one consumer stylesheet…
 #   - pdf-studio.css
 context-js:                          # optional: consumer scripts, emitted (defer)
 #   - nav-manifest.js                #   after base.js in list order — data first,
-#   - pdf-studio.js                  #   then the logic that reads it
+#   - reading-nav.js                 #   then the logic that reads it
 back-link: "← Back to the index"     # optional: footer link text (omit for none)
 ---
 ```
@@ -214,6 +214,7 @@ Body vocabulary (everything the author reaches for):
 | A bold lead-in inside a callout | `[Label]{.label}` at the paragraph start |
 | What a section boils down to | `::: {.keypoints}` with `### Title` + a `- ` list |
 | A grid of peer blocks | `:::: {.card-grid}` wrapping `::: {.card}` blocks |
+| A **filterable** card index (needs the `reading-nav` bundle) | `:::: {.card-grid filter="絞り込む…"}` — the `filter=` value is the search-box placeholder (empty = neutral default); emits `data-reading-filter` |
 | A small outlined / filled label | `[text]{.chip}` · `[text]{.chip .accent}` · `[text]{.badge}` |
 | Opening paragraph / eyebrow / louder line | `::: {.lede}` · `::: {.kicker}` · `::: {.pullquote}` (emitted as `<p class>`) |
 | A quiet remark | `::: {.aside}` |
@@ -259,9 +260,10 @@ hand-write under `-f markdown-raw_html`):
 | A harvested figure | `![caption](../ocr/figures/fig-p031-1.jpg)` | `<img src="figures/fig-p031-1.jpg" …>` — the `../ocr/figures/` prefix is rewritten to `figures/` at generation time, so no page points outside the site root (the caller's `grep '../'` review check becomes unnecessary) |
 
 `.player` without a `src=` is a **hard error at generation** (like an unknown callout
-variant). The page-to-page nav data (`window.__PDF_STUDIO_NAV`) is *not* the
-generator's concern — it is a per-site `nav-manifest.js` the consumer authors and
-loads as a `context-js` entry (before the script that reads it).
+variant). The page-to-page nav *widget* is the `reading-nav` opt-in component (below);
+its nav *data* (`window.__HTMLDOCS_NAV`) is *not* the generator's concern — it is a
+per-site `nav-manifest.js` the consumer authors and loads as a `context-js` entry
+(before `reading-nav.js`, which reads it).
 
 ### Generating
 
@@ -273,7 +275,7 @@ One page:
 ```bash
 scripts/build.sh <src.md> <out-dir> \
   --assets <understanding-html-docs/assets> \
-  [--context <dir-of-context-css>] \
+  [--context <dir-of-context-css>] [--component <name>]... \
   [--template <consumer-template>] [--filter <consumer-filter.lua>]... [--inline]
 ```
 
@@ -284,17 +286,22 @@ drops the `assets/` dir, yielding **one self-contained file** (remote CDN engine
 stay external). Inline is opt-in — a single-file consumer (explain-diff) asks for
 it; a multi-page site (pdf-studio) stays copy-mode so pages share one asset set.
 `--template` / `--filter` are the consumer hooks from *Consumer-specific
-vocabulary* above; both compose with `--inline`.
+vocabulary* above; both compose with `--inline`. `--component <name>` (repeatable)
+copies a Tier 2 opt-in bundle's flat css/js from `<assets>/components/<name>/` into
+`<out-dir>/assets/`, so a copy-mode site consumes an html-docs-owned component the
+same way it references a context asset (`--context` copies only a consumer's own flat
+dir, never the nested `components/` tree); the page still opts in per its
+`context-css` / `context-js` frontmatter. See *Opt-in components* below.
 
 A whole site (each `src/*.md` → `out/<name>.html`, sharing one asset set):
 
 ```bash
 scripts/build-site.sh <src-dir> <out-dir> \
-  --assets <understanding-html-docs/assets> [--context <dir>]
+  --assets <understanding-html-docs/assets> [--context <dir>] [--component <name>]...
 ```
 
-`base.css` / `base.js` (and any context `*.css`) are copied verbatim into
-`<out-dir>/assets/`. Inter-page navigation is authored as links in the source — the
+`base.css` / `base.js` (and any context `*.css`, and any `--component` bundle) are
+copied verbatim into `<out-dir>/assets/`. Inter-page navigation is authored as links in the source — the
 reference site links each page home from its `header.site` and lists the pages from
 the index; no manifest is needed for that shape.
 
@@ -364,7 +371,7 @@ real `alt` and a `figcaption`, never a bare `<img>`).
 | One line, said louder | `.pullquote` |
 | An eyebrow above a heading | `.kicker` |
 | The opening paragraph | `.lede` |
-| A bordered block, and a grid of them | `.card` / `.card-grid` |
+| A bordered block, and a grid of them | `.card` / `.card-grid` (add `filter=` to make the grid a reading-nav filter target → `data-reading-filter`) |
 | A small outlined label | `.chip` (`.chip.accent` to accent it) |
 | A small filled status/count marker | `.badge` |
 | A quiet remark, carrying no meaning-color | `.aside` (the class — not a bare `<aside>`) |
@@ -377,6 +384,14 @@ real `alt` and a `figcaption`, never a bare `<img>`).
 `.comments-panel`, `.comments-backdrop`, `.comments-fab`, `.comments-composer`,
 `.comments-cmenu`, `.comments-selbtn`, `.comment-card`, `.comment-anchored`, and
 their descendants. These exist only when the `comments` bundle is shipped.
+
+**Injected by the `reading-nav` component (Tier 2) — never authored:**
+`.filter`, `.filter-empty`, `.chapnav`, `.pagenav-panel`, `.pagenav-backdrop`,
+`.pages-btn`, and the `.rn-hidden` state on a non-matching filter item. These exist
+only when the `reading-nav` bundle is shipped. The index the filter enhances carries
+a `data-reading-filter` attribute — authored in the notation as `:::: {.card-grid
+filter="…"}`, or set by hand on a consumer's own index markup (e.g. the pdf-studio
+landing `ol.cards`). Its markup and styling are the consumer's, not this component's.
 
 **Forbidden:** a class nothing defines; a raw color in a `style` attribute
 (`style="color:#e11"` — go through `var(--token)`); a primitive (`--n-*`,
@@ -398,6 +413,7 @@ document that renders no diffs never ships diff2html.
 | `components/diff/` | git diffs (`pre.diff-source` + `div.diff-render` pairs, unified↔side-by-side) | diff2html v3 |
 | `components/diagram/` | mermaid diagrams (`pre.mermaid`) | mermaid v11 |
 | `components/comments/` | a browser-side review layer — select text / right-click a block to comment, list panel in the right gutter, localStorage + JSON/Markdown export (**no markup to author**) | — none; vanilla & offline |
+| `components/reading-nav/` | reading-site navigation for a multi-page site — a live filter over a `data-reading-filter` index, prev/next links, and an all-pages drawer, driven by a per-site `window.__HTMLDOCS_NAV` manifest (**no markup to author**) | — none; vanilla & offline |
 
 The `comments` bundle is the odd one out: it has **no third-party engine** and
 **no markup contract** (the reader creates comments at runtime; nothing is

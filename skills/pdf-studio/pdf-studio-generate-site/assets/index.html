@@ -1,8 +1,9 @@
 <!DOCTYPE html>
 <!-- pdf-studio generate-site: landing page skeleton.
      Replace the UPPERCASE placeholders; keep the overall structure and only
-     use classes from the base.css + pdf-studio.css catalog. Keep the four <head>
-     asset refs (bundled locally); external URLs (web fonts, CDN libraries, remote
+     use classes from the base.css + pdf-studio.css catalog (the reading-nav filter
+     injects its own chrome at runtime — nothing to author). Keep the <head> asset
+     refs (bundled locally); external URLs (web fonts, CDN libraries, remote
      images) are allowed where a page needs them. -->
 <html lang="ja">
 <head>
@@ -12,14 +13,15 @@
 <title>SITE_TITLE</title>
 <link rel="stylesheet" href="assets/base.css">
 <link rel="stylesheet" href="assets/pdf-studio.css">
+<link rel="stylesheet" href="assets/reading-nav.css">
 <!-- theme boot: apply the saved theme before first paint (no flash). Keep verbatim; key must match base.js THEME_KEY. -->
 <script>try{var t=localStorage.getItem('html-docs-theme');if(t==='dark')document.documentElement.classList.add('theme-dark');else if(t==='light')document.documentElement.classList.add('theme-light');}catch(e){}</script>
 <script src="assets/base.js" defer></script>
 <!-- page-to-page nav manifest: the single source of truth every page loads, written
      to site/assets/ in Phase 3 (the generated report pages reference it the same way,
-     via their context-js frontmatter). Must load before pdf-studio.js; defer keeps order. -->
+     via their context-js frontmatter). Must load before reading-nav.js; defer keeps order. -->
 <script src="assets/nav-manifest.js" defer></script>
-<script src="assets/pdf-studio.js" defer></script>
+<script src="assets/reading-nav.js" defer></script>
 </head>
 <body>
 <main>
@@ -36,8 +38,9 @@
 
   <h2>チャプター</h2>
   <!-- One <li> per page in reading order. Cards carry no hue: color means something
-       in this design system, so chapters are not color-coded. -->
-  <ol class="cards">
+       in this design system, so chapters are not color-coded. data-reading-filter
+       opts this index into the reading-nav live filter (empty = neutral placeholder). -->
+  <ol class="cards" data-reading-filter>
     <li>
       <a href="SLUG.html">
         <span class="num">KICKER<!-- 第1章 --></span>
