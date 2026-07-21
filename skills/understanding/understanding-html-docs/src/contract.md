@@ -41,7 +41,7 @@ There is deliberately **no linter**. A checker can tell you that a class *exists
 Whether a class exists is not the question. Whether it was used as intended is.
 :::
 
-That question is a *semantic* one, and once the page is generated from the IR it splits in a way that leaves no general review step to run. The **mechanical** half — a nonexistent class, a name borrowed from another system, an unwrapped table, an inline color — is made **impossible to emit** by the generator, so there is nothing to review. The **semantic** half is either low-stakes cosmetic, which a reading site skips by policy, or a consuming skill's own axis, which that skill **internalizes as its own completion check** (as `understanding-explain-diff` does for its `risk`/`tested`/`verified` values).
+That question is a *semantic* one, and once the page is generated from the source it splits in a way that leaves no general review step to run. The **mechanical** half — a nonexistent class, a name borrowed from another system, an unwrapped table, an inline color — is made **impossible to emit** by the generator, so there is nothing to review. The **semantic** half is either low-stakes cosmetic, which a reading site skips by policy, or a consuming skill's own axis, which that skill **internalizes as its own completion check** (as `understanding-explain-diff` does for its `risk`/`tested`/`verified` values).
 
 ::: {.keypoints}
 ### The semantic gap the generator cannot close

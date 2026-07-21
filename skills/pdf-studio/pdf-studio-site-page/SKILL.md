@@ -1,12 +1,12 @@
 ---
 name: pdf-studio-site-page
-description: Internal procedure for the pdf-studio-generate-site skill — read one report Markdown and author a restructured, web-native page as a semantic IR (Markdown + fenced divs), NOT a 1:1 conversion and NOT hand-written HTML. The understanding-html-docs generator binds the IR to the markup contract deterministically; this procedure writes only the meaning (which passage is a hazard, the key point, the takeaways) and the editorial restructuring. Applied once per report, in parallel, by the generate-site orchestrator (dispatched to a pdf-studio-site-page subagent under Claude Code, or applied inline otherwise). NOT a user-facing skill and NOT triggered directly by user requests.
+description: Internal procedure for the pdf-studio-generate-site skill — read one report Markdown and author a restructured, web-native page as semantic Markdown (Markdown + fenced divs), NOT a 1:1 conversion and NOT hand-written HTML. The understanding-html-docs generator binds the semantic Markdown to the markup contract deterministically; this procedure writes only the meaning (which passage is a hazard, the key point, the takeaways) and the editorial restructuring. Applied once per report, in parallel, by the generate-site orchestrator (dispatched to a pdf-studio-site-page subagent under Claude Code, or applied inline otherwise). NOT a user-facing skill and NOT triggered directly by user requests.
 user-invocable: false
 ---
 
 # Site page authoring
 
-You turn one report Markdown file into one **semantic IR file** (Markdown + fenced divs) that is *designed for the web*: restructured for scanning on a phone, not a mechanical rendering of the source. The [[understanding-html-docs]] generator turns your IR into the final HTML page — you never write HTML, `<head>`, classes, or asset links, and you never rewrite figure paths or escape characters. Those are the generator's job and it cannot get them wrong. **Your whole job is meaning and structure**: which passage is a hazard vs the key point, what the takeaways are, and how to lay the material out for reading.
+You turn one report Markdown file into one **semantic Markdown file** (Markdown + fenced divs) that is *designed for the web*: restructured for scanning on a phone, not a mechanical rendering of the source. The [[understanding-html-docs]] generator turns your semantic Markdown into the final HTML page — you never write HTML, `<head>`, classes, or asset links, and you never rewrite figure paths or escape characters. Those are the generator's job and it cannot get them wrong. **Your whole job is meaning and structure**: which passage is a hazard vs the key point, what the takeaways are, and how to lay the material out for reading.
 
 ## When this applies
 
@@ -17,14 +17,14 @@ The `pdf-studio-generate-site` skill applies this procedure once per report file
 The caller provides the following. If any is missing, report what is missing and stop.
 
 - Absolute path to the source report Markdown
-- Absolute output path for the IR (`<WORK_DIR>/ir/<slug>.md`)
+- Absolute output path for the source (`<WORK_DIR>/src/<slug>.md`)
 - Site title, and this page's kicker label (e.g. 第2章 / 全体レポート)
 - Whether `<WORK_DIR>/ocr/figures/` exists (harvested figure crops the caller copies into `site/figures/`)
 - Audio file name under `site/audio/` if a matching guide exists (else "none")
 
-## The IR you write
+## The source you write
 
-Write a Markdown file with this frontmatter, then the body in the IR vocabulary below. The frontmatter is boilerplate — keep it **verbatim except** `title` and the kicker text; it wires the page chrome and the asset order (the generator owns `<head>`, theme-boot, and asset links from it):
+Write a Markdown file with this frontmatter, then the body in the semantic-Markdown vocabulary below. The frontmatter is boilerplate — keep it **verbatim except** `title` and the kicker text; it wires the page chrome and the asset order (the generator owns `<head>`, theme-boot, and asset links from it):
 
 ```yaml
 ---
@@ -39,7 +39,7 @@ context-js:
 
 Body vocabulary — reach only for these; the generator rejects anything else (an invented class or raw HTML cannot pass, an unknown callout variant is a hard build error):
 
-| To express | Write in the IR |
+| To express | Write in the semantic Markdown |
 |---|---|
 | The kicker label (第N章 / 全体レポート) | `::: {.kicker}` … `:::` (the label passed by the caller) |
 | The page title | `# <PAGE_TITLE>` |
@@ -62,7 +62,7 @@ Body vocabulary — reach only for these; the generator rejects anything else (a
 
 Everything mechanical is the generator's guarantee — you do **not** write HTML, `<head>`, classes, asset/script tags, prev/next nav, figure-path rewrites, `<`/`>`/`&` escaping, or `.tablewrap`. What remains yours:
 
-- **Factual fidelity**: every claim in the IR must come from the source report. Restructure and rephrase freely; do not invent content.
+- **Factual fidelity**: every claim in the source must come from the source report. Restructure and rephrase freely; do not invent content.
 - **Keep every `[pNN]` anchor** from the source, written as `[pNN]{.p}` at the point it annotates. Do not drop them — they are the link back to the PDF.
 - **Write in the language of the source report.**
 - **Carry only the figures the source report actually embeds** — do not go hunting in `figures/` for extra crops. If the caller said `ocr/figures/` does not exist, the report has no figures; do not invent any. Never a bare figure: it appears where the prose discusses it, with the report's explanation intact, and the alt text says what it shows.
@@ -89,11 +89,11 @@ A page that ends up with the same heading sequence and sentence order as the sou
 
 ## Output
 
-Write the finished IR to the given output path (`<WORK_DIR>/ir/<slug>.md`) — unconditionally, without prompting about an existing file. This is an orchestrator-dispatched worker; the parent [[pdf-studio-generate-site]] already confirmed clearing/overwriting before dispatching. Do NOT run the generator yourself — the orchestrator builds every IR into HTML in one pass afterward.
+Write the finished source to the given output path (`<WORK_DIR>/src/<slug>.md`) — unconditionally, without prompting about an existing file. This is an orchestrator-dispatched worker; the parent [[pdf-studio-generate-site]] already confirmed clearing/overwriting before dispatching. Do NOT run the generator yourself — the orchestrator builds every source into HTML in one pass afterward.
 
 ## Reply
 
-Return ONLY, in this order (never the IR body):
+Return ONLY, in this order (never the source body):
 - the output path
 - the page title (the `# …` heading text)
 - a 2–3 line card summary for the landing page (plain text, composed for a reader deciding whether to open the chapter)

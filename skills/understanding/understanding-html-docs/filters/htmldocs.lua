@@ -1,4 +1,4 @@
--- htmldocs.lua — binds the semantic IR vocabulary to the understanding-html-docs
+-- htmldocs.lua — binds the semantic-Markdown vocabulary to the understanding-html-docs
 -- markup contract. This is the injectable "meaning -> presentation" rule layer.
 --
 -- What it guarantees (that hand-authored HTML cannot):

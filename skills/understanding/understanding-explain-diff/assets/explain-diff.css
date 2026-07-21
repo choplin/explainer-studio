@@ -62,7 +62,7 @@
   .ba-before, .ba-after { border-left: 5px solid; border-radius: 8px; padding: 0.5rem 1rem; }
   .ba-before { border-left-color: var(--before); }
   .ba-after  { border-left-color: var(--after); }
-  /* descendant (not direct-child): under the IR path the label ships as the
+  /* descendant (not direct-child): under the source path the label ships as the
      first paragraph's <strong>, i.e. .ba-before p strong — not a direct child. */
   .ba-before strong, .ba-after strong { display: block; margin-bottom: 0.35rem; font-size: 0.9rem; }
   .ba-before strong { color: var(--muted); }

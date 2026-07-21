@@ -83,9 +83,9 @@ Then compute the **review plan**: aggregate the chunks into an attention budget
 — how many chunks need close reading vs. skimming vs. no review (mechanical),
 with a rough time estimate. This is the first thing the reviewer sees.
 
-### 3. Author the IR and generate
+### 3. Author the semantic Markdown and generate
 
-Write a semantic **IR** (Markdown + fenced-div directives) and run this skill's
+Write semantic **Markdown** (Markdown + fenced-div directives) and run this skill's
 build script; the generator ([[understanding-html-docs]]) binds each
 meaning to markup, inlines the design system, and emits the single self-contained
 file. The author writes only meaning — never HTML, never a pasted `base.css` or
@@ -130,11 +130,11 @@ the order the reviewer should read them (there is no separate order attribute).
 Each `.chunk` needs a stable, unique `id` (the read-progress state key).
 
 **Generate** — run from this skill's directory (`examples/sample.md` is a worked
-IR example):
+semantic-Markdown example):
 
 ```bash
-scripts/build.sh <ir.md> <out-dir>          # one self-contained file (default)
-scripts/build.sh <ir.md> <out-dir> --copy   # multi-file (external assets/) instead
+scripts/build.sh <src.md> <out-dir>          # one self-contained file (default)
+scripts/build.sh <src.md> <out-dir> --copy   # multi-file (external assets/) instead
 ```
 
 Runtime is **pandoc**, resolved by the generator's preflight (PATH → bundled
@@ -244,7 +244,7 @@ unmarked. Over-marking destroys the signal, so when in doubt, leave it unmarked.
   (this skill's context layer, its only styling), the base skill, or the component.
   `assets/template-explain-diff.html` and `filters/explain-diff.lua` are the
   skill's own template/vocabulary — the meaning→markup binding lives there, not in
-  the IR.
+  the source.
 
 ## Success criteria
 

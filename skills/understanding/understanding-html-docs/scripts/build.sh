@@ -1,11 +1,11 @@
 #!/usr/bin/env bash
-# build.sh — render one semantic IR file into an understanding-html-docs page.
+# build.sh — render one semantic Markdown file into an understanding-html-docs page.
 #
 # Usage:
-#   build.sh <ir.md> <out-dir> --assets <base-assets-dir> [--context <dir>]
+#   build.sh <src.md> <out-dir> --assets <base-assets-dir> [--context <dir>]
 #            [--template <file>] [--filter <file>]... [--inline]
 #
-#   <ir.md>              the semantic IR (Markdown + fenced divs) to render
+#   <src.md>             the semantic Markdown (Markdown + fenced divs) to render
 #   <out-dir>            site output root; the page lands at <out-dir>/<name>.html
 #   --assets <dir>       dir holding base.css / base.js (understanding-html-docs/assets)
 #   --context <dir>      optional dir of consumer context stylesheets/scripts (*.css/*.js)
@@ -36,7 +36,7 @@ done
 
 template="${template:-$SKILL_DIR/assets/template.html}"
 
-[[ -f "$src" ]]      || { echo "build.sh: IR file not found: $src" >&2; exit 2; }
+[[ -f "$src" ]]      || { echo "build.sh: source file not found: $src" >&2; exit 2; }
 [[ -n "$out" ]]      || { echo "build.sh: missing <out-dir>" >&2; exit 2; }
 [[ -d "$assets" ]]   || { echo "build.sh: --assets dir not found: $assets" >&2; exit 2; }
 

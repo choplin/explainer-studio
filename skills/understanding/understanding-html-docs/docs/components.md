@@ -167,7 +167,7 @@ will helpfully add it back.
   not. The build is the one path — there is no hand-authoring route.** The original
   rule: a runtime floor of shell + jq, distribution by *an agent copies files by
   instruction*, and no build anywhere. It has been deliberately overturned **for
-  authoring** — every page is now written as a semantic IR (Markdown + fenced divs) and
+  authoring** — every page is now written as semantic Markdown (Markdown + fenced divs) and
   run through a **pandoc** build that emits the HTML (the generator this skill owns; see
   SKILL.md, *Producing a page*). What changed is only the *authoring* side: a page is
   generated, not typed, and pandoc is a real runtime resolved by preflight, so the

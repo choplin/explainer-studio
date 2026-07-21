@@ -58,10 +58,10 @@ Run this **before** Step 3: the overview site page embeds `audio/overview.m4a` a
 
 ## Step 3 — Site (unless "none" in Step 0)
 
-Follow **[[paper-studio-generate-site]]** in full to build a browsable website under `<WORK_DIR>/site/` from `reports/` (and the overview `audio/` guide, played in-page): scaffold the semantic IR layer and figures, author one IR page per report in parallel (in the canonical perspective order, with perspective kicker labels), generate the pages in one pass with the shared generator, then write the landing page + nav manifest.
+Follow **[[paper-studio-generate-site]]** in full to build a browsable website under `<WORK_DIR>/site/` from `reports/` (and the overview `audio/` guide, played in-page): scaffold the semantic-Markdown layer and figures, author one source page per report in parallel (in the canonical perspective order, with perspective kicker labels), generate the pages in one pass with the shared generator, then write the landing page + nav manifest.
 
 - **Build only — do not deploy here.** [[paper-studio-generate-site]] deliberately keeps `site/` local so it can be reviewed before going public; publishing is [[pdf-studio-deploy-site]]'s job and is handled at Finalize as an offer, confirmed then.
-- Delegate the mechanics (scaffold, per-page IR authoring, generation, index) to [[paper-studio-generate-site]] — do not duplicate them here. If `understanding-html-docs` or `pdf-studio-site-base` is not installed, it stops; skip the site build and say so rather than working around it.
+- Delegate the mechanics (scaffold, per-page source authoring, generation, index) to [[paper-studio-generate-site]] — do not duplicate them here. If `understanding-html-docs` or `pdf-studio-site-base` is not installed, it stops; skip the site build and say so rather than working around it.
 
 ## Finalize
 
@@ -82,5 +82,5 @@ Follow **[[paper-studio-generate-site]]** in full to build a browsable website u
 - [ ] `reports/overview.md` exists in the Ochiai format, and every in-scope `reports/<perspective>.md` exists; `spine.md` and `paper.bib` were produced, and [[paper-studio-summarize]]'s own Finalize consistency sweep ran.
 - [ ] Unless audio was "none": `dialogue/overview.txt` exists in the `A:`/`B:` format faithful to the overview, and (when VOICEVOX + ffmpeg are available) a non-empty `audio/overview.m4a` was produced and its path + duration reported; otherwise audio was skipped with a clear note.
 - [ ] The overview audio was produced **before** the site build, so the overview site page can embed it.
-- [ ] Unless the site was "none": `<WORK_DIR>/site/` was built via [[paper-studio-generate-site]] (a page per report in the canonical perspective order with perspective kickers, generated from IR by the shared generator) and **not** deployed without explicit confirmation; the user was told it is ready and offered [[pdf-studio-deploy-site]]. (If `understanding-html-docs` / `pdf-studio-site-base` were missing, the site was skipped with a clear note.)
+- [ ] Unless the site was "none": `<WORK_DIR>/site/` was built via [[paper-studio-generate-site]] (a page per report in the canonical perspective order with perspective kickers, generated from semantic Markdown by the shared generator) and **not** deployed without explicit confirmation; the user was told it is ready and offered [[pdf-studio-deploy-site]]. (If `understanding-html-docs` / `pdf-studio-site-base` were missing, the site was skipped with a clear note.)
 - [ ] A final manifest of all artifacts (with the work dir path) was shown to the user.

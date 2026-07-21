@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# build.sh — render an explain-diff IR file into a single self-contained
+# build.sh — render an explain-diff source file into a single self-contained
 # understanding-html-docs page (inline mode, the default).
 #
 # It assembles the context assets explain-diff always uses (its own
@@ -8,8 +8,8 @@
 # explain-diff template variant and consumer filter.
 #
 # Usage:
-#   build.sh <ir.md> <out-dir> [--copy]
-#     <ir.md>    the explain-diff semantic IR
+#   build.sh <src.md> <out-dir> [--copy]
+#     <src.md>   the explain-diff semantic Markdown
 #     <out-dir>  output root; the page lands at <out-dir>/<name>.html
 #     --copy     emit copy-mode (external assets/ dir) instead of one inline file
 #
@@ -30,7 +30,7 @@ while [[ $# -gt 0 ]]; do
     *) if [[ -z "$src" ]]; then src="$1"; elif [[ -z "$out" ]]; then out="$1"; fi; shift ;;
   esac
 done
-[[ -f "$src" ]] || { echo "build.sh: IR file not found: $src" >&2; exit 2; }
+[[ -f "$src" ]] || { echo "build.sh: source file not found: $src" >&2; exit 2; }
 [[ -n "$out" ]] || { echo "build.sh: missing <out-dir>" >&2; exit 2; }
 
 # Stage the context dir: explain-diff's stylesheet + the opt-in components it

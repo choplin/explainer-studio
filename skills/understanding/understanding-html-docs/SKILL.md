@@ -1,9 +1,9 @@
 ---
 name: understanding-html-docs
-description: The design system AND the deterministic generator for skills that explain something as a self-contained HTML document. It owns the visual language (typography, a meaning-only color model, callouts, chips), the progressive-enhancement kit (theme toggle, reading progress, table of contents, back-to-top), and a pandoc-based generator that binds a semantic intermediate representation (Markdown + fenced divs that name only meaning, `::: {.callout variant=danger}`) to that markup — so an unknown callout variant is a hard build error, every table is wrapped in .tablewrap, and an invented class or inline style is unrepresentable. The author writes only the meaning; the mechanical layer cannot be gotten wrong. Other skills delegate here to generate their pages from a semantic IR and copy the base assets, then layer their own context stylesheet and vocabulary on top; the output is plain static HTML that opens with no server. Use this skill when another skill produces understanding-html-docs pages or applies its design system.
+description: The design system AND the deterministic generator for skills that explain something as a self-contained HTML document. It owns the visual language (typography, a meaning-only color model, callouts, chips), the progressive-enhancement kit (theme toggle, reading progress, table of contents, back-to-top), and a pandoc-based generator that binds semantic Markdown (Markdown + fenced divs that name only meaning, `::: {.callout variant=danger}`) to that markup — so an unknown callout variant is a hard build error, every table is wrapped in .tablewrap, and an invented class or inline style is unrepresentable. The author writes only the meaning; the mechanical layer cannot be gotten wrong. Other skills delegate here to generate their pages from semantic Markdown and copy the base assets, then layer their own context stylesheet and vocabulary on top; the output is plain static HTML that opens with no server. Use this skill when another skill produces understanding-html-docs pages or applies its design system.
 ---
 
-# understanding-html-docs — design system + IR → page generator
+# understanding-html-docs — design system + semantic Markdown → page generator
 
 This skill owns the resources shared across skills that render an **explanation as
 a browsable web document** — [[understanding-explain-diff]] (a diff explained to a
@@ -22,12 +22,12 @@ And that design system is not authored by hand — it is **generated**. The skil
 factors the binding of *meaning* to *presentation* ("this is a hazard", never "make
 this box red") into two layers so the mechanical half is produced, not typed:
 
-- **The author writes a semantic IR** — Markdown with fenced divs that name only
+- **The author writes semantic Markdown** — Markdown with fenced divs that name only
   the meaning (`::: {.callout variant=danger}`).
 - **The generator binds meaning → markup** — a pandoc template for the structural
   boilerplate, a Lua filter for the component vocabulary.
 
-Consuming skills run their content (as a semantic IR) through this skill's generator
+Consuming skills run their content (as semantic Markdown) through this skill's generator
 and copy the asset files verbatim, adding their own context stylesheet and content —
 and never edit these files per document.
 
@@ -36,7 +36,7 @@ and never edit these files per document.
 **The normative source is the reference site under this skill's `site/`** — `site/index.html`
 and the six pages it links. It is itself **generated from `src/*.md` by this skill's
 own generator** (dogfood): the contract is written in the design system it documents,
-from the same IR any consumer writes, so the contract and the worked example are the
+from the same semantic Markdown any consumer writes, so the contract and the worked example are the
 same artifact and cannot drift apart. It is also the living catalog — every component,
 in both themes — and the worked example a generated document mirrors.
 
@@ -59,7 +59,7 @@ base pages build with the default template and filter; `tier2.html` is the one p
 whose Tier 2 component markup the base dialect cannot express, so it builds with
 `assets/template-tier2.html` (adds the `comments-gutter` class + the component `<head>`
 tags) and `filters/tier2.lua` (emits the `pre.mermaid` / `pre.diff-source` / highlight
-contracts from plain fenced code blocks). Editing a page means editing its IR and
+contracts from plain fenced code blocks). Editing a page means editing its source and
 regenerating — never hand-editing the generated HTML.
 
 The table below is an index into that site, not a second source of truth. When the
@@ -91,8 +91,8 @@ The generator machinery, also under this skill's root:
 - **`filters/htmldocs.lua`** — the pandoc Lua filter that binds each meaning to its
   markup, validates the vocabulary (an unknown callout variant is a hard error), and
   wraps every table in `.tablewrap`.
-- **`scripts/build.sh`** — render one IR file into a page; **`scripts/build-site.sh`**
-  — render a whole `ir/*.md` dir into a multi-page site; plus `scripts/preflight.sh`
+- **`scripts/build.sh`** — render one source file into a page; **`scripts/build-site.sh`**
+  — render a whole `src/*.md` dir into a multi-page site; plus `scripts/preflight.sh`
   (resolves pandoc: PATH → bundled `nix develop` → fail) and `scripts/inline.awk`
   (the inline-mode fold).
 - **`flake.nix` / `flake.lock`** — the pinned pandoc runtime the preflight falls back
@@ -136,11 +136,11 @@ At this skill's root:
   violation; it simply forgoes the parts of the kit it opted out of.
 - **Progressive enhancement, not dependence.** Everything `base.js` adds is a
   layer on top of a page that already reads correctly. The semantic markup comes
-  first (authored as IR, generated to HTML); the kit only enriches it.
+  first (authored as semantic Markdown, generated to HTML); the kit only enriches it.
 
-## Producing a page — IR → HTML, deterministically
+## Producing a page — semantic Markdown → HTML, deterministically
 
-**A page is generated from a semantic IR — this is the one route.** The generator
+**A page is generated from semantic Markdown — this is the one route.** The generator
 takes Markdown + fenced divs that name only the *meaning* (`::: {.callout
 variant=danger}`) and deterministically emits the HTML: `assets/template.html` owns the
 structural boilerplate (head skeleton, theme-boot key, asset order, `header.site` /
@@ -159,9 +159,9 @@ What determinism buys, and what it does not:
   callout variant is a **hard error at generation**, not a silent unstyled box;
   every `<table>` is wrapped in `.tablewrap`.
 - **Does not buy:** whether a passage *is* a hazard (`danger`) or the key point
-  (`key`) is a reading judgment no generator can make. That choice lives in the IR
+  (`key`) is a reading judgment no generator can make. That choice lives in the source
   and is still reviewed — see *Reviewing a document* below. Determinism guarantees
-  the IR→HTML mapping, not the correctness of the IR's meaning.
+  the semantic-Markdown→HTML mapping, not the correctness of the source's meaning.
 
 That path introduces an **authoring-time build** (pandoc) — a deliberate reversal of
 the old "No build step" prohibition, recorded in
@@ -181,7 +181,7 @@ Two output shapes, selected on the generator's command line:
   truth — the file is re-generated, never hand-tuned. (`build.sh --inline`;
   [[understanding-explain-diff]] takes this route.)
 
-### The IR dialect
+### The semantic-Markdown notation
 
 Frontmatter carries the page chrome:
 
@@ -227,7 +227,7 @@ Rules the generator enforces (so you cannot get them wrong):
 - `variant=` must be one of `tip` / `warn` / `danger` / `key` (or omitted for note).
   Anything else — `warning`, `error`, a typo — **fails the build**.
 - Every table is wrapped; never hand-write `.tablewrap`.
-- `-f markdown-raw_html` is on: raw HTML in the IR is **not** passed through, so an
+- `-f markdown-raw_html` is on: raw HTML in the source is **not** passed through, so an
   invented class or inline color cannot slip in.
 
 #### Consumer-specific vocabulary
@@ -244,7 +244,7 @@ or [[understanding-explain-diff]]'s risk / verify axes) supplies:
    from the default single `main > article` (e.g. explain-diff's multi-`article`
    walkthrough with its own header and bottom scripts).
 
-This is how the IR vocabulary, its rendering, *and* the page skeleton are injected
+This is how the semantic-Markdown vocabulary, its rendering, *and* the page skeleton are injected
 per consumer. Both the base and consumer filters run in one `--lua-filter` chain,
 so `base vocabulary + consumer vocabulary` compose.
 
@@ -271,7 +271,7 @@ fail); see [`docs/skill-runtime-and-dependencies.md`](../../../docs/skill-runtim
 One page:
 
 ```bash
-scripts/build.sh <ir.md> <out-dir> \
+scripts/build.sh <src.md> <out-dir> \
   --assets <understanding-html-docs/assets> \
   [--context <dir-of-context-css>] \
   [--template <consumer-template>] [--filter <consumer-filter.lua>]... [--inline]
@@ -286,15 +286,15 @@ it; a multi-page site (pdf-studio) stays copy-mode so pages share one asset set.
 `--template` / `--filter` are the consumer hooks from *Consumer-specific
 vocabulary* above; both compose with `--inline`.
 
-A whole site (each `ir/*.md` → `out/<name>.html`, sharing one asset set):
+A whole site (each `src/*.md` → `out/<name>.html`, sharing one asset set):
 
 ```bash
-scripts/build-site.sh <ir-dir> <out-dir> \
+scripts/build-site.sh <src-dir> <out-dir> \
   --assets <understanding-html-docs/assets> [--context <dir>]
 ```
 
 `base.css` / `base.js` (and any context `*.css`) are copied verbatim into
-`<out-dir>/assets/`. Inter-page navigation is authored as links in the IR — the
+`<out-dir>/assets/`. Inter-page navigation is authored as links in the source — the
 reference site links each page home from its `header.site` and lists the pages from
 the index; no manifest is needed for that shape.
 
@@ -311,7 +311,7 @@ the reader the opposite of the truth.
 > Whether a class exists is not the question. Whether it was used as intended is.
 
 So the review that would matter is a *semantic* reading task, not a mechanical one.
-But once the page is generated deterministically from the IR, that review splits, and
+But once the page is generated deterministically from the source, that review splits, and
 neither half justifies a standalone review skill:
 
 - **The mechanical half** — a class that does not exist, a name borrowed from another
@@ -337,7 +337,7 @@ semantic axes owns reviewing them; a low-stakes reading site skips review by pol
 This is the class vocabulary the generator emits — its allowlist. A class in
 `base.css` but missing from this index cannot appear in a document (see
 [`docs/components.md`](docs/components.md) §2). It is not a
-hand-authoring target — the author writes the IR dialect above, and the generator emits
+hand-authoring target — the author writes the semantic-Markdown notation above, and the generator emits
 this markup — but it is the canonical map from *meaning* to the element/class it
 becomes.
 
@@ -382,7 +382,7 @@ their descendants. These exist only when the `comments` bundle is shipped.
 (`style="color:#e11"` — go through `var(--token)`); a primitive (`--n-*`,
 `--blue-strong`) read from a component rule; a `<table>` outside `.tablewrap`; a
 meaning color used as decoration; a new ad-hoc hue; a Tier 2 marker without its
-bundle. The generator makes these unrepresentable from the IR; the index keeps them
+bundle. The generator makes these unrepresentable from semantic Markdown; the index keeps them
 nameable so the review can still speak of them.
 
 ## Opt-in components (Tier 2)
@@ -423,7 +423,7 @@ Whatever you add exists in three places at once, and they must agree: the rule i
 `base.css` (or a bundle), a demo on the reference site (the catalog documenting what
 each component means), and a row in the *Semantics → element / class* index above. A
 class missing from that index cannot be authored into a document — the generator emits
-only the indexed markup. A new vocabulary item also needs its **IR-dialect** entry
+only the indexed markup. A new vocabulary item also needs its **semantic-Markdown-notation** entry
 (above) and, if it is not a plain class/variant, a binding rule in
 `filters/htmldocs.lua`.
 
