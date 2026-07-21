@@ -39,11 +39,16 @@ single portable HTML file.</p>
 </div>
 <p>Either way, <strong>copy the assets</strong>. Never link to the
 base’s install path — the document would stop being self-contained.</p>
-<h2 id="the-skeleton">The skeleton</h2>
-<p>The minimum copy-mode page. The theme button mounts into
-<code>header.site</code>, and the table of contents and the
-reading-progress bar are built from the <code>h2</code> /
-<code>h3</code> headings inside <code>main &gt; article</code>.</p>
+<h2 id="the-skeleton-what-the-template-emits">The skeleton — what the
+template emits</h2>
+<p>You never hand-write this. You write only the body — a <code>#</code>
+title, <code>##</code> / <code>###</code> sections, prose — as semantic
+Markdown, and the generator wraps it in the page skeleton below. It is
+shown here as the <strong>output contract</strong>, not as something to
+author: the theme button mounts into <code>header.site</code>, and the
+table of contents and the reading-progress bar are built from the
+<code>h2</code> / <code>h3</code> headings (your <code>##</code> /
+<code>###</code>) inside <code>main &gt; article</code>.</p>
 <pre class="nohighlight"><code>&lt;!doctype html&gt;
 &lt;html lang=&quot;en&quot;&gt;
 &lt;head&gt;

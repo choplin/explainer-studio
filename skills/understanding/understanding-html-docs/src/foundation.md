@@ -11,51 +11,55 @@ FOUNDATION
 # Foundation
 
 ::: {.lede}
-The foundation is carried by element selectors. **No classes needed** — write plain semantic HTML and it is already styled.
+The foundation is what plain Markdown gets you. **No fenced-div class needed** — write ordinary Markdown and it is already styled.
 :::
 
-## Meaning to element
+## What you write
 
-| To express | Author |
+Write ordinary Markdown — the foundation styles it with no class to reach for.
+
+| To express | Write |
 | --- | --- |
-| The body of the document | `main` > `article` |
-| Page chrome | `header.site` / `footer` |
-| The document title | `h1` |
-| A section / subsection | `h2` / `h3` |
-| Prose | `p` |
-| A list, ordered or not | `ul` / `ol` |
-| Tabular data | `table` — always inside `.tablewrap` |
-| Code, inline or as a block | `code` / `pre` > `code` |
-| A quotation | `blockquote` |
-| An illustration and its caption | `figure` > `img` + `figcaption` |
-| A break in the subject | `hr` |
-| A highlighted phrase | `mark` |
-| A link | `a` |
+| The document title | a `#` heading |
+| A section / subsection | a `##` / `###` heading |
+| Prose | a plain paragraph (blank line between) |
+| A list, ordered or not | `- ` items / `1. ` items |
+| Tabular data | a Markdown table — **wrapped in `.tablewrap` automatically** |
+| Code, inline or as a block | inline `code`, or a fenced code block |
+| A quotation | a `>` blockquote |
+| An illustration and its caption | `![caption](path)` |
+| A break in the subject | `---` |
+| A highlighted phrase | `[phrase]{.mark}` |
+| A link | `[text](url)` |
+
+The document body (`main > article`) and the page chrome (`header.site` / `footer`) are **not** yours to write — the template emits them around your content. See [the skeleton](index.html).
 
 ::: {.callout}
-[Headings are not decoration]{.label} — the table of contents and the reading-progress bar are built from `h2` / `h3`. Do not promote a line to a heading just to make it bold.
+[Headings are not decoration]{.label} — the table of contents and the reading-progress bar are built from your `##` / `###` headings. Do not promote a line to a heading just to make it bold.
 :::
 
 ## Prose
 
-A paragraph is a `p`. Links take [the single accent](index.html), and inline `code` reads as a code surface against the page. A phrase can be lifted with [this highlighter band (mark)]{.mark}.
+A paragraph is just a blank-line-separated block of text. Links take [the single accent](index.html), and inline `code` reads as a code surface against the page. A phrase can be lifted with [this highlighter band (mark)]{.mark}.
 
 > A quotation is set apart by a rule and muted text. Use it for actually quoting a source — not for a remark of your own (that is `.aside` or `.callout`).
 
-- The foundation applies itself through element selectors
-- Components are opted into with a class
+- The foundation is plain Markdown — no class to reach for
+- Components are opted into with a fenced-div class
 
 ---
 
 ## Tables
 
-Every `<table>` goes inside `.tablewrap`. Without it, a wide table breaks out of the column on a narrow screen.
+Write a plain Markdown table — the generator wraps every one in `.tablewrap` automatically, so a wide table scrolls inside its column instead of breaking out on a narrow screen. You never write the wrapper yourself.
 
 | Layer | How it applies |
 | --- | --- |
-| Foundation | Element selectors. No class. |
-| Component | Opted into with a class. |
+| Foundation | Plain Markdown. No class. |
+| Component | Opted into with a fenced-div class. |
 | Tier 2 | Only on a page that ships the bundle. |
+
+The wrapper the generator emits around your table:
 
 ```{.nohighlight}
 <div class="tablewrap">
@@ -65,7 +69,7 @@ Every `<table>` goes inside `.tablewrap`. Without it, a wide table breaks out of
 
 ## Figures
 
-An illustration is a `figure` holding an `img` and a `figcaption` — never a bare `img`. `img`, `svg` and `video` are clamped to the text column, so an asset authored at any pixel width cannot push the page into horizontal scroll on a phone. They are never scaled *up*: a small crop stays small rather than being stretched soft.
+Write an illustration as `![caption](path)`; the generator emits a `figure` holding an `img` and a `figcaption` — never a bare `img`. `img`, `svg` and `video` are clamped to the text column, so an asset authored at any pixel width cannot push the page into horizontal scroll on a phone. They are never scaled *up*: a small crop stays small rather than being stretched soft.
 
 ```{.nohighlight}
 ![The caption.](figures/fig-p031-1.jpg)

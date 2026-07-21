@@ -66,7 +66,7 @@ should say, so this box takes no meaning color — it is drawn in the accent.
 ::: {.keypoints}
 ### This section in short
 
-- Put a heading (`h2`/`h3`) and a `ul` inside it
+- Put a `###` heading and a `-` list inside it
 - The color is the accent — there is nothing to choose
 - Never a meaning color (tip / warn / danger)
 :::

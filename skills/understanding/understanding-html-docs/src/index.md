@@ -41,12 +41,14 @@ Either way, **copy the assets**. Never link to the
 base's install path — the document would stop being
 self-contained.
 
-## The skeleton
+## The skeleton — what the template emits
 
-The minimum copy-mode page. The theme button mounts into
-`header.site`, and the table of contents and the
-reading-progress bar are built from the
-`h2` / `h3` headings inside
+You never hand-write this. You write only the body — a `#` title,
+`##` / `###` sections, prose — as semantic Markdown, and the generator
+wraps it in the page skeleton below. It is shown here as the **output
+contract**, not as something to author: the theme button mounts into
+`header.site`, and the table of contents and the reading-progress bar
+are built from the `h2` / `h3` headings (your `##` / `###`) inside
 `main > article`.
 
 ```{.nohighlight}

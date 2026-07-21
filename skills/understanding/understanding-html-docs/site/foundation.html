@@ -17,84 +17,87 @@
 <article>
 <p class="kicker">FOUNDATION</p>
 <h1 id="foundation">Foundation</h1>
-<p class="lede">The foundation is carried by element selectors. <strong>No classes
-needed</strong> — write plain semantic HTML and it is already styled.</p>
-<h2 id="meaning-to-element">Meaning to element</h2>
+<p class="lede">The foundation is what plain Markdown gets you. <strong>No fenced-div
+class needed</strong> — write ordinary Markdown and it is already
+styled.</p>
+<h2 id="what-you-write">What you write</h2>
+<p>Write ordinary Markdown — the foundation styles it with no class to
+reach for.</p>
 <div class="tablewrap">
 <table>
+<colgroup>
+<col style="width: 50%" />
+<col style="width: 50%" />
+</colgroup>
 <thead>
 <tr>
 <th>To express</th>
-<th>Author</th>
+<th>Write</th>
 </tr>
 </thead>
 <tbody>
 <tr>
-<td>The body of the document</td>
-<td><code>main</code> &gt; <code>article</code></td>
-</tr>
-<tr>
-<td>Page chrome</td>
-<td><code>header.site</code> / <code>footer</code></td>
-</tr>
-<tr>
 <td>The document title</td>
-<td><code>h1</code></td>
+<td>a <code>#</code> heading</td>
 </tr>
 <tr>
 <td>A section / subsection</td>
-<td><code>h2</code> / <code>h3</code></td>
+<td>a <code>##</code> / <code>###</code> heading</td>
 </tr>
 <tr>
 <td>Prose</td>
-<td><code>p</code></td>
+<td>a plain paragraph (blank line between)</td>
 </tr>
 <tr>
 <td>A list, ordered or not</td>
-<td><code>ul</code> / <code>ol</code></td>
+<td><code>-</code> items / <code>1.</code> items</td>
 </tr>
 <tr>
 <td>Tabular data</td>
-<td><code>table</code> — always inside <code>.tablewrap</code></td>
+<td>a Markdown table — <strong>wrapped in <code>.tablewrap</code>
+automatically</strong></td>
 </tr>
 <tr>
 <td>Code, inline or as a block</td>
-<td><code>code</code> / <code>pre</code> &gt; <code>code</code></td>
+<td>inline <code>code</code>, or a fenced code block</td>
 </tr>
 <tr>
 <td>A quotation</td>
-<td><code>blockquote</code></td>
+<td>a <code>&gt;</code> blockquote</td>
 </tr>
 <tr>
 <td>An illustration and its caption</td>
-<td><code>figure</code> &gt; <code>img</code> +
-<code>figcaption</code></td>
+<td><code>![caption](path)</code></td>
 </tr>
 <tr>
 <td>A break in the subject</td>
-<td><code>hr</code></td>
+<td><code>---</code></td>
 </tr>
 <tr>
 <td>A highlighted phrase</td>
-<td><code>mark</code></td>
+<td><code>[phrase]{.mark}</code></td>
 </tr>
 <tr>
 <td>A link</td>
-<td><code>a</code></td>
+<td><code>[text](url)</code></td>
 </tr>
 </tbody>
 </table>
 </div>
+<p>The document body (<code>main &gt; article</code>) and the page
+chrome (<code>header.site</code> / <code>footer</code>) are
+<strong>not</strong> yours to write — the template emits them around
+your content. See <a href="index.html">the skeleton</a>.</p>
 <div class="callout">
 <span class="label">Headings are not decoration</span> — the table of
-contents and the reading-progress bar are built from <code>h2</code> /
-<code>h3</code>. Do not promote a line to a heading just to make it
-bold.
+contents and the reading-progress bar are built from your
+<code>##</code> / <code>###</code> headings. Do not promote a line to a
+heading just to make it bold.
 </div>
 <h2 id="prose">Prose</h2>
-<p>A paragraph is a <code>p</code>. Links take <a href="index.html">the
-single accent</a>, and inline <code>code</code> reads as a code surface
-against the page. A phrase can be lifted with
+<p>A paragraph is just a blank-line-separated block of text. Links take
+<a href="index.html">the single accent</a>, and inline <code>code</code>
+reads as a code surface against the page. A phrase can be lifted with
 <mark>this highlighter band (mark)</mark>.</p>
 <blockquote>
 <p>A quotation is set apart by a rule and muted text. Use it for
@@ -102,14 +105,15 @@ actually quoting a source — not for a remark of your own (that is
 <code>.aside</code> or <code>.callout</code>).</p>
 </blockquote>
 <ul>
-<li>The foundation applies itself through element selectors</li>
-<li>Components are opted into with a class</li>
+<li>The foundation is plain Markdown — no class to reach for</li>
+<li>Components are opted into with a fenced-div class</li>
 </ul>
 <hr />
 <h2 id="tables">Tables</h2>
-<p>Every <code>&lt;table&gt;</code> goes inside <code>.tablewrap</code>.
-Without it, a wide table breaks out of the column on a narrow
-screen.</p>
+<p>Write a plain Markdown table — the generator wraps every one in
+<code>.tablewrap</code> automatically, so a wide table scrolls inside
+its column instead of breaking out on a narrow screen. You never write
+the wrapper yourself.</p>
 <div class="tablewrap">
 <table>
 <thead>
@@ -121,11 +125,11 @@ screen.</p>
 <tbody>
 <tr>
 <td>Foundation</td>
-<td>Element selectors. No class.</td>
+<td>Plain Markdown. No class.</td>
 </tr>
 <tr>
 <td>Component</td>
-<td>Opted into with a class.</td>
+<td>Opted into with a fenced-div class.</td>
 </tr>
 <tr>
 <td>Tier 2</td>
@@ -134,12 +138,14 @@ screen.</p>
 </tbody>
 </table>
 </div>
+<p>The wrapper the generator emits around your table:</p>
 <pre class="nohighlight"><code>&lt;div class=&quot;tablewrap&quot;&gt;
   &lt;table&gt;…&lt;/table&gt;
 &lt;/div&gt;</code></pre>
 <h2 id="figures">Figures</h2>
-<p>An illustration is a <code>figure</code> holding an <code>img</code>
-and a <code>figcaption</code> — never a bare <code>img</code>.
+<p>Write an illustration as <code>![caption](path)</code>; the generator
+emits a <code>figure</code> holding an <code>img</code> and a
+<code>figcaption</code> — never a bare <code>img</code>.
 <code>img</code>, <code>svg</code> and <code>video</code> are clamped to
 the text column, so an asset authored at any pixel width cannot push the
 page into horizontal scroll on a phone. They are never scaled

@@ -44,7 +44,7 @@ These are the preconditions of the kit. Meet them and everything above appears; 
 
 ## It is a layer, not a dependency
 
-Every feature degrades to nothing if the script never loads. Author the semantic HTML first and let the kit enrich it — the document must read correctly with JavaScript disabled, and light/dark still works, because that lives in `base.css`.
+Every feature degrades to nothing if the script never loads. Write the semantic Markdown first and let the kit enrich it — the document must read correctly with JavaScript disabled, and light/dark still works, because that lives in `base.css`.
 
 ::: {.pullquote}
 If the page needs the script to make sense, the markup was wrong.
