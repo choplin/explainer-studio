@@ -18,7 +18,7 @@ Layout:
   └── public/                   the deploy root (uploaded whole by wrangler)
       ├── index.html            library index, rebuilt from library.json
       ├── assets/base.css       shared base design system (from html-docs)
-      ├── assets/pdf-explainer.css pdf-explainer content layer (from reading-site-library-base)
+      ├── assets/reading-site.css pdf-explainer content layer (from reading-site-library-base)
       ├── assets/reading-nav.css reading-nav widget chrome (from html-docs component)
       ├── assets/base.js        base PE kit: theme toggle, back-to-top (from html-docs)
       ├── assets/reading-nav.js card live filter + page nav (from html-docs component)
@@ -101,8 +101,8 @@ def base_css_source():
 
 def context_css_source():
     # This skill's own pdf-explainer context layer, applied on top of base.css:
-    # reading-site-library-base/scripts/library.py -> reading-site-library-base/assets/pdf-explainer.css
-    return Path(__file__).resolve().parents[1] / "assets" / "pdf-explainer.css"
+    # reading-site-library-base/scripts/library.py -> reading-site-library-base/assets/reading-site.css
+    return Path(__file__).resolve().parents[1] / "assets" / "reading-site.css"
 
 
 def base_js_source():
@@ -182,7 +182,7 @@ INDEX = """\
 <meta name="generator" content="{generator}">
 <title>{title}</title>
 <link rel="stylesheet" href="assets/base.css">
-<link rel="stylesheet" href="assets/pdf-explainer.css">
+<link rel="stylesheet" href="assets/reading-site.css">
 <link rel="stylesheet" href="assets/reading-nav.css">
 {scripts}
 </head>
@@ -252,10 +252,10 @@ def write_public_scaffold(meta):
 
     ctx = context_css_source()
     if ctx.exists():
-        shutil.copy2(ctx, assets / "pdf-explainer.css")
+        shutil.copy2(ctx, assets / "reading-site.css")
     else:
         # The context layer is optional styling; an empty file keeps the link valid.
-        (assets / "pdf-explainer.css").write_text("", encoding="utf-8")
+        (assets / "reading-site.css").write_text("", encoding="utf-8")
 
     rn_css = reading_nav_css_source()
     if rn_css.exists():

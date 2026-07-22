@@ -105,7 +105,7 @@ The design system is layered — all shared, none per-consumer:
   (`reading-nav.css` / `reading-nav.js`: the index-card filter and runtime page nav)
   are owned by **[[html-docs]]** — consumed as the generator's
   `--assets` and pulled in with `--component reading-nav`.
-- the **content context layer** (`pdf-explainer.css` — content styling only) is owned by
+- the **content context layer** (`reading-site.css` — content styling only) is owned by
   **[[reading-site-library-base]]**, passed to the generator as `--context` (the deploy
   library index uses the same layers).
 
@@ -135,7 +135,7 @@ The generator's runtime is **pandoc**, resolved by its own preflight (PATH → b
    `<WORK_DIR>/src/` (the semantic layer Phase 2 writes) and `<WORK_DIR>/site/audio/`,
    and copy the audio files into `site/audio/`. **You do NOT copy the design-system
    assets here** — the generator copies `base.css`/`base.js` (from `--assets`),
-   `pdf-explainer.css` (from `--context`), and `reading-nav.css`/`reading-nav.js` (from
+   `reading-site.css` (from `--context`), and `reading-nav.css`/`reading-nav.js` (from
    `--component reading-nav`) into `site/assets/` when it runs in Phase 3. `site/` and
    `src/` are disposable — never hand-edit `site/` (edit `reports/` and regenerate);
    the editable semantic layer is `src/`.
@@ -192,7 +192,7 @@ landing is home, so `site-name` has no back-arrow and there is no prev/next):
 title: <SITE_TITLE>
 site-name: <SITE_TITLE>
 context-css:
-  - pdf-explainer.css
+  - reading-site.css
   - reading-nav.css
 context-js:
   - nav-manifest.js
@@ -315,7 +315,7 @@ public.
   that `src/*.md` and re-run Phase 3a. The mechanical error classes — an invented class,
   an unwrapped table, a figure pointing outside the site — are structurally impossible
   here, not review-caught: the generator cannot emit them.
-- **Reuse, don't fork, the shared assets.** The content context layer (`pdf-explainer.css`)
+- **Reuse, don't fork, the shared assets.** The content context layer (`reading-site.css`)
   comes from `reading-site-library-base` (the name is the shared context layer, not a
   pdf-explainer-only dependency) and is passed as `--context`; the reading-site nav widgets
   come from html-docs' `reading-nav` component via `--component reading-nav`.
@@ -338,7 +338,7 @@ public.
 - [ ] Reports with a matching audio slug have an in-page player; unmatched audio is
       listed on the index; every referenced audio file exists in `site/audio/`.
 - [ ] The design system is bundled locally: all of `site/assets/base.css`, `base.js`,
-      `pdf-explainer.css`, `reading-nav.css`, `reading-nav.js` exist (copied by the
+      `reading-site.css`, `reading-nav.css`, `reading-nav.js` exist (copied by the
       generator), plus `site/assets/nav-manifest.js` (written in Phase 3b). Every
       generated report page's `<head>` loads `assets/base.js`, `assets/nav-manifest.js`,
       `assets/reading-nav.js` in that order (guaranteed by the template + `context-js`).

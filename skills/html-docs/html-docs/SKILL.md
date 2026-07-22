@@ -191,7 +191,7 @@ title: Page title — Site name
 site-name: html-docs   # header.site link text
 context-css: color.css               # optional: one consumer stylesheet…
 # context-css:                       # …or a list, emitted after base.css in order
-#   - pdf-explainer.css
+#   - reading-site.css
 context-js:                          # optional: consumer scripts, emitted (defer)
 #   - nav-manifest.js                #   after base.js in list order — data first,
 #   - reading-nav.js                 #   then the logic that reads it

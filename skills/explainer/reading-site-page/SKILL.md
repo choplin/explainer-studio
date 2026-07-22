@@ -31,7 +31,7 @@ Write a Markdown file with this frontmatter, then the body in the semantic-Markd
 title: <PAGE_TITLE> — <SITE_TITLE>
 site-name: "← <SITE_TITLE>"        # header link back to the index
 context-css:
-  - pdf-explainer.css                 # pdf-explainer content styling
+  - reading-site.css                 # pdf-explainer content styling
   - reading-nav.css                # reading-nav widget chrome (html-docs component)
 context-js:
   - nav-manifest.js                # page-nav data — must load before the script that reads it
