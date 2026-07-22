@@ -7,9 +7,9 @@ trustworthy explanations and reading guides.
 
 - [`understanding`](skills/understanding/README.md) — reviewer-facing change
   explanations and a shared HTML document design system.
-- [`pdf-studio`](skills/pdf-studio/README.md) — staged PDF extraction,
+- [`pdf-explainer`](skills/pdf-explainer/README.md) — staged PDF extraction,
   synthesis, audio guides, and reading-guide sites.
-- [`paper-studio`](skills/paper-studio/README.md) — academic-paper digestion
+- [`paper-explainer`](skills/paper-explainer/README.md) — academic-paper digestion
   with source-faithfulness checks and perspective reports.
 
 The six Claude subagent wrappers used by the PDF and paper pipelines live in
