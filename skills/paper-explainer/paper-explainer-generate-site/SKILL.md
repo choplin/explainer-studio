@@ -1,6 +1,6 @@
 ---
 name: paper-explainer-generate-site
-description: This skill should be used when the user wants paper-explainer reports turned into a real website — authored web pages (not converted Markdown) browsable from a smartphone, built as a static site under a work dir's site/ from its reports/ (overview + background / method / experiments / discussion / related-work), with the overview's audio guide playable in-page. Triggers on "論文レポートをWebサイトにして", "この論文サマリをHTMLにして", "サイトを作って", "スマホで読めるようにして", "generate a site from the paper reports". Should NOT trigger for deploying/hosting the built site (use reading-site-deploy), for producing the reports (use paper-explainer-summarize), or for the audio guide (use explainer-audio-dialogue / explainer-audio-narrate).
+description: This skill should be used when the user wants paper-explainer reports turned into a real website — authored web pages (not converted Markdown) browsable from a smartphone, built as a static site under a work dir's site/ from its reports/ (overview + background / method / experiments / discussion / related-work), with the overview's audio guide playable in-page. Triggers on "論文レポートをWebサイトにして", "この論文サマリをHTMLにして", "サイトを作って", "スマホで読めるようにして", "generate a site from the paper reports". Should NOT trigger for deploying/hosting the built site (use explainer-reading-site-deploy), for producing the reports (use paper-explainer-summarize), or for the audio guide (use explainer-audio-dialogue / explainer-audio-narrate).
 user-invocable: true
 ---
 
@@ -14,7 +14,7 @@ one authored page per report, the overview's audio guide playable in-page.
 The whole build pipeline — scaffold, parallel semantic-Markdown authoring, the single
 generator build, the semantic landing page, the nav manifest, the gotchas, and the
 success criteria — is the **shared reading-site pipeline** owned by
-[[reading-site-generate-base]]. **Delegate the build to that skill.** This skill
+[[explainer-reading-site-generate-base]]. **Delegate the build to that skill.** This skill
 adds only what is paper-specific: the page-ordering profile and the landing vocabulary
 below. Do not re-derive the pipeline here; follow the base skill for every phase.
 
@@ -25,7 +25,7 @@ optional (pages without audio get no player). If no report exists yet, run
 [[paper-explainer-summarize]] first; for the overview audio on the page, run
 [[explainer-audio-dialogue]] (pointed at `reports/overview.md`) →
 [[explainer-audio-narrate]] first. This skill only *builds* the site; publishing it
-is [[reading-site-deploy]]'s job.
+is [[explainer-reading-site-deploy]]'s job.
 
 ## paper-explainer profile (the only paper-specific part)
 
@@ -46,8 +46,7 @@ only the reports that exist and preserving this order:
 
 - `overview` is always first and is the landing hero CTA / home. Do not renumber when
   a subset is present — keep the canonical order for whichever exist.
-- Any report whose slug is **not** in the table (a hand-added or deep-dived report,
-  e.g. a `explainer-deep-dive` output) is **appended last** in natural sort, with a
+- Any report whose slug is **not** in the table (a hand-added report) is **appended last** in natural sort, with a
   kicker derived from a readable title-case of its slug. Do not drop it.
 
 This satisfies the base contract (overview first; every existing report once;
@@ -64,7 +63,7 @@ Site title = the paper title (from `reports/overview.md`'s `<h1>`).
 
 ## Build
 
-Hand the profile above to [[reading-site-generate-base]] and run its pipeline
+Hand the profile above to [[explainer-reading-site-generate-base]] and run its pipeline
 (Phase 1 scaffold → Phase 2 author reports + landing → Phase 3 build + nav manifest →
-hand off to [[reading-site-deploy]]). The base skill's Success criteria are the
+hand off to [[explainer-reading-site-deploy]]). The base skill's Success criteria are the
 acceptance for this skill.

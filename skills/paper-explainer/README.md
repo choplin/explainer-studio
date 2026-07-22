@@ -2,7 +2,7 @@
 
 Digest an **academic paper PDF** (a conference/journal paper or preprint, typically 8–30 pages, mainly CS) into an Ochiai-format overview plus per-perspective detail reports — capturing the paper's novelty, usefulness, and validation explicitly.
 
-The sibling of [`pdf-explainer`](../pdf-explainer): where pdf-explainer scales a **book** through a heavy extract→structure→report pipeline, paper-explainer runs a light two-phase pipeline tuned for short papers — and shares pdf-explainer's work-dir conventions so pdf-explainer's audio, site, and deep-dive skills work on paper artifacts unchanged.
+The sibling of [`pdf-explainer`](../pdf-explainer): where pdf-explainer scales a **book** through a heavy extract→structure→report pipeline, paper-explainer runs a light two-phase pipeline tuned for short papers — and shares pdf-explainer's work-dir conventions so its audio and site skills work on paper artifacts unchanged.
 
 ## How it works
 
@@ -86,9 +86,8 @@ The work dir is named with a `{year}-{venue}-{short-title}` citation slug (e.g. 
 The layout matches pdf-explainer's work-dir conventions (`reports/*.md`, `[pNN]` anchors), so with pdf-explainer installed the pipeline extends into audio and a website:
 
 - **Audio guide** — `explainer-audio-dialogue` (pointed at `overview.md`) → `explainer-audio-narrate`. These pdf-explainer skills are fully source-generic and run unchanged; paper-explainer narrates the overview only.
-- **Website** — `paper-explainer-generate-site` (in this group) builds the site with the correct perspective order and kicker labels; the shared site worker (`reading-site-page`), context assets (`reading-site-library-base`), and hosting (`reading-site-deploy`) are reused from pdf-explainer. (Running `pdf-explainer-generate-site` directly also *works*, but mislabels the pages as 第N章 — use the paper-explainer one.)
+- **Website** — `paper-explainer-generate-site` (in this group) builds the site with the correct perspective order and kicker labels; the shared site worker (`explainer-reading-site-page`), context assets (`explainer-reading-site-library-base`), and hosting (`explainer-reading-site-deploy`) are reused from pdf-explainer. (Running `pdf-explainer-generate-site` directly also *works*, but mislabels the pages as 第N章 — use the paper-explainer one.)
 - **End-to-end** — `paper-explainer-full-guide` chains summary → overview audio → website in one request.
-- **`explainer-deep-dive`** — drill further into a page span; `overview.md` ends with a section map whose `[pNN]` spans it can resolve against.
 
 ## Notes
 

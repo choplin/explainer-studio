@@ -1,6 +1,6 @@
 ---
 name: explainer-audio-dialogue
-description: This skill should be used when the user wants a NotebookLM-style audio guide / audio overview / two-host podcast of a document — the FIRST step, writing the two-speaker dialogue script (台本). Triggers on "音声ガイドを作って", "この本の音声概要が欲しい", "ポッドキャスト風の対話にして", "NotebookLMみたいな音声を作りたい", "make an audio guide / audio overview", "turn this report into a two-host dialogue script". Works on any Markdown, especially pdf-explainer reports. Should NOT trigger for the audio synthesis step itself (use explainer-audio-narrate), or for producing the source report (use pdf-explainer-summarize / explainer-deep-dive).
+description: This skill should be used when the user wants a NotebookLM-style audio guide / audio overview / two-host podcast of a document — the FIRST step, writing the two-speaker dialogue script (台本). Triggers on "音声ガイドを作って", "この本の音声概要が欲しい", "ポッドキャスト風の対話にして", "NotebookLMみたいな音声を作りたい", "make an audio guide / audio overview", "turn this report into a two-host dialogue script". Works on any Markdown, especially pdf-explainer reports. Should NOT trigger for the audio synthesis step itself (use explainer-audio-narrate), or for producing the source report (use pdf-explainer-summarize).
 user-invocable: true
 ---
 

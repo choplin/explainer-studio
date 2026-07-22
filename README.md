@@ -5,8 +5,8 @@ trustworthy explanations and reading guides.
 
 ## Skill groups
 
-- [`understanding`](skills/understanding/README.md) — reviewer-facing change
-  explanations and a shared HTML document design system.
+- [`explainer`](skills/explainer/) — shared explanation, audio, reading-site,
+  HTML-document, and diff-explanation skills.
 - [`pdf-explainer`](skills/pdf-explainer/README.md) — staged PDF extraction,
   synthesis, audio guides, and reading-guide sites.
 - [`paper-explainer`](skills/paper-explainer/README.md) — academic-paper digestion

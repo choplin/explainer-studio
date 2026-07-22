@@ -1,6 +1,6 @@
 ---
 name: paper-explainer-summarize
-description: This skill should be used when the user wants to digest an academic paper PDF (conference/journal paper or preprint, mainly CS; usually 8–30 pages — content type, not page count, is the deciding factor) into a structured summary — an Ochiai-format overview plus per-perspective detail reports (background / method / experiments / discussion / related-work). Triggers on "この論文をまとめて/要約して", "論文サマリを作って", "落合フォーマットで読んで", "summarize this paper", "digest this arXiv paper", "make a paper report". Should NOT trigger for non-paper documents (books, manuals, dissertations — use pdf-explainer-summarize), for papers over ~30 pages of body (offer pdf-explainer-summarize, but default here for anything the user calls a "paper"), for drilling into one section of an already-digested document (use explainer-deep-dive), or for raw OCR/text extraction without synthesis.
+description: This skill should be used when the user wants to digest an academic paper PDF (conference/journal paper or preprint, mainly CS; usually 8–30 pages — content type, not page count, is the deciding factor) into a structured summary — an Ochiai-format overview plus per-perspective detail reports (background / method / experiments / discussion / related-work). Triggers on "この論文をまとめて/要約して", "論文サマリを作って", "落合フォーマットで読んで", "summarize this paper", "digest this arXiv paper", "make a paper report". Should NOT trigger for non-paper documents (books, manuals, dissertations — use pdf-explainer-summarize), for papers over ~30 pages of body (offer pdf-explainer-summarize, but default here for anything the user calls a "paper"), or for raw OCR/text extraction without synthesis.
 user-invocable: true
 ---
 
@@ -17,7 +17,7 @@ write reports/overview.md                   reports/discussion.md               
    (spine handed to every perspective)      reports/related-work.md (dblp)
 ```
 
-The work dir's internal layout (a self-contained dir holding `<dir-name>.pdf`, `reports/*.md`, and `[pNN]` anchors) is deliberately identical to pdf-explainer, so explainer-audio-dialogue, pdf-explainer-generate-site, and explainer-deep-dive work on these artifacts unchanged. (Only the dir *name* differs — paper-explainer uses a `{year}-{venue}-{short-title}` citation slug; the pdf-explainer skills take the work dir as input, so the name does not matter to them.)
+The work dir's internal layout (a self-contained dir holding `<dir-name>.pdf`, `reports/*.md`, and `[pNN]` anchors) is deliberately identical to pdf-explainer, so explainer-audio-dialogue and pdf-explainer-generate-site work on these artifacts unchanged. (Only the dir *name* differs — paper-explainer uses a `{year}-{venue}-{short-title}` citation slug; the pdf-explainer skills take the work dir as input, so the name does not matter to them.)
 
 `<SKILL_DIR>` below is this skill's own base directory; the bundled scripts live at `<SKILL_DIR>/scripts/`. Reference them by that skill-root-relative path — no absolute or plugin-root paths.
 
@@ -118,7 +118,7 @@ Build the spine against ground truth (the figures/tables and the Abstract's own 
 - **Key figure:** place the paper's single most explanatory figure — usually its Fig. 1 architecture/overview diagram, from `ocr/figures/` — right after the metadata block, with a one-line caption and its `[pNN]`.
 - Items 1–2 (何を提案 / 新規性) point to `background.md`; items 3–6 each point to their own detail report — only for reports in Step 0 scope.
 - Item 6 needs dblp-verified entries, which Phase 2 produces — leave it as `(Phase 2 完了後に確定)` for now and complete it at Finalize. If related-work is out of scope, instead pick 1–3 entries from the References section and verify them yourself with `bash <SKILL_DIR>/scripts/dblp_lookup.sh "<title> <first-author surname>"` before writing them (include the surname — title-only queries for generic titles miss the right paper).
-- Close with **前提知識** and **原文の読み方** (both short), then the section map (it doubles as the outline explainer-deep-dive resolves spans from).
+- Close with **前提知識** and **原文の読み方** (both short), then the section map for source traceability.
 
 ## Phase 2 — Perspective detail reports (parallel)
 
@@ -157,7 +157,7 @@ Perspective → relevant sections, when resolving spans: background → abstract
    - **Apply the fixes yourself, targeted and source-anchored — do not regenerate reports.** For each `blocker` finding, use its locus + minimal-fix + source verdict (`[pNN]`) to make the smallest edit that moves the **wrong side to what the source supports** — a sentence rewrite or a table-cell change. Do not merely make two reports agree (that can harden the wrong claim); align to the source. Because the spine is single-sourced, a wrong spine row is consistently wrong across reports — fix it in the spine **and** in every report that inherited it. Reading the flagged loci to edit them is the narrow read allowed by Context hygiene.
    - **Bound the loop.** After applying fixes, re-run the sweep once to confirm (at most 2 sweep rounds total). Stop when it returns clean or after the second round; report any residual `blocker` or `needs-human` findings to the user rather than looping further (an unbounded fix loop reintroduces the non-convergence this step is meant to end). `minor` findings may be left with a note.
 6. **Print a manifest**: the work dir path (the renamed slug dir), each report, `spine.md`, and `ocr/` contents (OCR always runs via MinerU). Note any figures recovered or dropped in step 1, and any residual sweep findings left unresolved in step 5.
-7. **Point to the next steps** (do not run them unprompted): the reports can now become a two-speaker **audio guide** of the overview (`explainer-audio-dialogue` on `reports/overview.md` → `explainer-audio-narrate`) and a browsable **website** (`paper-explainer-generate-site`, the paper-tuned site builder — orders pages by perspective and labels them 背景 / 手法 / …, then `reading-site-deploy` to publish). To run the whole chain (summary → overview audio → site) in one shot, use `paper-explainer-full-guide`.
+7. **Point to the next steps** (do not run them unprompted): the reports can now become a two-speaker **audio guide** of the overview (`explainer-audio-dialogue` on `reports/overview.md` → `explainer-audio-narrate`) and a browsable **website** (`paper-explainer-generate-site`, the paper-tuned site builder — orders pages by perspective and labels them 背景 / 手法 / …, then `explainer-reading-site-deploy` to publish). To run the whole chain (summary → overview audio → site) in one shot, use `paper-explainer-full-guide`.
 
 ## overview.md template
 

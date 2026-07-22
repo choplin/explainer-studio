@@ -14,11 +14,10 @@ extract  →  structure  →  report            (pdf-explainer-summarize)
   ▼            ▼             ▼
 chunk-*.md   outline.md   reports/overview.md
                               │
-                              ├─ ⟳  zoom back in  →  reports/<section>.md   (explainer-deep-dive)
                               ├─ 🔊  report → dialogue/<slug>.txt → audio/<slug>.m4a
                               │      (explainer-audio-dialogue → explainer-audio-narrate)
                               └─ 🌐  reports/*.md + audio/*.m4a → site/ → Cloudflare Pages
-                                     (pdf-explainer-generate-site → reading-site-deploy)
+                                     (pdf-explainer-generate-site → explainer-reading-site-deploy)
 ```
 
 - **Phase 1 — extract**: split the body into chunks, read each visually in parallel, write structured *material* (not a finished report) with `[pNN]` page anchors.
@@ -34,12 +33,11 @@ chunk-*.md   outline.md   reports/overview.md
 |-------|------|
 | `pdf-explainer-full-guide` | End-to-end: runs the whole pipeline on one PDF in a single request — chains summarize → deep-dive (per chapter) → audio-dialogue → audio-narrate. Confirms scope once up front, then runs the phases. |
 | `pdf-explainer-summarize` | First full-document pass. Drives the `extract → structure → report` phases. |
-| `explainer-deep-dive` | Zoom-in counterpart. Resolves a requested section/page range via the outline's `[pNN]` anchors and writes a detailed standalone report for just that part. |
 | `explainer-audio-dialogue` | Audio guide, step 1. Rewrites any report Markdown into a NotebookLM-style two-host dialogue script (台本) under `dialogue/`. |
 | `explainer-audio-narrate` | Audio guide, step 2. Synthesizes a dialogue script into a compact AAC/m4a with a local VOICEVOX ENGINE (offline, no API key) + `ffmpeg`, two distinct Japanese voices. |
 | `pdf-explainer-generate-site` | Builds a reading-guide website under `site/` — pages are *authored* for the web (lede, key points, scannable sections), not converted 1:1 from Markdown — with in-page audio players. Build only. |
-| `reading-site-initialize` | One-time hosting setup: a single Cloudflare Pages project + a local library, protected by a Cloudflare Access policy. Run once before the first deploy. |
-| `reading-site-deploy` | Publishes a built `site/` by adding it as a subpath to the shared library, then deploying the whole library. |
+| `explainer-reading-site-initialize` | One-time hosting setup: a single Cloudflare Pages project + a local library, protected by a Cloudflare Access policy. Run once before the first deploy. |
+| `explainer-reading-site-deploy` | Publishes a built `site/` by adding it as a subpath to the shared library, then deploying the whole library. |
 
 ### Internal (worker logic + shared resources)
 
@@ -47,16 +45,15 @@ chunk-*.md   outline.md   reports/overview.md
 |-------|------|
 | `pdf-explainer-pdf-extract` | Phase 1 worker — one per chunk, in parallel. Read+Write only. |
 | `pdf-explainer-pdf-stitch` | Phase 2 worker — single instance. Read+Write+Glob. |
-| `explainer-pdf-detail` | Section drill-down worker (deep-dive / full-guide). |
-| `reading-site-page` | Site page author — one per report, in parallel. |
-| `reading-site-library-base` | Shared resources, delegated to by name (not invoked directly): the Cloudflare Pages library manager (`library.py`) and the pdf-explainer content context layer (`reading-site.css`), layered on the `html-docs` base design system. The reading-site nav widgets are `html-docs`' `reading-nav` opt-in component (pulled in via `--component reading-nav`). |
+| `pdf-explainer-pdf-detail` | Internal per-chapter detail worker for `pdf-explainer-full-guide`. |
+| `explainer-reading-site-page` | Site page author — one per report, in parallel. |
+| `explainer-reading-site-library-base` | Shared resources, delegated to by name (not invoked directly): the Cloudflare Pages library manager (`library.py`) and the pdf-explainer content context layer (`reading-site.css`), layered on the `explainer-html-docs` base design system. The reading-site nav widgets are `explainer-html-docs`' `reading-nav` opt-in component (pulled in via `--component reading-nav`). |
 
 The four worker skills carry their own constraints and output format, so the orchestrators only choose *when* and *with what inputs* to run them. Under Claude Code each is wrapped by a thin subagent (see `opts/claude/agents/pdf-explainer-*`) so it runs in an isolated context and cannot install software or shell out to PDF converters; on any other agent the same skill is applied inline. This graceful fallback is written into each orchestrator.
 
 ## When skills activate
 
 - **summarize**: "PDFをレポートにして", "この本を要約して", "turn this PDF into a markdown report"
-- **deep-dive**: "第2章をもっと詳しく", "drill into chapter 2", "expand the section on X"
 - **full-guide**: "この本を全部やって", "summaryから音声まで一気に", "do everything for this PDF"
 - **audio-dialogue / audio-narrate**: "音声ガイドを作って", "台本を音声にして"
 - **generate-site / deploy-site / initialize-site**: "サイトを作って", "この本を公開して", "配信の初期設定"
@@ -80,7 +77,7 @@ Everything lands in one work dir named after the PDF's basename; the source PDF 
 │   └── outline.md           # summarize · Phase 2: stitched, deduped outline (## Page offset field)
 ├── reports/
 │   ├── overview.md          # summarize · Phase 3: overview report
-│   └── chapter-2.md         # deep-dive: on-demand section deep dive
+│   └── chapter-2.md         # full-guide: per-chapter detail report
 ├── dialogue/                # audio-dialogue: two-host dialogue script (台本, editable)
 ├── audio/                   # audio-narrate: synthesized audio (disposable, re-generatable)
 └── site/                    # generate-site: authored website (disposable, rebuilt on re-run)
@@ -88,6 +85,6 @@ Everything lands in one work dir named after the PDF's basename; the source PDF 
 
 ## Notes
 
-- `[pNN]` anchors are always **PDF** page numbers. The printed-page ↔ PDF-page offset is recorded once in the outline's `## Page offset` field so section drill-down can convert printed page numbers.
+- `[pNN]` anchors are always **PDF** page numbers. The printed-page ↔ PDF-page offset is recorded once in the outline's `## Page offset` field so full-guide chapter-detail workers can convert printed page numbers.
 - Report content is written in the language of the source PDF (or the conversation); the skills' own instructions and structural field names are in English.
-- For academic papers (conference/journal/preprint), use `paper-explainer-summarize` instead — it produces an Ochiai-format overview and dblp-verified bibliography. paper-explainer shares this work-dir layout, so these audio/site/deep-dive skills work on paper artifacts unchanged.
+- For academic papers (conference/journal/preprint), use `paper-explainer-summarize` instead — it produces an Ochiai-format overview and dblp-verified bibliography. paper-explainer shares this work-dir layout, so the audio and site skills work on paper artifacts unchanged.
