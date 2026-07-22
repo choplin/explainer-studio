@@ -1,4 +1,4 @@
-# reading-studio-skills
+# explainer-studio
 
 Independent skill collection for turning source material into readable,
 trustworthy explanations and reading guides.
