@@ -19,12 +19,14 @@ The inputs are a built `<WORK_DIR>/site/` and an already-initialized library. If
 ## Prerequisites
 
 - The book site exists: `<WORK_DIR>/site/index.html` is present.
-- The library is initialized: `python3 pdf-studio-site-base/scripts/library.py status`. If it prints "not initialized", stop and run [[pdf-studio-initialize-site]] first.
+- The library is initialized: `python3 pdf-studio-site-base/scripts/library.py status --namespace pdf-studio`. If it prints "not initialized", stop and run [[pdf-studio-initialize-site]] first.
 - **`wrangler` is an essential prerequisite — this skill cannot publish without it.** Verify it is authenticated (`wrangler whoami`); if missing or unauthenticated, stop and have the user set it up before re-running. Do not attempt a non-wrangler deploy path.
 
 ## Procedure
 
 Run **both `library.py` and wrangler without the command sandbox** (`dangerouslyDisableSandbox: true`). Two different reasons: wrangler needs the network, and `library.py` writes into the XDG library (`~/.local/share/pdf-studio/`) — **outside the workspace**, which the sandbox denies with a `PermissionError` on `shutil.rmtree`/`copytree`. "Local-only" is not the same as "sandbox-safe": what decides it is *where a command writes*, not whether it touches the network.
+
+`library.py` renders a document-type-neutral index (the deploy root is shared across studios), and the XDG library namespace is caller-chosen via `--namespace` (**it must come after the subcommand**, e.g. `library.py add --namespace pdf-studio …`). These pdf-studio skills always pass `--namespace pdf-studio`, so the library stays at `${XDG_DATA_HOME:-$HOME/.local/share}/pdf-studio/` exactly as before — no migration.
 
 1. **Decide the book's slug and card text.**
    - `<slug>`: the URL subpath, lowercase `a-z0-9-`, derived from the work dir name. For a Japanese name, propose a romanized slug and confirm it. Reusing an existing slug **replaces** that already-published book in place — so `library.py add` refuses an existing slug unless `--force`. Check `library.py status` first; if the slug is already listed, confirm with the user that they mean to replace the published book before re-running with `--force`.
@@ -33,13 +35,13 @@ Run **both `library.py` and wrangler without the command sandbox** (`dangerously
 2. **Add the book to the library** (copies `site/` into `public/<slug>/`, records it, and rebuilds the library index):
    ```sh
    python3 pdf-studio-site-base/scripts/library.py \
-     add --slug <slug> --title "<title>" --desc "<desc>" --from "<WORK_DIR>/site"
+     add --namespace pdf-studio --slug <slug> --title "<title>" --desc "<desc>" --from "<WORK_DIR>/site"
    ```
    Append `--force` **only** when deliberately replacing an existing slug, after the user confirmed the replace in step 1; without it, `add` stops rather than silently overwriting a published book.
 3. **Deploy the whole library** to the recorded project:
    ```sh
-   PROJECT=$(python3 pdf-studio-site-base/scripts/library.py project)
-   PUBLIC=$(python3 pdf-studio-site-base/scripts/library.py public)
+   PROJECT=$(python3 pdf-studio-site-base/scripts/library.py project --namespace pdf-studio)
+   PUBLIC=$(python3 pdf-studio-site-base/scripts/library.py public --namespace pdf-studio)
    wrangler pages deploy "$PUBLIC" --project-name="$PROJECT"
    ```
 4. **Verify and report.** `curl -sI https://<project>.pages.dev/<slug>/` should return a 302 to the Access login (protected) — or 200 only if the user deliberately left Access off. Report the book URL `https://<project>.pages.dev/<slug>/` and the index URL.
