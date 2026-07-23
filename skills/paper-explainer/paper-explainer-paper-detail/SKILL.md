@@ -65,68 +65,13 @@ Summarizing is lossy, and a few specific loss modes silently corrupt the paper's
 
 Every report starts with an H1 title (`# <perspective label> — <paper short title>`) and a one-line scope note (which sections / page span it covers). Then follow the assigned perspective's structure. Sections that genuinely do not apply to the paper may be dropped — note the omission in the scope line rather than padding.
 
-### `background` → 背景と問題設定
+Before drafting, read exactly one matching reference file completely. The text in each file is the original perspective section moved without abridgment; do not read unrelated perspective templates.
 
-This report answers *why this paper exists*: what is proposed, and why it matters. It is the deep version of overview items 1–2 (何を提案 / 新規性) plus the motivation the Ochiai overview compresses away. Keep it conceptual — the formal problem with notation lives in `method.md`, and the systematic prior-work catalog lives in `related-work.md`.
-
-1. **背景・動機** — the real-world or research context driving the work: what pain / need / opportunity motivates it, and why now. Draw on the Abstract and the Introduction's opening.
-2. **問題設定** — the problem the paper actually tackles, stated informally with its scope and assumptions, **and why it is hard** (the core challenges). This is the *motivating* problem, not the formal notation (that belongs in `method.md`) — keep it at the level a non-specialist can follow.
-3. **既存アプローチの限界（概念レベル）** — why current approaches fall short, at a conceptual level, to establish why a new method is needed. This is the framing gap that justifies the paper, NOT a catalog of specific prior works (that belongs in `related-work.md`) — name approaches only as far as needed to make the gap concrete.
-4. **提案の要旨（非技術）** — what the paper proposes at a conceptual level (the core idea, no equations) and how it addresses the problem set above. One or two paragraphs; the mechanics are `method.md`'s job.
-5. **なぜ重要か・インパクト** — the significance: what becomes possible, who benefits, and why the community should care. Keep author-claimed impact and your own inference clearly separated.
-
-Assigned figures are usually the paper's teaser / motivating-example figure — embed and explain it where it supports the motivation.
-
-The overall conclusion you state (in 背景・動機 / 提案の要旨 / なぜ重要か) must agree with the spine's thesis — same claim, same direction (see **Inputs**: the spine). This report and the overview are written independently and are never reconciled afterward, so a divergence here becomes two conflicting conclusions in the same deliverable. Deepen and support the thesis; do not silently contradict, weaken, or reverse it.
-
-### `method` → 技術・手法の詳細
-
-1. **問題設定と記法** — the formal problem, inputs/outputs, notation table if the paper defines one
-2. **手法の全体像** — the architecture / pipeline in a few paragraphs; include the paper's key overview figure if available, **and** redraw the pipeline as a `mermaid` flowchart in your own words (input → components → output). Re-diagramming forces a faithful understanding and gives a usable figure even when the visual path could not extract the original. Keep it to the main data flow, not every detail.
-3. **コンポーネント詳細** — one subsection per component: definitions, equations (LaTeX), algorithms as numbered steps; faithful to the paper, not paraphrased into vagueness
-4. **設計判断の根拠** — why this design; alternatives the paper considered or ablated
-5. **計算量・実装上の注意** — complexity, training/inference cost, implementation details the paper states
-
-### `experiments` → 実験設定と結果
-
-1. **実験設定** — datasets (with sizes/splits), baselines, metrics, hyperparameters / implementation environment as stated
-2. **主結果** — main tables reproduced compactly as Markdown tables; for each, one paragraph on what claim it supports and by how much. Every assigned result figure/plot (`ocr/figures/*`) is embedded here and read out (axes, trend, takeaway), not just linked.
-3. **アブレーション** — what was removed/varied and what that shows
-4. **追加分析** — qualitative results, error analysis, scaling/sensitivity studies
-5. **再現性** — code/data availability **only as printed in the paper** (no guessed URLs)
-
-### `discussion` → 議論・限界・今後
-
-1. **主張と根拠の対応表** — a Markdown table of the paper's principal claims, each with the evidence backing it and that evidence's strength. This is the analytical core of a critical read; label each claim's support as one of `実験` (empirical), `理論` (proof/derivation), `引用` (relies on cited work), `主張のみ` (asserted, no evidence in this paper).
-
-   | 主張 | 根拠 | 種別 | [pNN] |
-   | --- | --- | --- | --- |
-   | <claim> | <what backs it> | 実験 / 理論 / 引用 / 主張のみ | [pNN] |
-
-   **Cell-check each row you write against the body, the spine, and the source — cell by cell, on three axes.** A table cell compresses a body sentence into a phrase, and that one-word compression is where a quantifier gets dropped, an entity's polarity flips, or a hedge hardens — while the body prose you already wrote stays correct, so the error is a body↔cell internal contradiction that only a per-cell re-read catches. For **both** the 主張 column and the 根拠 column of every row, confirm against the sentence it condenses (and the spine's entry / the source `[pNN]`):
-   1. **Quantifier preserved** — a scope word in the source (`majority` / `大半`, `most` / `多く`, `many`, `almost all`, `at least`, `up to`, `X%`) is still in the cell and has not hardened into an all-cases claim ("the majority of the remaining 61%" must not become "the remaining 61% (all of it)").
-   2. **Entity / class polarity not flipped** — a class or entity described with a negation ("a system that does *not* support X", "transactions that *have* / *lack* Y") points the same way as the source; do not turn "systems that do not support interactive transactions (= one-shot-only systems)" into "systems that do not support non-interactivity". Negated class names invert most easily under compression and still read fluently.
-   3. **Modality matches the body** — a cell states a design argument / hedged expectation as such (`理論`, "can / may / 〜しうる"), not as a measured result, at the same strength the body uses.
-
-   *Why:* a reader who skims only the table takes each cell as the sole statement of that claim, so a cell that diverges from a correct body is never self-corrected; and compression to a single phrase is exactly the operation that drops quantifiers, reverses negated classes, and flattens hedges. Take the authoritative value from the spine where it has one — the spine is the shared source the sibling reports also use, so aligning the cell to it keeps this report consistent with them.
-
-2. **著者が明示した limitation** — as stated, with anchors
-3. **議論・考察** — the paper's own discussion points, open questions it raises
-4. **読み手としての批判的検討** — weaknesses or threats to validity you infer; MUST be clearly labeled as reader inference, never blended with author statements. Draw on the `主張のみ` / `引用` rows of the table above — unsupported claims are the natural targets.
-5. **Future work** — as stated by the authors
-6. **実務・研究への含意** — what a practitioner/researcher should take away
-
-### `related-work` → 関連研究の位置づけ
-
-1. **位置づけ** — organize the paper's Related Work discussion by category: for each category, the representative cited works and how this paper claims to differ. Add:
-   - **特性比較マトリクス** — a Markdown table comparing this paper against its main cited alternatives across the axes the paper competes on (e.g. データ要件 / 計算コスト / 対応タスク / 前提). Use only distinctions the paper or the cited works actually state; do not invent capability claims.
-   - **研究系譜** — a short `mermaid` graph placing this paper in its lineage: which prior works it builds on (arrows in) and which problem it opens. Nodes must be papers cited in this paper.
-2. **次に読むべき論文** — 3–7 entries. Procedure (mandatory):
-   1. Read the References section (given span) and pick candidates **only from entries that actually appear there**. Never propose an uncited paper.
-   2. For each candidate, run `bash <dblp_lookup.sh path> "<reference title> <first-author surname>"` and compare authors/year against the reference entry to confirm it is the same paper. Appending the surname matters: dblp ranks by term match, and generic titles (e.g. "Attention Is All You Need") do not surface the right paper from a title-only query. If nothing hits, retry with the title alone before giving up.
-   3. On a confident match, write: title — 筆頭著者 et al., venue, year, URL (dblp `url` field, which prefers the DOI link). When both a peer-reviewed venue entry and a CoRR/arXiv preprint match, cite the peer-reviewed one (the `type` field distinguishes them — a preprint reads "Informal and Other Publications").
-   4. On no confident match, append "(dblp未確認)" and record only what the References entry itself states — no URL.
-   5. For every entry, add 1–2 sentences: why read it next, and its relation to this paper (which part cites it, for what).
+- `background` → [`references/background.md`](references/background.md)
+- `method` → [`references/method.md`](references/method.md)
+- `experiments` → [`references/experiments.md`](references/experiments.md)
+- `discussion` → [`references/discussion.md`](references/discussion.md)
+- `related-work` → [`references/related-work.md`](references/related-work.md)
 
 ## Output
 
