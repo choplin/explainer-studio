@@ -1,0 +1,16 @@
+{
+  "$schema": "https://json.schemastore.org/claude-code-plugin.json",
+  "name": "explainer-studio",
+  "version": "0.1.0",
+  "description": "Turn PDFs, papers, and source material into trustworthy explanations, audio guides, and reading sites.",
+  "author": {
+    "name": "choplin"
+  },
+  "homepage": "https://github.com/choplin/explainer-studio",
+  "repository": "https://github.com/choplin/explainer-studio",
+  "skills": [
+    "./skills/explainer/",
+    "./skills/pdf-explainer/",
+    "./skills/paper-explainer/"
+  ]
+}

@@ -43,7 +43,7 @@ OCR materializes `ocr/paper.md` (full text as Markdown with LaTeX math, one `[pN
 
 The **audio** guide reuses pdf-explainer's fully generic audio skills unchanged (there is no paper-specific audio skill): `explainer-audio-dialogue` writes a two-speaker script from `reports/overview.md`, and `explainer-audio-narrate` synthesizes it to `audio/overview.m4a` via a local VOICEVOX ENGINE. paper-explainer's audio is overview-only by design — the perspective detail reports are for reading, not listening.
 
-The per-perspective report templates and the strict bibliographic constraints live in `paper-explainer-paper-detail`; the whole-set check criteria live in `paper-explainer-consistency-sweep`. The orchestrator passes each only its inputs. Under Claude Code each is wrapped by a thin subagent (`opts/claude/agents/paper-explainer-paper-detail` for the parallel perspective writers, `opts/claude/agents/paper-explainer-consistency-sweep` for the Finalize sweep) so it runs in an isolated context; on any other agent the same skill is applied inline. This graceful fallback is written into the orchestrator.
+The per-perspective report templates and the strict bibliographic constraints live in `paper-explainer-paper-detail`; the whole-set check criteria live in `paper-explainer-consistency-sweep`. The orchestrator passes each only its inputs. Under Claude Code each is wrapped by a thin subagent (`agents/paper-explainer-paper-detail` for the parallel perspective writers, `agents/paper-explainer-consistency-sweep` for the Finalize sweep) so it runs in an isolated context; on any other agent the same skill is applied inline. This graceful fallback is written into the orchestrator.
 
 ### Bundled scripts (in `paper-explainer-summarize/scripts/`)
 
