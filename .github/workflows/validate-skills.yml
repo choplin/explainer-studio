@@ -1,0 +1,35 @@
+name: Validate Agent Skills
+
+on:
+  pull_request:
+    paths:
+      - ".github/workflows/validate-skills.yml"
+      - "README.md"
+      - "scripts/check-skills.sh"
+      - "skills/**"
+      - "tests/fixtures/invalid-skill-frontmatter/**"
+  push:
+    branches:
+      - main
+    paths:
+      - ".github/workflows/validate-skills.yml"
+      - "README.md"
+      - "scripts/check-skills.sh"
+      - "skills/**"
+      - "tests/fixtures/invalid-skill-frontmatter/**"
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-go@v6
+        with:
+          go-version: "1.26.x"
+          cache: false
+      - name: Install skill-validator
+        run: |
+          GOBIN="${RUNNER_TEMP}/bin" go install github.com/agent-ecosystem/skill-validator/cmd/skill-validator@v1.5.6
+          echo "${RUNNER_TEMP}/bin" >> "${GITHUB_PATH}"
+      - name: Validate Agent Skills
+        run: ./scripts/check-skills.sh

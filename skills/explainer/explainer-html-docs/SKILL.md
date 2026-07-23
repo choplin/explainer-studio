@@ -96,7 +96,7 @@ The generator machinery, also under this skill's root:
   (resolves pandoc: PATH → bundled `nix develop` → fail) and `scripts/inline.awk`
   (the inline-mode fold).
 - **`flake.nix` / `flake.lock`** — the pinned pandoc runtime the preflight falls back
-  to; see [`docs/skill-runtime-and-dependencies.md`](../../../docs/skill-runtime-and-dependencies.md).
+  to.
 
 At this skill's root:
 
@@ -268,7 +268,7 @@ per-site `nav-manifest.js` the consumer authors and loads as a `context-js` entr
 ### Generating
 
 Runtime is **pandoc**, resolved by the preflight (PATH → bundled `nix develop` →
-fail); see [`docs/skill-runtime-and-dependencies.md`](../../../docs/skill-runtime-and-dependencies.md).
+fail).
 
 One page:
 

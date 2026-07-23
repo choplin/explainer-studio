@@ -15,6 +15,31 @@ Add this repository as a marketplace, then install the plugin:
 Run `/reload-plugins` after installing or updating it. For local development,
 load the checkout directly with `claude --plugin-dir .`.
 
+## Validate skills
+
+Install the pinned Agent Skill validator:
+
+```bash
+brew install agent-ecosystem/tap/skill-validator
+skill-validator --version  # must be v1.5.6
+```
+
+On systems without Homebrew, install the same pinned version with Go:
+
+```bash
+go install github.com/agent-ecosystem/skill-validator/cmd/skill-validator@v1.5.6
+```
+
+Then run the same repository check used by CI:
+
+```bash
+./scripts/check-skills.sh
+```
+
+The check validates every `skills/**/SKILL.md` package and verifies a deliberately
+broken YAML-frontmatter fixture. Validator errors fail the command; advisory
+warnings remain visible without failing CI.
+
 ## Skill groups
 
 - [`explainer`](skills/explainer/) — shared explanation, audio, reading-site,
