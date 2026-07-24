@@ -11,6 +11,8 @@ readonly VALIDATOR_ARGS=(
   --skip-orphans
   --allow-flat-layouts
   --allow-dirs=docs,examples,filters,site,src
+  --allow-nested-paths=assets/components
+  --exclude-token-paths=site
 )
 readonly INVALID_FIXTURE="tests/fixtures/invalid-skill-frontmatter"
 
@@ -29,6 +31,14 @@ if [[ "${actual_version}" != "${expected_version}" ]]; then
   exit 1
 fi
 
+validator_help="$(skill-validator validate structure --help)"
+for required_flag in allow-nested-paths exclude-token-paths; do
+  if [[ "${validator_help}" != *"--${required_flag}"* ]]; then
+    echo "error: skill-validator ${REQUIRED_VALIDATOR_VERSION} lacks required --${required_flag} support" >&2
+    exit 1
+  fi
+done
+
 validation_failed=0
 skill_count=0
 while IFS= read -r -d '' skill_md; do
@@ -43,7 +53,8 @@ while IFS= read -r -d '' skill_md; do
     0)
       ;;
     2)
-      echo "warning: ${skill_dir} has advisory findings; continuing" >&2
+      echo "error: ${skill_dir} has advisory findings" >&2
+      validation_failed=1
       ;;
     *)
       validation_failed=1
@@ -75,4 +86,4 @@ if [[ "${validation_failed}" -ne 0 ]]; then
   exit 1
 fi
 
-echo "Agent Skill validation passed for ${skill_count} skill packages (advisory warnings may be present)"
+echo "Agent Skill validation passed for ${skill_count} skill packages with no warnings"

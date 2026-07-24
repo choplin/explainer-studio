@@ -17,17 +17,20 @@ load the checkout directly with `claude --plugin-dir .`.
 
 ## Validate skills
 
-Install the pinned Agent Skill validator:
+Install the pinned fork of the Agent Skill validator. This revision provides
+the path-scoped nesting and token-accounting controls used by the repository:
 
 ```bash
-brew install agent-ecosystem/tap/skill-validator
+nix profile add github:choplin/skill-validator/be8d7501a54468f4ec1fa697c1ea3846fbb0fac6
 skill-validator --version  # must be v1.5.6
 ```
 
-On systems without Homebrew, install the same pinned version with Go:
+On systems without Nix, build the same pinned revision with Go:
 
 ```bash
-go install github.com/agent-ecosystem/skill-validator/cmd/skill-validator@v1.5.6
+git clone https://github.com/choplin/skill-validator.git
+git -C skill-validator checkout be8d7501a54468f4ec1fa697c1ea3846fbb0fac6
+(cd skill-validator && go install ./cmd/skill-validator)
 ```
 
 Then run the same repository check used by CI:
@@ -37,8 +40,8 @@ Then run the same repository check used by CI:
 ```
 
 The check validates every `skills/**/SKILL.md` package and verifies a deliberately
-broken YAML-frontmatter fixture. Validator errors fail the command; advisory
-warnings remain visible without failing CI.
+broken YAML-frontmatter fixture. Validator errors and advisory warnings both
+fail the command.
 
 ## Skill groups
 
