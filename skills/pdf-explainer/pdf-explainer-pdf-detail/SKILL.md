@@ -1,6 +1,6 @@
 ---
 name: pdf-explainer-pdf-detail
-description: Internal procedure for pdf-explainer-full-guide — re-read a resolved chapter span of an already-digested PDF (visually, or from a faithful text layer) and write a thorough, standalone detail report with [pNN] anchors. Applied once per in-scope chapter by the full-guide orchestrator, dispatched to a pdf-explainer-pdf-detail subagent under Claude Code or applied inline otherwise. NOT a user-facing skill and NOT triggered directly by user requests.
+description: "Internal per-chapter worker invoked by pdf-explainer-full-guide after summarization. Re-reads one resolved chapter span visually or from a faithful text layer and writes a standalone detail report with [pNN] source anchors."
 user-invocable: false
 ---
 

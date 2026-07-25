@@ -1,6 +1,6 @@
 ---
 name: explainer-reading-site-library-base
-description: Shared resources for the pdf-explainer site skills — the persistent Cloudflare Pages "library" manager (`scripts/library.py`) and the pdf-explainer site context layer (`assets/reading-site.css`, content styling only), which layers on top of the explainer-html-docs base design system. The reading-site navigation widgets are NOT here — they are explainer-html-docs' `reading-nav` opt-in component. explainer-reading-site-initialize and explainer-reading-site-deploy delegate here to run library.py; pdf-explainer-generate-site delegates here for the context asset its report pages share with the library index. Use this skill when another pdf-explainer skill asks to run the library manager or copy the context asset. Not typically invoked on its own.
+description: "Internal resource package invoked by reading-site initialize, deploy, and generate flows. Provides the persistent Cloudflare library manager and shared reading-site context assets."
 user-invocable: false
 ---
 

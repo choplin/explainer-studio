@@ -1,6 +1,6 @@
 ---
 name: pdf-explainer-pdf-stitch
-description: Internal Phase 2 procedure for the pdf-explainer-summarize skill — read all Phase 1 extraction chunks, join sections split across chunk boundaries, dedupe, build the canonical structural spine toc.md from the chunks' verbatim heading streams, and assemble the outline.md against it. Applied once (single pass) by the summarize orchestrator (dispatched to a pdf-explainer-pdf-stitch subagent under Claude Code, or applied inline otherwise). NOT a user-facing skill and NOT triggered directly by user requests.
+description: "Internal Phase 2 worker invoked once by pdf-explainer-summarize after chunk extraction. Reconciles sections across chunk boundaries, deduplicates the material, and writes the canonical structural spine and outline."
 user-invocable: false
 ---
 

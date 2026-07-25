@@ -1,6 +1,6 @@
 ---
 name: explainer-audio-narrate
-description: This skill should be used to synthesize an existing two-speaker dialogue script (台本, where each line is prefixed A:/B:) into a spoken audio file — the SECOND step of the audio-guide flow, after explainer-audio-dialogue writes the script. Triggers on "台本を音声にして", "この対話を読み上げて / 音声化して", "音声ファイルを作って", "narrate this dialogue", "turn the script into audio", "synthesize the audio". Uses a local VOICEVOX ENGINE (offline, no API key) and encodes AAC/m4a with ffmpeg. Should NOT trigger for writing the dialogue script (use explainer-audio-dialogue).
+description: "Synthesize an existing A:/B: two-speaker dialogue script into AAC/m4a with local VOICEVOX and ffmpeg. Use when the user wants a script narrated as audio. Use explainer-audio-dialogue when the script does not exist yet."
 user-invocable: true
 ---
 

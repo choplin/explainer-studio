@@ -1,6 +1,6 @@
 ---
 name: explainer-reading-site-page
-description: Internal procedure for the pdf-explainer-generate-site skill — read one report Markdown and author a restructured, web-native page as semantic Markdown (Markdown + fenced divs), NOT a 1:1 conversion and NOT hand-written HTML. The explainer-html-docs generator binds the semantic Markdown to the markup contract deterministically; this procedure writes only the meaning (which passage is a hazard, the key point, the takeaways) and the editorial restructuring. Applied once per report, in parallel, by the generate-site orchestrator (dispatched to a explainer-reading-site-page subagent under Claude Code, or applied inline otherwise). NOT a user-facing skill and NOT triggered directly by user requests.
+description: "Internal per-report authoring procedure invoked by explainer-reading-site-generate-base. Restructures one report as semantic Markdown for deterministic generation by explainer-html-docs."
 user-invocable: false
 ---
 

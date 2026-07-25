@@ -1,6 +1,6 @@
 ---
 name: paper-explainer-summarize
-description: This skill should be used when the user wants to digest an academic paper PDF (conference/journal paper or preprint, mainly CS; usually 8–30 pages — content type, not page count, is the deciding factor) into a structured summary — an Ochiai-format overview plus per-perspective detail reports (background / method / experiments / discussion / related-work). Triggers on "この論文をまとめて/要約して", "論文サマリを作って", "落合フォーマットで読んで", "summarize this paper", "digest this arXiv paper", "make a paper report". Should NOT trigger for non-paper documents (books, manuals, dissertations — use pdf-explainer-summarize), for papers over ~30 pages of body (offer pdf-explainer-summarize, but default here for anything the user calls a "paper"), or for raw OCR/text extraction without synthesis.
+description: "Digest an academic paper into a structured overview and perspective reports covering background, method, experiments, discussion, and related work. Use for conference or journal papers and preprints. Use pdf-explainer-summarize for books, manuals, dissertations, or other long non-paper PDFs."
 user-invocable: true
 ---
 

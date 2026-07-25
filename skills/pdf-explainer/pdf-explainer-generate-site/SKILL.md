@@ -1,6 +1,6 @@
 ---
 name: pdf-explainer-generate-site
-description: This skill should be used when the user wants pdf-explainer reports turned into a real website — authored web pages (not converted Markdown) browsable from a smartphone, built as a static site under a work dir's site/ from its reports/, with the audio/ guides playable in-page. Triggers on "レポートをWebサイトにして", "HTMLにして", "サイトを作って", "スマホで読めるようにして", "generate a site from the reports", "make a website from the reports". Should NOT trigger for deploying/hosting the built site (use explainer-reading-site-deploy), for producing the reports (use pdf-explainer-summarize), or for the audio guide (use explainer-audio-dialogue / explainer-audio-narrate).
+description: "Build a static reading site from existing pdf-explainer reports, including audio guides when present. Use when reports already exist and the user wants a local site. Use explainer-reading-site-deploy to publish it."
 user-invocable: true
 ---
 

@@ -1,6 +1,6 @@
 ---
 name: pdf-explainer-full-guide
-description: This skill should be used when the user wants to run the WHOLE pdf-explainer pipeline end-to-end on one PDF in a single request — from summary, through a detailed report per chapter, to a two-host dialogue script, to synthesized audio, to a browsable website. Triggers on "この本を全部やって", "一冊まるごと音声ガイドまで", "summaryから音声・サイトまで一気に", "全ステップ実行して", "run the whole pipeline / do everything for this PDF / from summary to audio and site". It chains pdf-explainer-summarize → pdf-explainer-pdf-detail (per chapter) → explainer-audio-dialogue → explainer-audio-narrate → pdf-explainer-generate-site (and hands off to explainer-reading-site-deploy for publishing). Should NOT trigger for a single phase (use those sub-skills directly), or for a PDF already partway through the pipeline where only remaining steps are wanted (invoke the remaining sub-skills).
+description: "Run the complete PDF pipeline for one book, manual, or long document: an overview, per-chapter reports, dialogue scripts, synthesized audio, and a reading site. Use only for end-to-end requests; use the individual phase skills when the user wants a subset or is resuming an existing work directory."
 user-invocable: true
 ---
 

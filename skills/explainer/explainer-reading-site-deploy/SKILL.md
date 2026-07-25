@@ -1,6 +1,6 @@
 ---
 name: explainer-reading-site-deploy
-description: This skill should be used when the user wants to publish an already-generated pdf-explainer book site (a <WORK_DIR>/site/ dir) to the internet — adding it as a subpath to the shared Cloudflare Pages library set up by explainer-reading-site-initialize, then deploying so it is reachable (Access-protected) from a phone. Triggers on "サイトをデプロイして", "この本を公開して", "ホストして", "ネットで読めるようにして", "deploy the site", "publish this book", "put it online". Should NOT trigger for the one-time hosting setup (use explainer-reading-site-initialize first), for building the site (use pdf-explainer-generate-site), for producing reports (use pdf-explainer-summarize), or for the audio guide (use explainer-audio-dialogue / explainer-audio-narrate).
+description: "Publish an already-built <WORK_DIR>/site/ to the shared Access-protected Cloudflare Pages library. Use when a local site exists and the user wants it online; use explainer-reading-site-initialize if hosting is not set up."
 user-invocable: true
 ---
 

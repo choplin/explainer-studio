@@ -1,6 +1,6 @@
 ---
 name: paper-explainer-generate-site
-description: This skill should be used when the user wants paper-explainer reports turned into a real website — authored web pages (not converted Markdown) browsable from a smartphone, built as a static site under a work dir's site/ from its reports/ (overview + background / method / experiments / discussion / related-work), with the overview's audio guide playable in-page. Triggers on "論文レポートをWebサイトにして", "この論文サマリをHTMLにして", "サイトを作って", "スマホで読めるようにして", "generate a site from the paper reports". Should NOT trigger for deploying/hosting the built site (use explainer-reading-site-deploy), for producing the reports (use paper-explainer-summarize), or for the audio guide (use explainer-audio-dialogue / explainer-audio-narrate).
+description: "Build a static reading site from existing paper-explainer reports, including overview audio when present. Use when reports already exist and the user wants a local site. Use explainer-reading-site-deploy to publish it."
 user-invocable: true
 ---
 

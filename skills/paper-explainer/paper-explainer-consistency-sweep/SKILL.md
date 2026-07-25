@@ -1,6 +1,6 @@
 ---
 name: paper-explainer-consistency-sweep
-description: Internal Finalize-phase procedure for the paper-explainer-summarize skill — the one pass that reads the WHOLE report set at once and checks it for (1) cross-report contradictions and (2) faithfulness to the source paper's logical structure, returning a findings list only (it never edits the reports). Applied once at Finalize by the summarize orchestrator (dispatched to a paper-explainer-consistency-sweep subagent under Claude Code, or applied inline otherwise). NOT a user-facing skill and NOT triggered directly by user requests.
+description: "Internal Finalize worker invoked once by paper-explainer-summarize after all reports are written. Reads the complete report set and returns only findings about cross-report contradictions and faithfulness to the paper's logical structure; it does not edit reports."
 user-invocable: false
 ---
 

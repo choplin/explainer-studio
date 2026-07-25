@@ -1,6 +1,6 @@
 ---
 name: pdf-explainer-summarize
-description: This skill should be used when the user wants to turn a large PDF (a book, manual, or long document — roughly 30+ pages) into a Markdown report, digest, or summary. Triggers on "PDFをレポートにして", "この本を要約して/レポート化して", "turn this PDF into a markdown report", "generate a digest of this document", "read this whole PDF and summarize it". Should NOT trigger for short PDFs under ~30 pages (read them directly with the Read tool), for academic conference/journal papers or preprints regardless of length (use paper-explainer-summarize), or for raw text extraction without synthesis.
+description: "Digest a book, manual, or other long non-paper PDF into a source-anchored Markdown overview. Use when the requested deliverable is a report, digest, or summary. Use paper-explainer-summarize for academic papers, direct reading for short PDFs, and pdf-explainer-full-guide when chapter reports, audio, and a site are also wanted."
 user-invocable: true
 ---
 

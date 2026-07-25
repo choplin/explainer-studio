@@ -1,6 +1,6 @@
 ---
 name: pdf-explainer-pdf-extract
-description: Internal Phase 1 procedure for the pdf-explainer-summarize skill — read one page range of a PDF visually and write structured extraction material (not a finished report) to a file, including a verbatim heading stream for the structural spine. Applied once per chunk, in parallel, by the summarize orchestrator (dispatched to a pdf-explainer-pdf-extract subagent under Claude Code, or applied inline otherwise). NOT a user-facing skill and NOT triggered directly by user requests.
+description: "Internal Phase 1 worker invoked by pdf-explainer-summarize once per page chunk. Reads the chunk visually or from a faithful text layer and writes structured source material with a verbatim heading stream, not a finished report."
 user-invocable: false
 ---
 

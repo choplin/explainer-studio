@@ -1,6 +1,6 @@
 ---
 name: explainer-reading-site-initialize
-description: This skill should be used once, before the first deploy, to set up the shared hosting target for pdf-explainer sites — a single Cloudflare Pages project (plus a local library directory under XDG) that books deploy into as subpaths, with a Cloudflare Access policy so the collection is not left public. Triggers on "サイトのセットアップをして", "配信の初期設定", "Pagesプロジェクトを用意して", "initialize the site", "set up hosting", "set up Cloudflare Pages". Should NOT trigger for deploying a book (use explainer-reading-site-deploy), building a book's site (use pdf-explainer-generate-site), or once the library already exists (deploy-site handles subsequent deploys).
+description: "Set up the shared Access-protected Cloudflare Pages library used by reading-site deployments. Use only for first-time hosting setup; use explainer-reading-site-deploy after the library exists."
 user-invocable: true
 ---
 

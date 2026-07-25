@@ -1,6 +1,6 @@
 ---
 name: paper-explainer-paper-detail
-description: Internal Phase 2 procedure for the paper-explainer-summarize skill — write ONE perspective-specific detail report (background / method / experiments / discussion / related-work) for an academic paper already digested in Phase 1, reading either the OCR Markdown or a resolved PDF page span. Applied once per in-scope perspective, in parallel, by the summarize orchestrator (dispatched to a paper-explainer-paper-detail subagent under Claude Code, or applied inline otherwise). NOT a user-facing skill and NOT triggered directly by user requests.
+description: "Internal Phase 2 worker invoked by paper-explainer-summarize once per perspective. Re-reads the relevant source material and writes one standalone background, method, experiments, discussion, or related-work report."
 user-invocable: false
 ---
 

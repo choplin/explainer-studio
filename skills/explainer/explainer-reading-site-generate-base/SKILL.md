@@ -1,6 +1,6 @@
 ---
 name: explainer-reading-site-generate-base
-description: The shared workflow for turning a work dir's reports/ into a reading-guide website — the scaffold, the parallel semantic-Markdown authoring, the single generator build, the semantic landing page, and the nav manifest. It owns the pipeline that pdf-explainer-generate-site and paper-explainer-generate-site both run; each consumer delegates here and supplies only its own page-ordering profile (which reports, in what order, with what kicker labels) and its document-type vocabulary. Use this skill when a reading-site generate-site skill delegates its build here, or when adding a new consumer of the same reading-site pipeline. Not user-invocable and not triggered directly by user requests — a generate-site consumer invokes it.
+description: "Internal build orchestrator invoked by pdf-explainer-generate-site and paper-explainer-generate-site. Turns reports into semantic pages, a landing page, assets, and navigation using the consumer's ordering profile and vocabulary."
 user-invocable: false
 ---
 

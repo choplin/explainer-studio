@@ -1,6 +1,6 @@
 ---
 name: explainer-diff
-description: This skill should be used when the user wants an HTML explanation document generated from a git diff — a reviewer-facing guide that layers background, mental model, diagrams, a guided walkthrough in understanding order with risk annotations, and review points. Triggers on "explain this diff", "diffの解説を作って", "この変更の解説HTMLを生成して", "generate an explanation page for these changes". Should NOT trigger for publishing an explanation for a PR (use git-helpers-explain-pr, which delegates here), writing a Markdown PR description (git-helpers-pr-description), or reviewing code for defects (code-review skills).
+description: "Generate a reviewer-facing HTML explanation of a git diff, including context, mental models, diagrams, a guided walkthrough, risks, and review points. Use when the requested deliverable is an explanation page for code changes; use git-helpers-explain-pr to publish one for a PR, git-helpers-pr-description for Markdown PR text, and code-review skills to find defects."
 allowed-tools: Bash, Read, Write, Glob
 user-invocable: true
 ---
