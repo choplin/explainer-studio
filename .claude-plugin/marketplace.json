@@ -5,13 +5,13 @@
     "name": "choplin"
   },
   "metadata": {
-    "description": "Claude Code plugins for producing trustworthy explanations and reading guides."
+    "description": "Ready-to-run explainer pipelines and a reusable HTML foundation for shaping AI output for human understanding."
   },
   "plugins": [
     {
       "name": "explainer-studio",
       "source": "./",
-      "description": "Turn PDFs, papers, and source material into trustworthy explanations, audio guides, and reading sites."
+      "description": "Shape AI output for human understanding with ready-to-run explainer pipelines and a reusable HTML foundation."
     }
   ]
 }

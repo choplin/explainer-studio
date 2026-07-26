@@ -2,9 +2,9 @@
   "$schema": "https://json.schemastore.org/claude-code-plugin.json",
   "name": "explainer-studio",
   "version": "0.1.0",
-  "description": "Turn PDFs, papers, and source material into trustworthy explanations, audio guides, and reading sites.",
+  "description": "Shape AI output for human understanding with ready-to-run explainer pipelines and a reusable HTML foundation.",
   "author": {
-    "name": "choplin"
+    "name": "Akihiro Okuno"
   },
   "homepage": "https://github.com/choplin/explainer-studio",
   "repository": "https://github.com/choplin/explainer-studio",
