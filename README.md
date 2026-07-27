@@ -85,15 +85,18 @@ If Nix is already installed, you can skip this step.
 
 ### 3. Generate your first explanation
 
+Invoke an installed skill by name. The examples below use Claude Code syntax;
+invocation syntax may differ in other compatible agents.
+
 From a git repository with changes, run:
 
 ```text
 /explainer-studio:explainer-diff
 ```
 
-The result is a self-contained HTML explanation that gives the reviewer
-context, a mental model, a guided walkthrough, risks, verification status, and
-focused review points.
+The result is a single-file HTML explanation that gives the reviewer context, a
+mental model, a guided walkthrough, risks, verification status, and focused
+review points.
 
 The document pipelines are richer applications of the same HTML system. They
 also require [poppler](https://poppler.freedesktop.org/) for PDF inspection and
@@ -117,42 +120,76 @@ Publishing is offered separately and is never automatic.
 
 ## 🧭 Choose the right workflow
 
-Choose the source-specific workflow that feeds the shared HTML explanation
-system. Invoke a narrower skill when you already have intermediate material.
+| Goal | Primary output | Skill (Claude Code syntax) |
+| --- | --- | --- |
+| Explain any source material | Understandable HTML | `/explainer-studio:explainer-html-docs` |
+| Understand a long PDF | Markdown overview | `/explainer-studio:pdf-explainer-summarize` |
+| Explore a long PDF in depth | Reports and reading site | `/explainer-studio:pdf-explainer-full-guide` |
+| Understand an academic paper | Structured Markdown reports | `/explainer-studio:paper-explainer-summarize` |
+| Explore an academic paper in depth | Reports and reading site | `/explainer-studio:paper-explainer-full-guide` |
+| Review code changes | Reviewer-facing HTML | `/explainer-studio:explainer-diff` |
 
-| Goal | Skill |
-| --- | --- |
-| Explain a git diff as a reviewer-facing HTML page | `/explainer-studio:explainer-diff` |
-| Full guide for a book, manual, thesis, or long PDF | `/explainer-studio:pdf-explainer-full-guide` |
-| Source-anchored overview of a long PDF | `/explainer-studio:pdf-explainer-summarize` |
-| Full guide for an academic paper | `/explainer-studio:paper-explainer-full-guide` |
-| Overview and perspective reports for a paper | `/explainer-studio:paper-explainer-summarize` |
-| Build a local site from existing PDF reports | `/explainer-studio:pdf-explainer-generate-site` |
-| Build a local site from existing paper reports | `/explainer-studio:paper-explainer-generate-site` |
-| Turn Markdown into a two-speaker script | `/explainer-studio:explainer-audio-dialogue` |
-| Narrate an existing two-speaker script | `/explainer-studio:explainer-audio-narrate` |
-| Initialize or publish the shared reading-site library | `/explainer-studio:explainer-reading-site-initialize` / `/explainer-studio:explainer-reading-site-deploy` |
-
-Claude can also select a skill automatically from a natural-language request.
-The explicit commands above are useful when you already know which artifact you
+Compatible agents can also select a skill automatically from a natural-language
+request. Explicit invocation is useful when you already know which artifact you
 want.
 
-## 🧰 Optional capabilities and requirements
+## 🧰 External dependencies
 
-Install only the dependencies needed by the outputs you want.
+Explainer Studio does not silently install global tools. Each workflow checks
+its own requirements and uses tools already on `PATH`; where a bundled Nix
+environment exists, its preflight script can use that instead.
 
-| Capability | Requirements | Behavior when unavailable |
+### Local tools by capability
+
+Install only what the outputs you want require.
+
+| Capability | Local requirements | Notes |
 | --- | --- | --- |
-| Core HTML generation | `pandoc` on `PATH` or Nix | HTML output cannot be built |
-| Long-PDF text reports | poppler | Required; the pipeline stops with setup guidance |
-| Long-PDF figure extraction | `uv` or Nix for local MinerU resolution | Optional; reports continue without extracted figure crops |
-| Academic-paper reports | poppler plus `uv` or Nix; `curl` and `jq` for dblp verification | MinerU OCR is required; the first run downloads several GB of model data |
-| Audio synthesis | VOICEVOX ENGINE, `ffmpeg`, Python 3, and `curl` | Dialogue scripts remain available; synthesis is skipped |
-| Site publishing | authenticated `wrangler` and a Cloudflare account | Local site generation is unaffected |
+| Supported plugin installation | Current Claude Code and a Bash-compatible shell | macOS and Linux provide the expected shell environment; native Windows needs WSL or Git Bash for the bundled scripts |
+| HTML generation | `pandoc` on `PATH`, or Nix with flakes enabled | Required by every workflow that produces HTML |
+| Git-diff explanation | Git plus the HTML runtime | Reads the current repository diff and produces one HTML file |
+| Long-PDF reports | poppler (`pdfinfo`, `pdftotext`, `pdftoppm`) | Required for PDF inspection, text-layer extraction, and page rendering |
+| Long-PDF figure extraction | `uv`, or an installed MinerU plus Python 3; Nix can supply the runtime | Optional; the report pipeline continues without extracted figure crops |
+| Academic-paper reports | poppler plus `uv`, or poppler plus an installed MinerU and Python 3; `curl` and `jq` for related-work bibliography verification | MinerU is required; `uv` resolves it with `uvx --from 'mineru[core]'` when it is not installed |
+| Audio synthesis | VOICEVOX ENGINE, Python 3, `curl`, and `ffmpeg` | Optional; dialogue scripts remain available when synthesis is skipped |
+| Reading-site publishing | Python 3, authenticated `wrangler`, `curl`, and a Cloudflare account | Optional; local site generation does not require Cloudflare |
 
-The bundled preflight scripts resolve supported runtimes from `PATH` first and
-use the bundled Nix environment when available. They do not silently install
-global packages.
+The bundled Nix environments are capability-specific:
+
+- HTML generation supplies `pandoc` with Lua support.
+- Long-PDF processing supplies poppler, `uv`, and Python 3.
+- Academic-paper processing supplies poppler, `uv`, Python 3, `curl`, and `jq`.
+
+Nix does not bundle MinerU itself. `uv` resolves MinerU into its shared tool
+cache on demand, and the first run downloads the package and several gigabytes
+of model data.
+
+### Network services and remote assets
+
+Source PDFs are not uploaded to an OCR service. Network use is limited to the
+capabilities below and to the agent's configured model provider.
+
+- **MinerU bootstrap** — `uvx` resolves the MinerU package from PyPI, and MinerU
+  downloads its model data on first use. OCR itself then runs locally.
+- **Nix bootstrap** — first use downloads the pinned flake inputs and runtime
+  packages; later runs reuse the local Nix store.
+- **dblp** — the academic-paper related-work workflow queries the public dblp
+  API to verify bibliography metadata. No API key is required.
+- **jsDelivr** — the optional highlight.js, diff2html, and Mermaid components
+  load their renderers from a CDN unless they are vendored. Base HTML, reading
+  navigation, and browser-side comments use local assets; reviewer-facing diff
+  pages need network access for rich diff and diagram rendering.
+- **Cloudflare** — publishing uses the Cloudflare API through `wrangler` and
+  hosts the shared reading-site library on Cloudflare Pages. No Cloudflare
+  connection is made during local generation.
+- **VOICEVOX** — narration talks only to a local VOICEVOX ENGINE on
+  `localhost`; it does not call a hosted speech API.
+
+### Development-only dependency
+
+Repository validation uses `skill-validator` v1.5.6 in addition to
+`claude plugin validate`. End users do not need `skill-validator` to run the
+installed plugin.
 
 ## 🎯 Accuracy and trust model
 
@@ -173,17 +210,6 @@ and source reading from synthesis where the source requires it.
   than assigned a guessed URL.
 - **Git diffs** are grouped into a guided behavioral walkthrough rather than
   presented as an undifferentiated sequence of changed lines.
-
-## 🔒 Network and privacy boundaries
-
-- Source PDFs and MinerU OCR stay local; documents are not uploaded to an OCR
-  service.
-- VOICEVOX synthesis uses a local engine on `localhost`.
-- Paper related-work verification queries the public dblp API.
-- Optional diagram, diff, and syntax-highlighting components may load their
-  renderer from a CDN.
-- Publishing uses Cloudflare Pages and requires explicit confirmation. The
-  initialization skill can place the shared library behind Cloudflare Access.
 
 ## 📌 Current scope
 

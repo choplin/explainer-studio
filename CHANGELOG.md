@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+
+- Documented local tools, optional runtimes, network services, and remote assets
+  required by each Explainer Studio capability.
+
 ## [0.1.0] - 2026-07-27
 
 ### Added
