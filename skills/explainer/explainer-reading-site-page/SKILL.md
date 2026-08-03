@@ -6,7 +6,7 @@ user-invocable: false
 
 # Site page authoring
 
-You turn one report Markdown file into one **semantic Markdown file** (Markdown + fenced divs) that is *designed for the web*: restructured for scanning on a phone, not a mechanical rendering of the source. The [[explainer-html-docs]] generator turns your semantic Markdown into the final HTML page — you never write HTML, `<head>`, classes, or asset links, and you never rewrite figure paths or escape characters. Those are the generator's job and it cannot get them wrong. **Your whole job is meaning and structure**: which passage is a hazard vs the key point, what the takeaways are, and how to lay the material out for reading.
+You turn one report Markdown file into one **semantic Markdown file** (Markdown + fenced divs) that is *designed for the web*: restructured for scanning on a phone, not a mechanical rendering of the source. The [[explainer-html-docs]] generator turns your semantic Markdown into the final HTML page — you never write HTML, `<head>`, presentation-only classes outside the vocabulary below, or asset links, and you never rewrite figure paths or escape characters. Those are the generator's job and it cannot get them wrong. **Your whole job is meaning and structure**: which passage is a hazard vs the key point, what the takeaways are, and how to lay the material out for reading.
 
 ## When this applies
 
@@ -21,6 +21,10 @@ The caller provides the following. If any is missing, report what is missing and
 - Site title, and this page's kicker label (e.g. 第2章 / 全体レポート)
 - Whether `<WORK_DIR>/ocr/figures/` exists (harvested figure crops the caller copies into `site/figures/`)
 - Audio file name under `site/audio/` if a matching guide exists (else "none")
+- The canonical site-wide authoring conventions from the caller, including the
+  page-anchor grammar. Treat them as requirements, not suggestions; if they
+  conflict with this skill, report the conflict and stop rather than choosing a
+  page-local convention.
 
 ## The source you write
 
@@ -53,7 +57,7 @@ Body vocabulary — reach only for these; the generator rejects anything else (a
 | A colored lead-in inside a callout | `[結論:]{.label}` at the paragraph start |
 | One striking sentence (≤1 per page) | `::: {.pullquote}` … `:::` |
 | An inline highlighted term | `[term]{.mark}` |
-| A source-PDF page anchor | `[p31]{.p}` |
+| A source-PDF page anchor | `[p31]{.p}` / `[p31–p33]{.p}` |
 | A harvested figure | `![説明](../ocr/figures/fig-p031-1.jpg)` — **carry the source path as-is**; the generator rewrites `../ocr/figures/` → `figures/` so nothing points outside the site |
 | An in-page audio player (only if the caller gave an audio file) | `::: {.player src=audio/<file>}` `:::` |
 | Tabular data | a plain Markdown table — wrapped in `.tablewrap` automatically |
@@ -62,10 +66,24 @@ Body vocabulary — reach only for these; the generator rejects anything else (a
 
 ## Constraints (meaning only)
 
-Everything mechanical is the generator's guarantee — you do **not** write HTML, `<head>`, classes, asset/script tags, prev/next nav, figure-path rewrites, `<`/`>`/`&` escaping, or `.tablewrap`. What remains yours:
+Everything mechanical is the generator's guarantee — you do **not** write HTML, `<head>`, presentation-only classes outside the semantic vocabulary above, asset/script tags, prev/next nav, figure-path rewrites, `<`/`>`/`&` escaping, or `.tablewrap`. What remains yours:
 
 - **Factual fidelity**: every claim in the source must come from the source report. Restructure and rephrase freely; do not invent content.
-- **Keep every `[pNN]` anchor** from the source, written as `[pNN]{.p}` at the point it annotates. Do not drop them — they are the link back to the PDF.
+- **Every source-PDF page reference uses `.p`.** Keep every source anchor and
+  write a single page as `[p31]{.p}` and a range as `[p31–p33]{.p}` at the point
+  it annotates. A bare `[p31]` or `[p31–p33]` in prose is invalid even though it
+  is legal Markdown and the generator would accept it. Do not drop anchors —
+  they are the link back to the PDF.
+- **Never put a page anchor in a heading.** It pollutes both the generated
+  heading id and the navigation/TOC label. If the heading is the only place that
+  carries the reference, move the anchor into the first following paragraph; if
+  that paragraph already carries the same reference, remove it from the heading.
+- **Put sentence punctuation after the anchor**, for example
+  `…である [p14]{.p}。`, not `…である。 [p14]{.p}`. This keeps the reference
+  attached to the claim it supports.
+- Treat a bracketed token as a page anchor only when it is a source reference in
+  prose. Do not rewrite fenced or inline code, image alt text, or a table-header
+  placeholder such as `| [pNN] |` merely because it resembles one.
 - **Write in the language of the source report.**
 - **Carry only the figures the source report actually embeds** — do not go hunting in `figures/` for extra crops. If the caller said `ocr/figures/` does not exist, the report has no figures; do not invent any. Never a bare figure: it appears where the prose discusses it, with the report's explanation intact, and the alt text says what it shows.
 - **Do not author prev/next links.** Page-to-page navigation is rendered at runtime by `reading-nav.js` (the explainer-html-docs reading-nav component) from the site's `nav-manifest.js` (loaded via the `context-js` frontmatter) — one source for the page order. Hand-authored neighbor links are exactly the drift a single source removes.
@@ -92,6 +110,12 @@ A page that ends up with the same heading sequence and sentence order as the sou
 ## Output
 
 Write the finished source to the given output path (`<WORK_DIR>/src/<slug>.md`) — unconditionally, without prompting about an existing file. This is an orchestrator-dispatched worker; the parent [[pdf-explainer-generate-site]] already confirmed clearing/overwriting before dispatching. Do NOT run the generator yourself — the orchestrator builds every source into HTML in one pass afterward.
+
+Before replying, re-read the finished source and inspect its Markdown context. Verify
+that every prose source reference—including ranges—uses `.p`, none is in a heading,
+and punctuation follows the anchor; verify separately that code, image alt text, and
+table-header placeholders were not rewritten. Fix the page before returning if any
+check fails.
 
 ## Reply
 

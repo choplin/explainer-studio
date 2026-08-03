@@ -16,10 +16,28 @@ Pass only:
 - site title;
 - kicker from the Phase 1 ordered list;
 - whether `<WORK_DIR>/ocr/figures/` exists;
-- matching filename under `site/audio/`, or `none`.
+- matching filename under `site/audio/`, or `none`;
+- the following canonical site-wide authoring conventions, verbatim.
+
+```text
+CANONICAL SITE-WIDE AUTHORING CONVENTIONS
+- Every source-PDF page reference in prose uses `.p`: `[p31]{.p}` for one page,
+  `[p31–p33]{.p}` for a range.
+- A page reference never appears in a heading. Move an otherwise-unrepresented
+  reference to the first following paragraph; delete a heading copy only when the
+  following body already preserves it.
+- Sentence punctuation follows the anchor: `… [p14]{.p}。`.
+- Do not rewrite lookalikes in fenced/inline code, image alt text, or table-header
+  placeholders such as `| [pNN] |`.
+- Every report page opens with one kicker, one H1, one lede, then one keypoints box.
+```
+
+This block is deliberately both part of the page skill and part of the dispatch
+contract. Isolated workers must not infer a site-wide vocabulary independently.
 
 The worker carries any `../ocr/figures/...` references unchanged; the generator
-rewrites them. It does not author head markup, classes, prev/next links, or rewrites.
+rewrites them. It does not author head markup, presentation-only classes outside the
+page skill's semantic vocabulary, prev/next links, or path rewrites.
 It returns only the source path, page title, and a 2–3 line card summary. Trust the
 reply; do not re-read the finished source to compose the landing.
 
@@ -54,6 +72,10 @@ Compose:
 5. A plain Markdown CTA to `overview.html`.
 6. The consumer's cards-section `##` heading.
 7. A filterable card grid with one card per page in profile order.
+
+If a returned summary contains a source-PDF page reference, preserve it with the
+same canonical `.p` notation in landing prose. Never put it in the landing H1, cards
+heading, or a card title.
 
 Use this card notation:
 

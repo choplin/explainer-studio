@@ -89,9 +89,13 @@ Read `references/authoring-and-verification.md` completely now.
    supports isolated subagents. Each worker writes `src/<slug>.md` and returns only
    the source path, title, and a 2–3 line card summary.
 2. Pass each worker only the absolute report/output paths, site title, profile kicker,
-   figure-directory availability, and matching audio filename or `none`.
-3. Do not have workers author head markup, classes, figure rewrites, or prev/next
-   links. Runtime navigation comes from the manifest written in Phase 3.
+   figure-directory availability, matching audio filename or `none`, and the exact
+   canonical site-wide authoring conventions from
+   `references/authoring-and-verification.md`. The conventions are an explicit
+   dispatch input because isolated workers cannot infer them from sibling output.
+3. Do not have workers author head markup, presentation-only classes outside the
+   page skill's semantic vocabulary, figure rewrites, or prev/next links. Runtime
+   navigation comes from the manifest written in Phase 3.
 4. Compose `src/index.md` inline from worker replies and the consumer vocabulary.
    Do not re-read report sources for cards. The landing is semantic Markdown and is
    built like every other page.
