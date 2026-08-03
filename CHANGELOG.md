@@ -14,6 +14,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Renamed the git-diff explanation skill from `explainer-diff` to
   `diff-explainer`, matching the subject-first naming of `paper-explainer` and
   `pdf-explainer`. Invoke it as `/explainer-studio:diff-explainer`.
+- The diff explainer now gathers the context behind a change as a defined step:
+  for a pull request it reads the description and the issues and pull requests it
+  references, for a commit range it reads the commit messages, and in every case
+  it also draws on the conversation and on the repository's own README,
+  changelog, decision records, and conventions. Explanations list the sources
+  they were built from.
 
 ## [0.1.0] - 2026-07-27
 

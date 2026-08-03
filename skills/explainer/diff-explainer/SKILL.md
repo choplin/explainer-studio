@@ -1,6 +1,6 @@
 ---
 name: diff-explainer
-description: "Generate a reviewer-facing HTML explanation of a git diff, including context, mental models, diagrams, a guided walkthrough, risks, and review points. Use when the requested deliverable is an explanation page for code changes; use git-helpers-explain-pr to publish one for a PR, git-helpers-pr-description for Markdown PR text, and code-review skills to find defects."
+description: "Generate a reviewer-facing HTML explanation of a git diff — for a PR, a branch, a commit range, or uncommitted work — including the context behind the change, mental models, diagrams, a guided walkthrough, risks, and review points. Use when the requested deliverable is an explanation page for code changes; use git-helpers-pr-description for Markdown PR text, and code-review skills to find defects."
 allowed-tools: Bash, Read, Write, Glob
 user-invocable: true
 ---
@@ -13,8 +13,11 @@ generates far more code than humans can read line-by-line: build understanding i
 layers (why → mental model → diagrams → guided code walkthrough → review points)
 so the reviewer spends attention only where human judgment is actually needed.
 
-This skill is pure generation: diff in, HTML file out. No git branch operations,
-no publishing, no PR interaction — callers (e.g. `git-helpers-explain-pr`) own those.
+This skill is generation only: diff in, HTML file out, written locally. It **reads**
+whatever context explains the change (step 1), but changes nothing outside its own
+output — no git branch operations, no publishing, no writing to a PR. Distribution
+is out of scope: the deliverable is a file on disk, and how it reaches other people
+is the caller's problem, not this skill's.
 
 ## Inputs
 
@@ -22,28 +25,74 @@ Resolve each input in this order; ask only if genuinely ambiguous.
 
 | Input | Resolution |
 |-------|-----------|
-| Diff | Caller/user-specified range or pathspec → else staged changes if any → else `<merge-base with default branch>...HEAD` |
-| Context material | Optional free-form text from the caller: purpose statement, issue/PR body, commit messages, design notes. More context → better "Background & Why" |
+| Diff | Caller/user-specified PR number/URL, range, or pathspec → else staged changes if any → else `<merge-base with default branch>...HEAD` |
+| Context material | **Collected in step 1** from the diff's provenance. Free-form text from the caller (purpose statement, design notes) is additional, and takes precedence where the two conflict |
 | Output path | Caller-specified → else `.agents/diff-explainer/{yyyy-mm-dd}-{branch-or-range-slug}/index.html` |
 | Language | Caller-specified → else the dominant language of the context material → else the conversation language |
 
 ## Process
 
-### 1. Collect the material
+### 1. Collect the diff and its context
 
-- `git diff --stat <range>` for the shape, `git diff <range>` for the content.
-- `git log --format='%h %s%n%b' <range>` when the range spans commits — commit
-  messages are context even when no other material is provided.
+Collecting context is a **step, not an option**: "Background & Why" is only as good
+as what is gathered here, and *how the diff was specified* determines what is
+reachable. Take the diff itself first — `git diff --stat <range>` for the shape and
+`git diff <range>` for the content (`gh pr diff <n>` when the input is a PR) — then
+gather context by input shape.
+
+**A PR (number or URL)** — the richest case:
+
+- `gh pr view <n> --json title,body,url,baseRefName,headRefName` for the PR itself.
+- `git log --format='%h %s%n%b' origin/<base>..<head>` for the commit messages.
+- **Every issue/PR the body references** — `#N`, `Fixes …` / `Closes …`, and full
+  GitHub URLs: fetch title + body (`gh issue view` / `gh pr view`, adding
+  `-R owner/repo` for another repository). A change is often only explicable
+  through the issue that motivated it, and a cross-repo reference is usually the
+  dependency it is built on.
+- Do **not** read the PR's review comments. This skill explains the change; it
+  neither relays nor pre-empts other people's review findings.
+
+**A range, branch, or single commit**:
+
+- `git log --format='%h %s%n%b' <range>` — commit messages are context even when
+  nothing else exists; include trailers (`Fixes`, `Refs`, `Co-authored-by`).
+- Expand issue references found in those messages the same way as above.
+- If the branch has an open PR (`gh pr view` succeeds), **escalate to the PR case**
+  — a branch name alone still reaches the PR body and everything it links to.
+
+**Always, whatever the input was**:
+
+- **This session.** What the user asked for in this conversation is first-class
+  context material, and for uncommitted work it is usually the only material that
+  exists. Use it rather than inferring purpose from the diff.
+- **Repository-local material for the touched paths** — the module README, the
+  `CHANGELOG` `[Unreleased]` entry (the author's own user-facing framing of the
+  change; its *absence* is itself a signal in a repository that requires one),
+  relevant ADRs and design docs, and the module's `CLAUDE.md` / `AGENTS.md`
+  conventions. Conventions matter most: they let `risk=` rest on a stated rule
+  ("this module targets Java 8, so an API signature change breaks clients")
+  rather than on guesswork.
 - Read surrounding source files when the diff alone is not enough to explain a
   chunk correctly (e.g. a modified function whose callers matter).
-- When the diff and its commit messages still leave a chunk genuinely ambiguous in
-  a way that would change the explanation — e.g. you cannot tell whether a change is
-  a behavior change or a pure refactor, which flips its risk level — **ask the user
-  rather than guessing, when the session is interactive**. When running headless or
-  delegated by a caller (e.g. `git-helpers-explain-pr`) there is no one to ask: fall
-  back to inferring and marking it inferred (see Background & Why). Reserve the
-  question for gaps that affect correctness; route minor uncertainty to the
-  `.inferred-note` path, not to the user.
+
+**Budget.** Follow references **one hop only, never recursively** — a linked
+issue's own links are out of scope, or collection never terminates. Skip anything
+unreachable in silence (a private cross-repo issue, a dead link). Cap at roughly
+five references, preferring the ones the body actually leans on.
+
+**Record what was consulted.** List the sources the explanation was built from, in
+the background section or the footer. This serves the same purpose as the
+verified/inferred split: the reader sees what the explanation rests on — and what
+it never looked at.
+
+**When collection still leaves a gap.** If a chunk stays genuinely ambiguous in a
+way that would change the explanation — e.g. you cannot tell whether a change is a
+behavior change or a pure refactor, which flips its risk level — **ask the user
+rather than guessing, when the session is interactive**. When running headless or
+delegated by another skill there is no one to ask: fall back to inferring and
+marking it inferred (see Background & Why). Reserve the
+question for gaps that affect correctness; route minor uncertainty to the
+`.inferred-note` path, not to the user.
 
 ### 2. Plan the walkthrough
 
@@ -175,10 +224,12 @@ Section-by-section rules:
   it takes the tier color ("精読が必要: N チャンク…", "確認不要: 機械的変更 M
   ファイル…"). This is what lets the reviewer plan before reading *and* teaches
   the risk color language; keep it to the aggregate, not a per-chunk list.
-- **Background & Why**: purpose, linked issues, prerequisite knowledge. With no
-  context material, infer from the diff and commit messages and put that
-  admission in the `.inferred-note` (amber) so the reader trusts it less; delete
-  the note when real context was given.
+- **Background & Why**: purpose, linked issues, prerequisite knowledge, and the
+  list of sources step 1 actually consulted. When collection came back empty,
+  infer from the diff and commit messages and put that admission in the
+  `.inferred-note` (amber) so the reader trusts it less; delete the note when real
+  context was given. Attribute claims that rest on the author's own words rather
+  than on the code ("the PR states that …") — they are context, not findings.
 - **Mental model**: how the system behaves before vs. after, in prose, before any
   code appears. Use the `.ba-before`/`.ba-after` cards for the one system-level
   before→after shift (grey = old, accent = new); omit them if the change has no
@@ -259,8 +310,11 @@ Verify before reporting completion; fix and re-check on any No:
 - [ ] Every `[…]{.verified}` claim was actually confirmed by a command run this
       session — no verified marks on unchecked inferences.
 - [ ] Chunk order follows the narrative of understanding, not file path order.
-- [ ] Background section exists; if no context material was given, it is
-      explicitly marked as inferred.
+- [ ] Step 1's context collection ran for the input shape at hand (PR references
+      expanded one hop, or commit messages read, plus the session and the
+      repository-local material), and the sources consulted are listed on the page.
+- [ ] Background section exists; if collection came back empty, it is explicitly
+      marked as inferred.
 - [ ] Each `.diff-source` block holds a parseable unified diff (a `diff --git`,
       `---`, or `+++` header + intact `@@` hunks).
 - [ ] The build ran without error (an invalid `risk`/`tested` value, an unknown
