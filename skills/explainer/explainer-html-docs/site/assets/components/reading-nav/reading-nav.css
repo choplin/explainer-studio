@@ -73,3 +73,9 @@
 .filter:focus { outline: none; border-color: var(--accent); }
 [data-reading-filter] > .rn-hidden { display: none; }
 .filter-empty { color: var(--muted); font-size: .9rem; margin: 1rem 0; }
+
+/* A filterable card index is a reading LIST, not a set of peer tiles: each card
+   carries a kicker, a title and a 2–3 line summary, which reads badly in the
+   narrow columns base.css's auto-fit grid produces on a wide screen. One card
+   per row at every width. */
+.card-grid[data-reading-filter] { grid-template-columns: 1fr; }
