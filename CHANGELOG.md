@@ -11,6 +11,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Documented local tools, optional runtimes, network services, and remote assets
   required by each Explainer Studio capability.
+- Renamed the git-diff explanation skill from `explainer-diff` to
+  `diff-explainer`, matching the subject-first naming of `paper-explainer` and
+  `pdf-explainer`. Invoke it as `/explainer-studio:diff-explainer`.
 
 ## [0.1.0] - 2026-07-27
 

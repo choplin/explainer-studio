@@ -16,7 +16,7 @@ splits review into two parts:
 - The **semantic half** remains a reading judgment. Low-stakes PDF/Paper reading
   sites skip a standalone semantic review by policy. A consumer with high-stakes
   axes internalizes the check into its own completion criteria, as
-  [[explainer-diff]] does for `risk`, `tested`, and `verified`.
+  [[diff-explainer]] does for `risk`, `tested`, and `verified`.
 
 A general reviewer cannot validate consumer-specific axes it does not own.
 
@@ -107,7 +107,7 @@ A class missing from the meaning→markup index must not become authorable.
 - Keep the theme-boot storage key in `template.html` aligned with `base.js`'
   `THEME_KEY`, or the saved theme flashes and silently stops applying.
 - `base.js` targets the first `main article`. A multi-article page must omit it and
-  supply its own scripts/template, as [[explainer-diff]] does.
+  supply its own scripts/template, as [[diff-explainer]] does.
 - The generator catches structural vocabulary errors, not semantic
   misclassification. Apply the review ownership above.
 - The substrate is offline; heavy CDN-backed renderers require an online viewer

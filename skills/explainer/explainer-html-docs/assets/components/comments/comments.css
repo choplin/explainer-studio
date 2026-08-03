@@ -227,7 +227,7 @@
    1rem from the viewport edge). It also sets `--comments-dock-right` so the panel
    hugs the column, the mirror of base.js's left-gutter TOC. Because the gutter is
    measured rather than assumed from a fixed breakpoint, this adapts to ANY column
-   width — a 48rem base page or explain-diff's ~1080px column — and falls back to
+   width — a 48rem base page or diff-explainer's ~1080px column — and falls back to
    the 💬 overlay whenever the window is too narrow to fit the panel. */
 html.comments-docked .comments-panel {
   left: auto;

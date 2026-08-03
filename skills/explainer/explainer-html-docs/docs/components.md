@@ -85,7 +85,7 @@ Two rulings pin it, because the code alone cannot:
 
 - A diagram engine's **palette hook**, so diagrams inherit the document's colors, is
   **base**. It is engine wiring, not content.
-- The **meaning** of explain-diff's high/med/low risk axis is **consumer**. The base
+- The **meaning** of diff-explainer's high/med/low risk axis is **consumer**. The base
   hands it hues; it does not know what they rank.
 
 The base owns engine wiring for a reason: a consumer that re-derives an integration
@@ -128,7 +128,7 @@ it.
 So the horizon is: **`base.css` for what most documents use, a CSS-only bundle for
 the niche** — and a CSS-only bundle is a legitimate shape, not a degenerate one
 (`diagram/diagram.css` is three lines). "Most documents" is checkable: the consumers
-are `explainer-diff` and `pdf-explainer`. If neither would reach for it,
+are `diff-explainer` and `pdf-explainer`. If neither would reach for it,
 it is niche.
 
 ### The review surface is what limits growth, not the CSS

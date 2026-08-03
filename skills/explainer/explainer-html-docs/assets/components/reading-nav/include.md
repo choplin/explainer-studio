@@ -15,7 +15,7 @@ navigation aids on top of `base.js`:
 Like `comments`, this is **injected chrome with no authored markup** and **no
 third-party engine** (vanilla JS/CSS, offline). It is Tier 2 because multi-page
 navigation is a mode not every document wants — a single-page document (e.g. an
-[[explainer-diff]] page) never loads it.
+[[diff-explainer]] page) never loads it.
 
 **Document-type-neutral.** The widget hardcodes no chapter/section/book vocabulary:
 the filter wording is generic ("絞り込む…" / "一致する項目がありません。"), and the

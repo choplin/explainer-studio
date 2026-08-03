@@ -97,7 +97,7 @@ A consumer adding semantic components supplies:
 3. Only when the page skeleton differs, a template variant passed with `--template`.
 
 Use the `ramp` / `swatch` rules in `filters/htmldocs.lua` and
-[[explainer-diff]]'s filter/template as worked examples. Base and consumer filters
+[[diff-explainer]]'s filter/template as worked examples. Base and consumer filters
 run in one Lua-filter chain, so their vocabularies compose.
 
 The PDF reading-site consumer also uses:

@@ -1,11 +1,11 @@
 ---
-name: explainer-diff
+name: diff-explainer
 description: "Generate a reviewer-facing HTML explanation of a git diff, including context, mental models, diagrams, a guided walkthrough, risks, and review points. Use when the requested deliverable is an explanation page for code changes; use git-helpers-explain-pr to publish one for a PR, git-helpers-pr-description for Markdown PR text, and code-review skills to find defects."
 allowed-tools: Bash, Read, Write, Glob
 user-invocable: true
 ---
 
-# Explain Diff
+# Diff Explainer
 
 Generate a single self-contained HTML document that explains a git diff to a human
 reviewer. The goal is to minimize reviewer cognitive load in a world where AI
@@ -24,7 +24,7 @@ Resolve each input in this order; ask only if genuinely ambiguous.
 |-------|-----------|
 | Diff | Caller/user-specified range or pathspec → else staged changes if any → else `<merge-base with default branch>...HEAD` |
 | Context material | Optional free-form text from the caller: purpose statement, issue/PR body, commit messages, design notes. More context → better "Background & Why" |
-| Output path | Caller-specified → else `.agents/explain-diff/{yyyy-mm-dd}-{branch-or-range-slug}/index.html` |
+| Output path | Caller-specified → else `.agents/diff-explainer/{yyyy-mm-dd}-{branch-or-range-slug}/index.html` |
 | Language | Caller-specified → else the dominant language of the context material → else the conversation language |
 
 ## Process
@@ -103,13 +103,13 @@ has-diffs: true        # emit the diff2html engine + renderer (omit if no diffs)
 has-diagrams: true     # emit the mermaid engine (omit if no diagrams)
 reviewed-label: 確認済み
 risk-labels: { high: 要精査, medium: 流し読み, low: 確認不要 }  # risk-badge text
-context-css: explain-diff.css
+context-css: diff-explainer.css
 toc-heading: 目次       # optional; omit to drop the TOC
 footer: "…"            # optional footer note (generator/truncation note)
 ---
 ```
 
-**Body directives** — the explain-diff vocabulary. The base
+**Body directives** — the diff-explainer vocabulary. The base
 [[explainer-html-docs]] vocabulary (callouts, keypoints, plain
 tables — auto-wrapped in `.tablewrap`) is available too; these add the axes this
 skill owns:
@@ -139,7 +139,7 @@ scripts/build.sh <src.md> <out-dir> --copy   # multi-file (external assets/) ins
 
 Runtime is **pandoc**, resolved by the generator's preflight (PATH → bundled
 `nix develop` → fail). The default (inline) output is a single file with
-`base.css`, `explain-diff.css`, and the diff/diagram/comments components folded
+`base.css`, `diff-explainer.css`, and the diff/diagram/comments components folded
 in; only the diff2html and mermaid **engines** load from a CDN. Review the result
 against the **Color language** section below and the semantic-axis self-check in
 **Success criteria** (an inline self-check this skill owns — there is no separate
@@ -148,7 +148,7 @@ design-system review pass).
 ### Color language
 
 Color carries meaning, so keep it consistent — one hue, one meaning, everywhere.
-On top of the base design system's palette, the `explain-diff` context layer
+On top of the base design system's palette, the `diff-explainer` context layer
 defines exactly two page-level axes (risk maps to the base's `--bad`/`--warn`/
 `--tip` hues, change to `--muted`/`--accent`, so they inherit light/dark). Apply
 them, and do not invent other colors:
@@ -240,9 +240,9 @@ unmarked. Over-marking destroys the signal, so when in doubt, leave it unmarked.
   component's include.md for full offline).
 - **The generator owns the design-system inlining — don't touch it.** `base.css`
   and the components are folded in by the build (inline mode), unchanged. Never
-  edit generated CSS/JS by hand; to change presentation, edit `assets/explain-diff.css`
+  edit generated CSS/JS by hand; to change presentation, edit `assets/diff-explainer.css`
   (this skill's context layer, its only styling), the base skill, or the component.
-  `assets/template-explain-diff.html` and `filters/explain-diff.lua` are the
+  `assets/template-diff-explainer.html` and `filters/diff-explainer.lua` are the
   skill's own template/vocabulary — the meaning→markup binding lives there, not in
   the source.
 
@@ -266,7 +266,7 @@ Verify before reporting completion; fix and re-check on any No:
 - [ ] The build ran without error (an invalid `risk`/`tested` value, an unknown
       callout variant, or a `.chunk` missing its required attributes fails it).
 - [ ] The build produced a single self-contained HTML file (default inline mode —
-      `base.css`, `explain-diff.css`, and the used components folded in; only the
+      `base.css`, `diff-explainer.css`, and the used components folded in; only the
       diff2html and mermaid engines external) that opens standalone in a browser.
 - [ ] **Each semantic-axis value matches the content it labels**, not merely that the
       attribute is present (the generator already enforces presence and validity). Read

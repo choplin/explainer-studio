@@ -20,7 +20,7 @@ it needs an online viewer.
 
 **Independent of `base.js`.** The anchor scope is `main` (not `main article`), so
 it works both on a base.js reading page (one `main article`) and on an
-explainer-diff page (several `article.chunk` under `main`, no
+diff-explainer page (several `article.chunk` under `main`, no
 `base.js`). Load it alongside `base.js` or on its own.
 
 ## Files
@@ -47,7 +47,7 @@ Copy-mode (multi-page site — files linked next to `base.css`):
 <script src="assets/comments.js" defer></script>
 ```
 
-Inline-mode (single self-contained file, e.g. explainer-diff): paste
+Inline-mode (single self-contained file, e.g. diff-explainer): paste
 `comments.css` into a `<style>` after the base stylesheet and `comments.js` into
 a `<script>` at the end of `<body>`. Nothing stays external.
 
@@ -70,7 +70,7 @@ on load and on every resize: when at least ~16rem of clear space is there (the
 the panel there and sets `--comments-dock-right` so the panel hugs the column;
 when the window is too narrow it falls back to the 💬 slide-in overlay. Because
 the gutter is measured rather than assumed from a fixed breakpoint, one rule
-serves **any** column width — a 48rem base page or a ~1080px explain-diff column —
+serves **any** column width — a 48rem base page or a ~1080px diff-explainer column —
 with nothing per-document to tune. Leave the class off to force the overlay
 everywhere (the safe choice for a distraction-free reading page).
 

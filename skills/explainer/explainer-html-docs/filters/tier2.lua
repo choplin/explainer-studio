@@ -5,7 +5,7 @@
 -- component contracts are raw <pre>/<code>/<div> shapes, and under
 -- -f markdown-raw_html the author cannot write raw HTML. So a plain fenced code
 -- block names the component and this filter emits the contract markup, exactly
--- the way explainer-diff's filter emits its diff/diagram blocks.
+-- the way diff-explainer's filter emits its diff/diagram blocks.
 --
 --   * ```mermaid          -> <pre class="mermaid">…</pre>            (diagram)
 --   * ```{.diff-source}    -> format toggle + <pre class="diff-source" hidden>

@@ -9,9 +9,9 @@ risk-labels:
   high: 要精査
   medium: 流し読み
   low: 確認不要
-context-css: explain-diff.css
+context-css: diff-explainer.css
 toc-heading: 目次
-footer: "explainer-diff で生成 · 対象 4 ファイル"
+footer: "diff-explainer で生成 · 対象 4 ファイル"
 ---
 
 ::: {.review-plan heading="レビュー計画"}

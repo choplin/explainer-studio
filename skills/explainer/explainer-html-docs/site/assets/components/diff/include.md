@@ -31,7 +31,7 @@ Copy-mode (multi-page site — files linked next to `base.css`):
 <script src="assets/diff.js"></script>
 ```
 
-Inline-mode (single self-contained file, e.g. explain-diff): keep the two
+Inline-mode (single self-contained file, e.g. diff-explainer): keep the two
 diff2html CDN tags in `<head>`, paste the contents of `diff.css` into a
 `<style>` block after the base stylesheet, and paste the contents of `diff.js`
 into a `<script>` at the end of `<body>`. Only diff2html stays external.

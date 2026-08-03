@@ -6,7 +6,7 @@ description: "The design system and deterministic generator for any skill that p
 # explainer-html-docs — design system + semantic Markdown → page generator
 
 This skill owns the shared design system, progressive-enhancement kit, and
-deterministic generator used by [[explainer-diff]], the PDF/Paper reading sites, and
+deterministic generator used by [[diff-explainer]], the PDF/Paper reading sites, and
 future explanation documents of the same shape.
 
 The contract has two layers:

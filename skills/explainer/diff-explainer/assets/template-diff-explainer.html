@@ -1,12 +1,12 @@
 <!doctype html>
-<!-- explain-diff template variant for explainer-html-docs.
-     Owns explain-diff's page skeleton (the generic generator template only emits
+<!-- diff-explainer template variant for explainer-html-docs.
+     Owns diff-explainer's page skeleton (the generic generator template only emits
      a single <main><article>): comments-gutter <html>, header meta, an authored
      walkthrough of many article.chunk under <main>, and the bottom scripts.
      Deliberately does NOT load base.js (its "first main article" assumption
      mis-targets the multi-chunk layout); interactivity is the read-progress
      script below plus the opt-in diff/diagram/comments components.
-     Chrome is frontmatter-driven; meaning is source body + explain-diff.lua.
+     Chrome is frontmatter-driven; meaning is source body + diff-explainer.lua.
      Asset refs are external (copy-mode); inline (single-file) mode is layered on
      by the generator's inline path, not by this template. -->
 <!-- No comments-gutter: this ~1080px column leaves no room for a pinned side
@@ -62,7 +62,7 @@ $endif$<script>
     const countEl = document.querySelector("[data-progress-count]");
     const totalEl = document.querySelector("[data-progress-total]");
     if (totalEl) totalEl.textContent = chunks.length;
-    const key = (id) => "explain-diff:" + location.pathname + "#" + id;
+    const key = (id) => "diff-explainer:" + location.pathname + "#" + id;
     const refresh = () => {
       if (countEl) countEl.textContent = chunks.filter((c) => c.classList.contains("reviewed")).length;
     };

@@ -1,4 +1,4 @@
-  /* explain-diff context layer over explainer-html-docs. Two axes layered on top
+  /* diff-explainer context layer over explainer-html-docs. Two axes layered on top
      of the base's semantic color model:
        RISK (how much attention): high/med/low, reusing the base's bad/warn/tip
          hues so risk speaks the same palette (and inherits light/dark).

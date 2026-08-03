@@ -28,7 +28,7 @@ Copy-mode (multi-page site):
 <script type="module" src="assets/diagram.js"></script>
 ```
 
-Inline-mode (single self-contained file, e.g. explain-diff): paste `diagram.css`
+Inline-mode (single self-contained file, e.g. diff-explainer): paste `diagram.css`
 into a `<style>` block after the base stylesheet, and paste `diagram.js` into a
 `<script type="module">` in `<head>`. Only the mermaid CDN `import` stays
 external.
@@ -67,7 +67,7 @@ hues (theme-agnostic mid-tones that read on both light and dark backgrounds):
 | amber  | `#e8a13c` | `--warn` |
 
 That is the palette hook the base owns. **Which change-role gets which hue is the
-consuming skill's decision** (e.g. explain-diff maps added→green, removed→red,
+consuming skill's decision** (e.g. diff-explainer maps added→green, removed→red,
 changed→amber to speak its risk/change language). Use stroke-only classDefs so
 nodes read in both themes; prefer prose over inventing a hue the set can't
 express.

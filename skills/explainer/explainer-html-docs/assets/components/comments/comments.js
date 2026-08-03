@@ -9,7 +9,7 @@
 
    It deliberately does NOT depend on base.js: the anchor scope is `main` (not
    `main article`), so it works both on a base.js reading page and on an
-   explainer-diff page (many `article.chunk` under `main`, no base.js).
+   diff-explainer page (many `article.chunk` under `main`, no base.js).
 
    Anchoring uses the CSS Custom Highlight API so the document DOM is never
    mutated (no wrapper <mark>): the highlight is painted over a Range rebuilt from
@@ -409,7 +409,7 @@
      runtime whether the right gutter next to `main` has room for the panel and
      dock it there persistently; otherwise fall back to the slide-in overlay.
      Measuring the real column edge (rather than a fixed media-query breakpoint)
-     lets one rule serve any column width — a 48rem base page, explain-diff's
+     lets one rule serve any column width — a 48rem base page, diff-explainer's
      ~1080px column — and track it across window resizes. */
   var wantDock = document.documentElement.classList.contains("comments-gutter");
   function isDocked() { return document.documentElement.classList.contains("comments-docked"); }

@@ -1,8 +1,8 @@
--- explain-diff.lua — the explain-diff CONSUMER vocabulary, chained AFTER
--- htmldocs.lua (`--lua-filter htmldocs.lua --lua-filter explain-diff.lua`).
--- htmldocs.lua binds the base design system; this filter binds explain-diff's
+-- diff-explainer.lua — the diff-explainer CONSUMER vocabulary, chained AFTER
+-- htmldocs.lua (`--lua-filter htmldocs.lua --lua-filter diff-explainer.lua`).
+-- htmldocs.lua binds the base design system; this filter binds diff-explainer's
 -- own semantic axes (risk / verify / walkthrough chunks / attention budget) to
--- the markup contract that explainer-diff/assets/explain-diff.css
+-- the markup contract that diff-explainer/assets/diff-explainer.css
 -- styles. It only handles vocabulary the author cannot express natively:
 --
 --   * .chunk         — a walkthrough card whose <header> (risk badge, files,
@@ -82,11 +82,11 @@ local function handle_div(el)
     local a = el.attributes
     local risk = a["risk"]
     if not risk or risk == "" then
-      error("explain-diff: .chunk requires a risk= attribute (high|medium|low)")
+      error("diff-explainer: .chunk requires a risk= attribute (high|medium|low)")
     end
     local tested = a["tested"]
     if tested ~= "yes" and tested ~= "no" then
-      error("explain-diff: .chunk requires tested=yes|no (got '" .. tostring(tested) .. "')")
+      error("diff-explainer: .chunk requires tested=yes|no (got '" .. tostring(tested) .. "')")
     end
     local risk_label = risk_labels[risk] or risk
 

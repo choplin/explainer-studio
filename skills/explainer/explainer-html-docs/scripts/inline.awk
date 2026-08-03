@@ -10,7 +10,7 @@
 #
 # This is the opt-in inline path (build.sh --inline). Copy-mode is the default
 # and never runs this. Assumption: inlined scripts sit at <body> end (like
-# explain-diff) — a `defer` script in <head> (e.g. base.js) is NOT safely
+# diff-explainer) — a `defer` script in <head> (e.g. base.js) is NOT safely
 # inlinable there; those pages stay copy-mode. Gotcha: a raw "</script>" inside
 # an inlined .js would split the tag (rare; the bundled components are clean).
 

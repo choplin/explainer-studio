@@ -91,7 +91,7 @@ invocation syntax may differ in other compatible agents.
 From a git repository with changes, run:
 
 ```text
-/explainer-studio:explainer-diff
+/explainer-studio:diff-explainer
 ```
 
 The result is a single-file HTML explanation that gives the reviewer context, a
@@ -127,7 +127,7 @@ Publishing is offered separately and is never automatic.
 | Explore a long PDF in depth | Reports and reading site | `/explainer-studio:pdf-explainer-full-guide` |
 | Understand an academic paper | Structured Markdown reports | `/explainer-studio:paper-explainer-summarize` |
 | Explore an academic paper in depth | Reports and reading site | `/explainer-studio:paper-explainer-full-guide` |
-| Review code changes | Reviewer-facing HTML | `/explainer-studio:explainer-diff` |
+| Review code changes | Reviewer-facing HTML | `/explainer-studio:diff-explainer` |
 
 Compatible agents can also select a skill automatically from a natural-language
 request. Explicit invocation is useful when you already know which artifact you
