@@ -24,10 +24,10 @@
 
 /* Pull the whole FAB stack in from the viewport corner so it hugs the RIGHT
    EDGE of the centered article instead of floating far out in the wide-screen
-   gutter (48rem article → its right edge is calc(50vw - 24rem) from the viewport
+   gutter (the article's right edge is calc(50vw - --measure/2) from the viewport
    right; sit the stack just outside that). max() keeps it at the 1rem corner on
    narrow screens, where the article already fills the width. */
-.fab { right: max(1rem, calc(50vw - 27.5rem)); }
+.fab { right: max(1rem, calc(50vw - var(--measure) / 2 - 3.5rem)); }
 
 .pagenav-backdrop {
   position: fixed; inset: 0; z-index: 21; background: rgba(0,0,0,.4);
@@ -39,7 +39,7 @@
    On narrow screens min() makes it full-bleed, the usual mobile bottom sheet. */
 .pagenav-panel {
   position: fixed; left: 0; right: 0; bottom: 0; margin-inline: auto;
-  width: min(100%, 48rem); z-index: 22; max-height: 70vh; overflow-y: auto;
+  width: min(100%, var(--measure)); z-index: 22; max-height: 70vh; overflow-y: auto;
   background: var(--bg); border-top: 3px solid var(--accent);
   border-radius: 16px 16px 0 0; padding: .8rem 1.1rem 1.4rem;
   transform: translateY(100%); transition: transform .25s ease;

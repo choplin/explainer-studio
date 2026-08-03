@@ -87,6 +87,32 @@
 :root.theme-light { color-scheme: light; }
 :root.theme-dark  { color-scheme: dark; }
 
+/* --- layout variants -------------------------------------------------------
+   Every page carries exactly one `layout-*` class on <body>, chosen at BUILD
+   time (`build.sh --layout`, or `layout:` in frontmatter; default `standard`).
+   A variant sets ONE thing — the measure of the column — and everything
+   downstream derives from it: the sidebar rail's offset in the gutter, the FAB
+   column, and the viewport width at which base.js promotes the TOC to a rail
+   (RAIL_MIN there mirrors --measure + 31rem — keep the two in sync). So a
+   variant never restates a layout rule.
+
+   The three steps are steps of ONE quantity, so the name says which way it
+   moves. Content that outgrows the column does not widen it — it scrolls
+   inside its own box (see "horizontal overflow" further down); that is what
+   keeps a single measure enough.
+
+   The article stays centered in the viewport in every variant; the rail is
+   positioned in the gutter beside it and never shifts the column. --- */
+/* ~46 Japanese characters per line. Prose only, and short. */
+body.layout-narrow { --measure: 48rem; }
+/* Default. ~54 JA chars/line — long enough that an inline table or code block
+   is not immediately cramped, short enough for a comfortable return sweep. */
+body, body.layout-standard { --measure: 56rem; }
+/* ~62 JA chars/line. For reference material where tables, diagrams and code are
+   the reason the page exists; long for continuous prose, so do not reach for it
+   just to fill a wide monitor. */
+body.layout-wide { --measure: 64rem; }
+
 /* --- foundation --- */
 * { box-sizing: border-box; }
 body {
@@ -94,7 +120,7 @@ body {
   font-family: -apple-system, BlinkMacSystemFont, "Hiragino Sans", "Noto Sans JP", sans-serif;
   line-height: 1.9; -webkit-text-size-adjust: 100%;
 }
-main { max-width: 48rem; margin: 0 auto; padding: 1rem 1.25rem 4rem; }
+main { max-width: var(--measure); margin: 0 auto; padding: 1rem 1.25rem 4rem; }
 header.site {
   position: sticky; top: 0; z-index: 10; background: var(--bg);
   border-bottom: 1px solid var(--line); padding: .6rem 1.25rem; font-size: .9rem;
@@ -137,13 +163,42 @@ mark {
   background: linear-gradient(transparent 56%, var(--mark) 56%);
   color: inherit; padding: 0 .05em;
 }
-footer { max-width: 48rem; margin: 0 auto; padding: 0 1.25rem 2rem; color: var(--muted); font-size: .8rem; }
+footer { max-width: var(--measure); margin: 0 auto; padding: 0 1.25rem 2rem; color: var(--muted); font-size: .8rem; }
 
 /* --- tables --- */
-.tablewrap { overflow-x: auto; margin: 1rem 0; }
-table { border-collapse: collapse; font-size: .92rem; min-width: 60%; }
-th, td { border: 1px solid var(--edge); padding: .35rem .6rem; text-align: left; }
+.tablewrap { overflow-x: auto; margin-block: 1rem; }
+/* width: max-content is what actually makes a wide table scroll. A `table` is a
+   block box: left to `auto` it shrinks to the available width and wraps every
+   cell instead of overflowing, so .tablewrap would never have anything to
+   scroll — a nine-column table would just render as a squeezed block. Sizing to
+   content lets it exceed the column, and the wrapper takes over from there.
+   min-width keeps a two-column table from collapsing to a narrow sliver. */
+table { border-collapse: collapse; font-size: .92rem; min-width: 60%; width: max-content; }
+/* ...but max-content alone would put a long sentence on ONE line and drag the
+   table out to an absurd width. A cell cap restores wrapping where it is
+   actually wanted: prose cells wrap at 22rem, short cells stay on one line, and
+   the table's width is the sum of what the columns really need. */
+th, td { border: 1px solid var(--edge); padding: .35rem .6rem; text-align: left; max-width: 22rem; }
 th { background: var(--card); }
+
+/* --- horizontal overflow ------------------------------------------------------
+   A layout variant never widens the column to fit its widest element. Content
+   that outgrows the measure scrolls inside its own box instead — `pre` and
+   `.tablewrap` both set overflow-x: auto above — which is what lets one measure
+   serve a page carrying a nine-column table or a long code line.
+
+   The scrollbar is deliberately left to the platform. Styling it AT ALL
+   (scrollbar-color, scrollbar-width, or any ::-webkit-scrollbar rule) opts the
+   box out of overlay behavior and pins a permanent 8px band under every code
+   block and table; there is no middle setting that keeps the overlay and
+   restyles it. So nothing is declared here, and the bar behaves the way it does
+   everywhere else on the reader's system.
+
+   The cost is real and known: at rest an overlay bar shows nothing, so a table
+   clipped at the right edge can read as the whole table. Weighed against a
+   permanent band on every such box, and decided in favor of the platform
+   default. The sidebar TOC further down does style its scrollbar — that one is
+   a fixed-position panel where the gutter is already reserved. --- */
 
 /* --- callout: semantic message box. Base class = note (blue/info); add a
    variant class (tip/warn/danger/key) to change meaning + color + icon. --- */
@@ -294,56 +349,64 @@ th { background: var(--card); }
    On wide screens the same TOC nav (built and scroll-spied by base.js) is laid
    out as a persistent sidebar column in the left gutter, beside the centered
    article; the overlay affordances (☰ FAB, backdrop) are hidden. Only layout
-   branches here — no TOC/scroll-spy logic is duplicated. The 79rem breakpoint
-   is the width at which a 14rem sidebar + 1rem gap fits in the gutter to the
-   left of the 48rem `main`; below it, the overlay panel + FAB stay. */
-@media (min-width: 79rem) {
-  /* .fab button.toc-btn, not .toc-btn: `.fab button { display: flex }` is (0,1,1)
-     and would out-specify a bare `.toc-btn` (0,1,0), leaving the ☰ visible next to
-     the sidebar it's supposed to replace. Match its specificity to hide it. */
-  .fab button.toc-btn { display: none; }
-  .toc-backdrop { display: none; }
-  /* A quiet index column in the gutter — NOT a card. One hairline rail runs
-     down the whole list; the active entry colors and bolds its own segment of
-     that rail. A rail cue, never a nested filled box (which reads as box-in-box
-     against the article's real cards). */
-  .toc-panel {
-    left: max(1rem, calc((100vw - 48rem) / 2 - 15rem)); right: auto; bottom: auto;
-    top: 3.4rem; width: 14rem; max-height: calc(100vh - 4.6rem);
-    background: none; border: 0; border-radius: 0;
-    padding: .4rem 0 1rem; transform: none; transition: none;
-  }
-  .toc-panel h2 { margin: .2rem 0 .6rem; padding-left: .9rem; }
-  .toc-panel a {
-    border-radius: 0; border-left: 2px solid var(--line);
-    padding: .28rem .9rem; line-height: 1.45;
-  }
-  .toc-panel a:hover { color: var(--accent); border-left-color: var(--muted); background: none; }
-  .toc-panel a.active {
-    background: none; color: var(--accent); border-left-color: var(--accent); font-weight: 600;
-  }
-  .toc-panel li.sub a { padding-left: 1.7rem; }
-  /* Quiet index: show only the active section's sub-entries. base.js toggles
-     `.reveal` on the h3 links in the active h2 group; the rest collapse so the
-     sidebar isn't a wall of every subsection at once. (Sidebar-only — the
-     mobile overlay keeps all subs visible.) Entries slide open/closed via
-     max-height + opacity (overflow clipped on the li, so the link's padding
-     collapses too) instead of popping. The 5rem cap clears the tallest wrapped
-     entry; real entries are shorter, so the li tracks its own content height. */
-  .toc-panel li.sub {
-    overflow: hidden; max-height: 0; opacity: 0;
-    transition: max-height .2s ease, opacity .2s ease;
-  }
-  .toc-panel li.sub.reveal { max-height: 5rem; opacity: 1; }
-  /* Scrollbar stays quiet until pointed at: reserve the gutter but keep the
-     thumb transparent when idle, tint it on hover. Reserving width (rather than
-     toggling scrollbar-width on hover) avoids a reflow when the bar appears. */
-  .toc-panel { scrollbar-width: thin; scrollbar-color: transparent transparent; }
-  .toc-panel:hover { scrollbar-color: var(--line) transparent; }
-  .toc-panel::-webkit-scrollbar { width: 8px; }
-  .toc-panel::-webkit-scrollbar-thumb { background: transparent; border-radius: 4px; }
-  .toc-panel:hover::-webkit-scrollbar-thumb { background: var(--line); }
+   branches here — no TOC/scroll-spy logic is duplicated.
+
+   The switch is a `sidebar-rail` class on <body>, not a media query, because
+   the width at which the rail fits depends on the page's layout variant and a
+   media query's condition cannot read a custom property. base.js owns that
+   threshold (RAIL_MIN) and toggles the class; since the TOC itself is built by
+   base.js, nothing is lost when the script does not run. */
+body.sidebar-rail {
+  /* left edge of the rail: the article's own left edge, minus the rail's 14rem
+     and a 1rem gap. max() parks it at the viewport corner if the gutter is
+     tighter than that. */
+  --rail-left: max(1rem, calc((100vw - var(--measure)) / 2 - 15rem));
 }
+/* .fab button.toc-btn, not .toc-btn: `.fab button { display: flex }` is (0,1,1)
+   and would out-specify a bare `.toc-btn` (0,1,0), leaving the ☰ visible next to
+   the sidebar it's supposed to replace. Match its specificity to hide it. */
+body.sidebar-rail .fab button.toc-btn { display: none; }
+body.sidebar-rail .toc-backdrop { display: none; }
+/* A quiet index column in the gutter — NOT a card. One hairline rail runs
+   down the whole list; the active entry colors and bolds its own segment of
+   that rail. A rail cue, never a nested filled box (which reads as box-in-box
+   against the article's real cards). */
+body.sidebar-rail .toc-panel {
+  left: var(--rail-left); right: auto; bottom: auto;
+  top: 3.4rem; width: 14rem; max-height: calc(100vh - 4.6rem);
+  background: none; border: 0; border-radius: 0;
+  padding: .4rem 0 1rem; transform: none; transition: none;
+}
+body.sidebar-rail .toc-panel h2 { margin: .2rem 0 .6rem; padding-left: .9rem; }
+body.sidebar-rail .toc-panel a {
+  border-radius: 0; border-left: 2px solid var(--line);
+  padding: .28rem .9rem; line-height: 1.45;
+}
+body.sidebar-rail .toc-panel a:hover { color: var(--accent); border-left-color: var(--muted); background: none; }
+body.sidebar-rail .toc-panel a.active {
+  background: none; color: var(--accent); border-left-color: var(--accent); font-weight: 600;
+}
+body.sidebar-rail .toc-panel li.sub a { padding-left: 1.7rem; }
+/* Quiet index: show only the active section's sub-entries. base.js toggles
+   `.reveal` on the h3 links in the active h2 group; the rest collapse so the
+   sidebar isn't a wall of every subsection at once. (Sidebar-only — the
+   mobile overlay keeps all subs visible.) Entries slide open/closed via
+   max-height + opacity (overflow clipped on the li, so the link's padding
+   collapses too) instead of popping. The 5rem cap clears the tallest wrapped
+   entry; real entries are shorter, so the li tracks its own content height. */
+body.sidebar-rail .toc-panel li.sub {
+  overflow: hidden; max-height: 0; opacity: 0;
+  transition: max-height .2s ease, opacity .2s ease;
+}
+body.sidebar-rail .toc-panel li.sub.reveal { max-height: 5rem; opacity: 1; }
+/* Scrollbar stays quiet until pointed at: reserve the gutter but keep the
+   thumb transparent when idle, tint it on hover. Reserving width (rather than
+   toggling scrollbar-width on hover) avoids a reflow when the bar appears. */
+body.sidebar-rail .toc-panel { scrollbar-width: thin; scrollbar-color: transparent transparent; }
+body.sidebar-rail .toc-panel:hover { scrollbar-color: var(--line) transparent; }
+body.sidebar-rail .toc-panel::-webkit-scrollbar { width: 8px; }
+body.sidebar-rail .toc-panel::-webkit-scrollbar-thumb { background: transparent; border-radius: 4px; }
+body.sidebar-rail .toc-panel:hover::-webkit-scrollbar-thumb { background: var(--line); }
 
 @media (prefers-reduced-motion: reduce) {
   .progress > i, .fab button, .toc-backdrop, .toc-panel, .toc-panel li.sub { transition: none; }

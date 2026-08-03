@@ -106,9 +106,12 @@ Resolve all paths relative to this skill's installed directory:
 1. Read `references/authoring-contract.md`.
 2. Author semantic Markdown and any consumer-owned context/filter/template.
 3. Run `scripts/build.sh` for one page or `scripts/build-site.sh` for a site.
-4. If a Tier 2 bundle is needed, pass repeatable `--component <name>` and follow that
+4. Pick a layout variant if the default 56rem measure is not right: `--layout
+   narrow | wide`, or `layout:` in frontmatter. See the layout table in
+   `references/authoring-contract.md`.
+5. If a Tier 2 bundle is needed, pass repeatable `--component <name>` and follow that
    bundle's `include.md`.
-5. Apply the review ownership described in
+6. Apply the review ownership described in
    `references/markup-and-components.md`: generated mechanics need no standalone
    review, while consumer-defined high-stakes semantics do.
 

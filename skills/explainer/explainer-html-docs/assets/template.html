@@ -11,7 +11,9 @@ $for(context-css)$<link rel="stylesheet" href="assets/$context-css$" />
 $endfor$<script src="assets/base.js" defer></script>
 $for(context-js)$<script src="assets/$context-js$" defer></script>
 $endfor$</head>
-<body>
+<!-- layout variant, most specific first: the page's own `layout:` frontmatter,
+     then build.sh --layout (passed as layout-default), then `standard`. -->
+<body class="layout-$if(layout)$$layout$$else$$if(layout-default)$$layout-default$$else$standard$endif$$endif$">
 <header class="site">
 <a href="index.html">$if(site-name)$$site-name$$else$Home$endif$</a>
 </header>

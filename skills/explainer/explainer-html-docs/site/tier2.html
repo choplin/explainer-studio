@@ -40,7 +40,9 @@
 <script src="assets/nav-manifest.js" defer></script>
 <script src="assets/components/reading-nav/reading-nav.js" defer></script>
 </head>
-<body>
+<!-- layout variant, most specific first: the page's own `layout:` frontmatter,
+     then build.sh --layout (passed as layout-default), then `standard`. -->
+<body class="layout-standard">
 <header class="site">
 <a href="index.html">explainer-html-docs</a>
 </header>
@@ -55,11 +57,6 @@ a page that uses one ships it.</strong></p>
 <h2 id="the-bundles">The bundles</h2>
 <div class="tablewrap">
 <table>
-<colgroup>
-<col style="width: 33%" />
-<col style="width: 33%" />
-<col style="width: 33%" />
-</colgroup>
 <thead>
 <tr>
 <th>Bundle</th>

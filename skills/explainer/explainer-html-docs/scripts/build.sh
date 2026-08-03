@@ -8,6 +8,11 @@
 #   <src.md>             the semantic Markdown (Markdown + fenced divs) to render
 #   <out-dir>            site output root; the page lands at <out-dir>/<name>.html
 #   --assets <dir>       dir holding base.css / base.js (explainer-html-docs/assets)
+#   --layout <name>      DEFAULT column measure, emitted as a layout-<name> class
+#                        on <body>: narrow (48rem) | standard (56rem, the default)
+#                        | wide (64rem). A page's own `layout:` frontmatter wins
+#                        over this, so a consumer sets the site-wide default here
+#                        and a page that needs a different measure says so itself.
 #   --context <dir>      optional dir of consumer context stylesheets/scripts (*.css/*.js)
 #   --component <name>   optional Tier 2 opt-in bundle to copy in; repeatable. Copies
 #                        the flat css/js from <assets>/components/<name>/ into
@@ -26,11 +31,12 @@ set -euo pipefail
 
 SKILL_DIR="$(cd "$(dirname "$0")/.." && pwd)"
 
-src=""; out=""; assets=""; context=""; template=""; inline=""
+src=""; out=""; assets=""; context=""; template=""; inline=""; layout=""
 filters=(); components=()
 while [[ $# -gt 0 ]]; do
   case "$1" in
     --assets)    assets="$2"; shift 2 ;;
+    --layout)    layout="$2"; shift 2 ;;
     --context)   context="$2"; shift 2 ;;
     --component) components+=("$2"); shift 2 ;;
     --template)  template="$2"; shift 2 ;;
@@ -45,6 +51,16 @@ template="${template:-$SKILL_DIR/assets/template.html}"
 [[ -f "$src" ]]      || { echo "build.sh: source file not found: $src" >&2; exit 2; }
 [[ -n "$out" ]]      || { echo "build.sh: missing <out-dir>" >&2; exit 2; }
 [[ -d "$assets" ]]   || { echo "build.sh: --assets dir not found: $assets" >&2; exit 2; }
+
+# Closed vocabulary, same contract as the fenced-div variants: an unknown layout
+# fails the build rather than silently emitting a class base.css has no rule for
+# (which would render as `standard` and hide the typo).
+if [[ -n "$layout" ]]; then
+  case "$layout" in
+    narrow|standard|wide) ;;
+    *) echo "build.sh: unknown --layout: $layout (narrow|standard|wide)" >&2; exit 2 ;;
+  esac
+fi
 
 page="$(basename "${src%.md}").html"
 mkdir -p "$out/assets"
@@ -70,16 +86,23 @@ done
 
 # Chain the base filter first, then any consumer filters (so consumer vocabulary
 # is bound on top of the base binding, and base rules like .tablewrap still run).
-filter_args=(--lua-filter "$SKILL_DIR/filters/htmldocs.lua")
+pandoc_args=(--lua-filter "$SKILL_DIR/filters/htmldocs.lua")
 for f in "${filters[@]:-}"; do
-  [[ -n "$f" ]] && filter_args+=(--lua-filter "$f")
+  [[ -n "$f" ]] && pandoc_args+=(--lua-filter "$f")
 done
+
+# Passed as `layout-default`, NOT `layout`: -M outranks frontmatter, and this
+# flag is the site-wide default a page's own `layout:` must be able to override.
+# The template picks layout -> layout-default -> standard, in that order.
+# Appended to the same array so the expansion is never empty (a bare
+# "${arr[@]:-}" on an empty array would hand pandoc a stray empty argument).
+if [[ -n "$layout" ]]; then pandoc_args+=(-M "layout-default=$layout"); fi
 
 # -f markdown-raw_html closes the escape hatch: the AUTHOR cannot inject raw HTML
 # (invented classes / inline style), but the trusted filter still emits it.
 "$SKILL_DIR/scripts/preflight.sh" pandoc "$src" \
   --template "$template" \
-  "${filter_args[@]}" \
+  "${pandoc_args[@]}" \
   -f markdown-raw_html \
   -o "$out/$page"
 

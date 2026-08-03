@@ -11,6 +11,7 @@ Frontmatter carries page chrome and asset selection:
 ---
 title: Page title — Site name
 site-name: explainer-html-docs
+layout: standard
 context-css: color.css
 # context-css:
 #   - reading-site.css
@@ -31,6 +32,32 @@ one-element list. Asset order is fixed:
 
 `build.sh --context <dir>` copies every flat `*.css` and `*.js` file from that
 consumer-owned directory into the output `assets/` directory.
+
+## Layout variants
+
+`layout` selects the measure of the page's column — three steps of one quantity.
+It is emitted as a `layout-<name>` class on `<body>`; everything else (the sidebar
+rail's offset, the FAB column, the width at which the TOC becomes a rail) derives
+from the measure. The article is centered in the viewport in every variant — the
+rail sits in the gutter beside it and never shifts the column.
+
+| `layout` | Measure | Use when |
+|---|---|---|
+| `narrow` | 48rem (~46 JA chars/line) | Short, prose-only documents |
+| `standard` (default) | 56rem (~54 JA chars/line) | Nearly everything |
+| `wide` | 64rem (~62 JA chars/line) | Reference material built around tables, diagrams and code |
+
+An unknown value fails the build, from either route.
+
+Content wider than the measure does not widen the column — code blocks and tables
+scroll inside their own box, behind the platform's own scrollbar. So `wide` is for
+a page whose *substance* is wide, not a workaround for one oversized table. Note
+that an overlay scrollbar shows nothing at rest: keep the columns a reader must
+not miss at the left of a wide table.
+
+`build.sh --layout` / `build-site.sh --layout` sets the default for a whole site;
+a page's own `layout:` frontmatter overrides it. Resolution is most-specific-first:
+`layout:` frontmatter → `--layout` → `standard`.
 
 ## Base authoring vocabulary
 
@@ -95,7 +122,7 @@ Build one page:
 ```bash
 scripts/build.sh <src.md> <out-dir> \
   --assets <explainer-html-docs/assets> \
-  [--context <dir>] [--component <name>]... \
+  [--context <dir>] [--component <name>]... [--layout <name>] \
   [--template <consumer-template>] [--filter <consumer-filter.lua>]... [--inline]
 ```
 
@@ -112,7 +139,8 @@ Build a whole site:
 
 ```bash
 scripts/build-site.sh <src-dir> <out-dir> \
-  --assets <explainer-html-docs/assets> [--context <dir>] [--component <name>]...
+  --assets <explainer-html-docs/assets> [--context <dir>] [--component <name>]... \
+  [--layout <name>]
 ```
 
 Each `src/*.md` becomes `out/<name>.html` and all pages share one asset set.

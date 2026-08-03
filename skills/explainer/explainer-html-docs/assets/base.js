@@ -14,6 +14,33 @@
   var root = document.documentElement;
   var body = document.body;
 
+  /* ---------- layout variant: when the TOC becomes a sidebar rail ----------
+     The page's build-time `layout-*` body class picks the article measure in
+     base.css; the viewport width at which the TOC can sit in the gutter as a
+     persistent rail follows from it — the rail needs 14rem plus a gap on each
+     side of the column. That is --measure + 31rem, but a media query cannot
+     read a custom property, so the thresholds live here and base.css keys off
+     the `sidebar-rail` class instead. Keep this table in sync with the layout
+     variants in base.css. */
+  var RAIL_MIN = {
+    "layout-narrow": "79rem",     // 48rem column
+    "layout-standard": "87rem",   // 56rem column (the default)
+    "layout-wide": "95rem"        // 64rem column
+  };
+  function wireSidebarRail() {
+    var threshold = RAIL_MIN["layout-standard"];
+    for (var name in RAIL_MIN) {
+      if (body.classList.contains(name)) { threshold = RAIL_MIN[name]; break; }
+    }
+    var mq = window.matchMedia("(min-width: " + threshold + ")");
+    function apply() { body.classList.toggle("sidebar-rail", mq.matches); }
+    // addListener is the pre-2021 Safari spelling; keep the fallback.
+    if (mq.addEventListener) mq.addEventListener("change", apply);
+    else if (mq.addListener) mq.addListener(apply);
+    apply();
+  }
+  wireSidebarRail();
+
   /* ---------- theme toggle: auto -> light -> dark ---------- */
   var THEME_KEY = "explainer-html-docs-theme";
   var THEMES = ["auto", "light", "dark"];

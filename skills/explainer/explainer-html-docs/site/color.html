@@ -10,7 +10,9 @@
 <link rel="stylesheet" href="assets/color.css" />
 <script src="assets/base.js" defer></script>
 </head>
-<body>
+<!-- layout variant, most specific first: the page's own `layout:` frontmatter,
+     then build.sh --layout (passed as layout-default), then `standard`. -->
+<body class="layout-standard">
 <header class="site">
 <a href="index.html">explainer-html-docs</a>
 </header>
@@ -92,11 +94,6 @@ headings, not by color.
 rule may read only the middle one.</strong></p>
 <div class="tablewrap">
 <table>
-<colgroup>
-<col style="width: 33%" />
-<col style="width: 33%" />
-<col style="width: 33%" />
-</colgroup>
 <thead>
 <tr>
 <th>Layer</th>

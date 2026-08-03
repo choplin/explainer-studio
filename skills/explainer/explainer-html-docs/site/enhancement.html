@@ -9,7 +9,9 @@
 <link rel="stylesheet" href="assets/base.css" />
 <script src="assets/base.js" defer></script>
 </head>
-<body>
+<!-- layout variant, most specific first: the page's own `layout:` frontmatter,
+     then build.sh --layout (passed as layout-default), then `standard`. -->
+<body class="layout-standard">
 <header class="site">
 <a href="index.html">explainer-html-docs</a>
 </header>
@@ -27,10 +29,6 @@ contents (a sidebar on a wide screen, a ☰ panel on a narrow one), and
 the back-to-top button.</p>
 <div class="tablewrap">
 <table>
-<colgroup>
-<col style="width: 50%" />
-<col style="width: 50%" />
-</colgroup>
 <thead>
 <tr>
 <th>Feature</th>

@@ -9,9 +9,30 @@
 --   * Every <table> is wrapped in .tablewrap — the contract forbids a bare
 --     <table>, and here that is structurally guaranteed, not review-caught.
 --   * .lede / .kicker / .pullquote emit <p class>, not <div class>.
+--   * `layout:` is a closed vocabulary too, checked wherever it came from.
 
 local ALLOWED = { note = true, tip = true, warn = true, danger = true, key = true }
 local PCLASS = { lede = true, kicker = true, pullquote = true }
+local LAYOUTS = { narrow = true, standard = true, wide = true }
+
+-- Layout variant, same closed-vocabulary contract as a callout variant. build.sh
+-- validates its own --layout flag so a bad CLI argument fails before pandoc runs;
+-- this catches the other route in — a typo in a page's own `layout:` frontmatter,
+-- which would otherwise emit a layout-<typo> class that base.css has no rule for
+-- and render as `standard`, hiding the mistake.
+function Meta(m)
+  for _, key in ipairs({ "layout", "layout-default" }) do
+    local v = m[key]
+    if v ~= nil then
+      local name = pandoc.utils.stringify(v)
+      if not LAYOUTS[name] then
+        error("htmldocs: unknown " .. key .. " '" .. name
+          .. "' — allowed: narrow, standard, wide")
+      end
+    end
+  end
+  return m
+end
 
 -- HTML-escape text that the filter injects into raw markup (swatch captions etc.)
 local function esc(s)
@@ -129,6 +150,19 @@ function Span(el)
 end
 
 -- Contract: a <table> may never appear outside .tablewrap. Enforce it.
+--
+-- Also drop pandoc's inferred column widths. Past a certain source-line length
+-- pandoc emits `<table style="width:100%">` plus a `<col style="width:N%">` per
+-- column, which pins the table to its container and makes every cell wrap: a
+-- table too wide for the measure then renders as a squeezed block instead of
+-- scrolling inside .tablewrap the way the design system intends. Width is the
+-- stylesheet's call, so clear the colspec widths (keeping alignment) and let the
+-- table size to its content.
 function Table(el)
+  local specs = {}
+  for i, spec in ipairs(el.colspecs) do
+    specs[i] = { spec[1] } -- alignment only; absent width == ColWidthDefault
+  end
+  el.colspecs = specs
   return pandoc.Div({ el }, pandoc.Attr("", { "tablewrap" }))
 end
