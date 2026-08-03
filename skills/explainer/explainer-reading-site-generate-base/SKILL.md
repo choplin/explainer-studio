@@ -99,6 +99,13 @@ Read `references/authoring-and-verification.md` completely now.
 4. Compose `src/index.md` inline from worker replies and the consumer vocabulary.
    Do not re-read report sources for cards. The landing is semantic Markdown and is
    built like every other page.
+5. Apply [[explainer-reading-site-consistency-sweep]] to **every** `src/*.md` at
+   once, including the landing. Pass the fixed profile and the same canonical
+   conventions used for page dispatch, plus the site title and consumer landing
+   vocabulary. Apply its targeted findings to `src/` and rerun it until clean. This
+   fan-in gate catches required markup omissions and cross-page structural drift
+   that are valid Markdown and therefore invisible to the generator. Do not begin
+   Phase 3 while findings remain.
 
 ### Phase 3 — Build once, then write navigation data
 
@@ -142,6 +149,10 @@ the user reviews the built artifact before it goes public.
 - Reports are not color-coded by chapter, section, or perspective.
 - `src/` contains semantic Markdown; `site/` contains generated output.
 - One `explainer-html-docs` build produces the landing and all report pages.
+- Every source-PDF page reference in prose uses the canonical `.p` form, and no
+  page anchor appears in a heading.
+- The whole-source consistency sweep passes after parallel authoring and before the
+  one site build.
 - `nav-manifest.js` is the only page-navigation source.
 - Shared assets are reused through `--assets`, `--context`, and
   `--component reading-nav`; consumers do not fork them.

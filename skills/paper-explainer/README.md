@@ -86,7 +86,7 @@ The work dir is named with a `{year}-{venue}-{short-title}` citation slug (e.g. 
 The layout matches pdf-explainer's work-dir conventions (`reports/*.md`, `[pNN]` anchors), so with pdf-explainer installed the pipeline extends into audio and a website:
 
 - **Audio guide** — `explainer-audio-dialogue` (pointed at `overview.md`) → `explainer-audio-narrate`. These pdf-explainer skills are fully source-generic and run unchanged; paper-explainer narrates the overview only.
-- **Website** — `paper-explainer-generate-site` (in this group) builds the site with the correct perspective order and kicker labels; the shared site worker (`explainer-reading-site-page`), context assets (`explainer-reading-site-library-base`), and hosting (`explainer-reading-site-deploy`) are reused from pdf-explainer. (Running `pdf-explainer-generate-site` directly also *works*, but mislabels the pages as 第N章 — use the paper-explainer one.)
+- **Website** — `paper-explainer-generate-site` (in this group) builds the site with the correct perspective order and kicker labels; the shared site page worker (`explainer-reading-site-page`), whole-source sweep (`explainer-reading-site-consistency-sweep`), context assets (`explainer-reading-site-library-base`), and hosting (`explainer-reading-site-deploy`) are reused from pdf-explainer. (Running `pdf-explainer-generate-site` directly also *works*, but mislabels the pages as 第N章 — use the paper-explainer one.)
 - **End-to-end** — `paper-explainer-full-guide` chains summary → overview audio → website in one request.
 
 ## Notes

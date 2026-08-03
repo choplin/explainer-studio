@@ -21,6 +21,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   changelog, decision records, and conventions. Explanations list the sources
   they were built from.
 
+### Fixed
+
+- Reading sites now require `.p` markup for prose page references, keep page
+  anchors out of headings, pass one canonical convention set to every parallel
+  page author, and run a whole-source consistency sweep before building.
+
 ## [0.1.0] - 2026-07-27
 
 ### Added

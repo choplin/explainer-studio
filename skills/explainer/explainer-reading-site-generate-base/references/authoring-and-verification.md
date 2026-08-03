@@ -140,6 +140,21 @@ render prev/next links and current-page state.
 - Write `nav-manifest.js` after the build because the generated `site/assets/`
   directory does not exist before it.
 
+## Whole-source consistency sweep
+
+After every report page and `src/index.md` exist, but **before the build**, apply
+[[explainer-reading-site-consistency-sweep]] once to the complete `src/*.md` set.
+Pass all absolute source paths, the canonical conventions above, and the fixed Phase
+1 profile, plus the site title and consumer landing vocabulary. Use one isolated
+sweep worker when the host supports it; otherwise apply the procedure inline.
+
+The sweep returns findings only. Apply each fix surgically to `src/`, then rerun the
+sweep until it reports clean. Do not build first: the point of this fan-in gate is to
+catch legal-but-wrong Markdown such as bare `[p31]` before it becomes internally
+consistent but site-wide divergent HTML. A later source correction therefore needs
+only the final one-pass build; never patch `site/` and never preserve generated
+assets by hand across rebuilds.
+
 ## Success checklist
 
 - [ ] Every existing `reports/*.md` has `src/<slug>.md` and
@@ -150,6 +165,12 @@ render prev/next links and current-page state.
       `.card-grid filter=`.
 - [ ] Page order and kickers exactly match the consumer profile.
 - [ ] Every report source contains a lede and keypoints box.
+- [ ] Every prose source-page reference uses `[pNN]{.p}` or
+      `[pNN–pMM]{.p}`; none appears in a heading, and sentence punctuation follows
+      the anchor. Code, image alt text, and table-header placeholders were left
+      alone.
+- [ ] The whole-source consistency sweep read every `src/*.md`, all findings were
+      fixed, and its final result was clean before the build ran.
 - [ ] No generated page retains `../ocr/figures/...`; every `<img src>` resolves
       under `site/figures/`.
 - [ ] Every report with matching audio has a player; unmatched audio appears on the

@@ -47,9 +47,10 @@ chunk-*.md   outline.md   reports/overview.md
 | `pdf-explainer-pdf-stitch` | Phase 2 worker — single instance. Read+Write+Glob. |
 | `pdf-explainer-pdf-detail` | Internal per-chapter detail worker for `pdf-explainer-full-guide`. |
 | `explainer-reading-site-page` | Site page author — one per report, in parallel. |
+| `explainer-reading-site-consistency-sweep` | Site source-set reviewer — one fan-in pass after parallel page authoring, before the build. |
 | `explainer-reading-site-library-base` | Shared resources, delegated to by name (not invoked directly): the Cloudflare Pages library manager (`library.py`) and the pdf-explainer content context layer (`reading-site.css`), layered on the `explainer-html-docs` base design system. The reading-site nav widgets are `explainer-html-docs`' `reading-nav` opt-in component (pulled in via `--component reading-nav`). |
 
-The four worker skills carry their own constraints and output format, so the orchestrators only choose *when* and *with what inputs* to run them. Under Claude Code each is wrapped by a thin subagent (see `agents/pdf-explainer-*`) so it runs in an isolated context and cannot install software or shell out to PDF converters; on any other agent the same skill is applied inline. This graceful fallback is written into each orchestrator.
+The five worker skills carry their own constraints and output format, so the orchestrators only choose *when* and *with what inputs* to run them. Under Claude Code each is wrapped by a thin subagent so it runs in an isolated context; on any other agent the same skill is applied inline. This graceful fallback is written into each orchestrator.
 
 ## When skills activate
 
