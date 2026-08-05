@@ -15,19 +15,28 @@ The whole build pipeline — scaffold, parallel semantic-Markdown authoring, the
 generator build, the semantic landing page, the nav manifest, the gotchas, and the
 success criteria — is the **shared reading-site pipeline** owned by
 [[explainer-reading-site-generate-base]]. **Delegate the build to that skill.** This skill
-adds only what is paper-specific: the page-ordering profile and the landing vocabulary
-below. Do not re-derive the pipeline here; follow the base skill for every phase.
+adds only what is paper-specific: the canonical source-structure path,
+page-ordering profile, and landing vocabulary below. Do not re-derive the pipeline
+here; follow the base skill for every phase.
 
 ## When this applies
 
-The input is a paper-explainer work dir with reports under `reports/`. `audio/` is
-optional (pages without audio get no player). If no report exists yet, run
-[[paper-explainer-summarize]] first; for the overview audio on the page, run
+The input is a paper-explainer work dir with reports under `reports/` and the
+canonical paper section structure at `source-structure.md`. `audio/` is optional
+(pages without audio get no player). If reports or `source-structure.md` do not
+exist yet, run [[paper-explainer-summarize]] first; for the overview audio on the page, run
 [[explainer-audio-dialogue]] (pointed at `reports/overview.md`) →
 [[explainer-audio-narrate]] first. This skill only *builds* the site; publishing it
 is [[explainer-reading-site-deploy]]'s job.
 
-## paper-explainer profile (the only paper-specific part)
+## paper-explainer inputs
+
+### Canonical source structure
+
+Pass the absolute path to `<WORK_DIR>/source-structure.md` to the shared pipeline.
+It records the paper's source-authored headings separately from `spine.md`, which
+remains the authority for confirmed facts. Perspective-report headings are
+editorial artifacts and are never a substitute for this source structure.
 
 ### Ordered page list — `[{ slug, kicker }]`
 
@@ -63,7 +72,7 @@ Site title = the paper title (from `reports/overview.md`'s `<h1>`).
 
 ## Build
 
-Hand the profile above to [[explainer-reading-site-generate-base]] and run its pipeline
+Hand the profile and canonical source-structure path above to [[explainer-reading-site-generate-base]] and run its pipeline
 (Phase 1 scaffold → Phase 2 author reports + landing → Phase 3 build + nav manifest →
 hand off to [[explainer-reading-site-deploy]]). The base skill's Success criteria are the
 acceptance for this skill.

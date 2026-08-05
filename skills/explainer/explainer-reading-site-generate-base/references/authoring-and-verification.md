@@ -9,9 +9,22 @@ Apply [[explainer-reading-site-page]] to every report. Under Claude Code, dispat
 one isolated worker per report in parallel; otherwise apply the procedure once per
 report.
 
+Before dispatch, resolve two exact attribution strings once in the site's report
+language. Keep them concise enough for every heading and explicit enough to rule
+out source authorship. For example in Japanese:
+
+```text
+EDITORIAL_STRUCTURE_LABEL: 本サイトによる構成
+EDITORIAL_STRUCTURE_NOTE: 「本サイトによる構成」と表示された区分と見出しは、読解のために本サイトが追加したものであり、原典の区分ではありません。
+```
+
+Use the resolved values verbatim in the canonical block below and on every report
+page. Individual workers never translate or rephrase them.
+
 Pass only:
 
 - absolute source report path;
+- absolute canonical source-structure artifact path supplied by the consumer;
 - absolute output path `<WORK_DIR>/src/<slug>.md`;
 - site title;
 - kicker from the Phase 1 ordered list;
@@ -21,6 +34,19 @@ Pass only:
 
 ```text
 CANONICAL SITE-WIDE AUTHORING CONVENTIONS
+- EDITORIAL_STRUCTURE_LABEL: <exact site-wide value resolved above>
+- EDITORIAL_STRUCTURE_NOTE: <exact site-wide value resolved above>
+- Source-authored body headings use `{.source-structure}` and must match the
+  canonical source-structure artifact in existence, hierarchy, title (or faithful
+  display translation), and anchor.
+- Site-authored body headings use `{.editorial-structure}`. They must not use
+  source-native Part/Chapter/Section labels or source-like numbering. The
+  reading-site filter renders their attribution in both the article and sidebar.
+- Every flowing-body H2/H3 is exactly one of those two types. Component-internal
+  and landing headings are exempt.
+- Editorial headings may subdivide prose but never reparent source divisions.
+  Group real chapters/sections under an editorial theme as list/table/card items,
+  not by demoting their source headings into the editorial hierarchy.
 - Every source-PDF page reference in prose uses `.p`: `[p31]{.p}` for one page,
   `[p31–p33]{.p}` for a range.
 - A page reference never appears in a heading. Move an otherwise-unrepresented
@@ -131,12 +157,14 @@ render prev/next links and current-page state.
 - `site/` and `src/` are disposable. Ask before clearing an existing tree; if the
   user declines, warn that stale files may be deployed later.
 - Never hand-edit generated `site/`; edit reports or semantic `src/` and regenerate.
-- A heading sequence that merely mirrors a report is conversion, not authored
-  restructuring.
+- Restructuring is judged by comprehension and source attribution, not by whether
+  the heading sequence differs from the report. Preserve source topology when it
+  helps; add a typed editorial reading path only when it adds value.
 - A failed build names the invalid source. Fix that source; do not weaken generator
   validation.
-- Reuse `reading-site.css` through `--context` and `reading-nav` through
-  `--component`. A consumer owns no forked shared assets.
+- Reuse `reading-site.css` through `--context`, the structure-provenance binding
+  through `--filter`, and `reading-nav` through `--component`. A consumer owns no
+  forked shared assets.
 - Write `nav-manifest.js` after the build because the generated `site/assets/`
   directory does not exist before it.
 
@@ -144,9 +172,10 @@ render prev/next links and current-page state.
 
 After every report page and `src/index.md` exist, but **before the build**, apply
 [[explainer-reading-site-consistency-sweep]] once to the complete `src/*.md` set.
-Pass all absolute source paths, the canonical conventions above, and the fixed Phase
-1 profile, plus the site title and consumer landing vocabulary. Use one isolated
-sweep worker when the host supports it; otherwise apply the procedure inline.
+Pass all absolute source paths, the canonical conventions above, the canonical
+source-structure artifact, and the fixed Phase 1 profile, plus the site title and
+consumer landing vocabulary. Use one isolated sweep worker when the host supports
+it; otherwise apply the procedure inline.
 
 The sweep returns findings only. Apply each fix surgically to `src/`, then rerun the
 sweep until it reports clean. Do not build first: the point of this fan-in gate is to
@@ -165,6 +194,14 @@ assets by hand across rebuilds.
       `.card-grid filter=`.
 - [ ] Page order and kickers exactly match the consumer profile.
 - [ ] Every report source contains a lede and keypoints box.
+- [ ] Every flowing-body H2/H3 is typed as `.source-structure` or
+      `.editorial-structure`; source headings agree with the canonical structure
+      artifact, and editorial headings use no source-like structural label.
+- [ ] Pages with editorial headings contain localized
+      `editorial-structure-label` and `editorial-structure-note` frontmatter; the
+      values exactly match the canonical site-wide strings; the
+      generated article shows the disclosure and every editorial heading badge,
+      and the sidebar contains the same badge text.
 - [ ] Every prose source-page reference uses `[pNN]{.p}` or
       `[pNN–pMM]{.p}`; none appears in a heading, and sentence punctuation follows
       the anchor. Code, image alt text, and table-header placeholders were left

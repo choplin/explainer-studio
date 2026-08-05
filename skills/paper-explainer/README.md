@@ -9,16 +9,16 @@ The sibling of [`pdf-explainer`](../pdf-explainer): where pdf-explainer scales a
 ```
 Phase 1 (orchestrator, inline)          Phase 2 (paper-detail, parallel)     Finalize
 read the paper via local MinerU OCR  →  reports/background.md   背景・問題  →  consistency & faithfulness
-biblio metadata + section map [pNN]     reports/method.md       手法             sweep over the whole set
+biblio metadata + source-structure.md   reports/method.md       手法             sweep over the whole set
 write spine.md (confirmed facts)        reports/experiments.md  実験             (paper-explainer-consistency-
 write reports/overview.md               reports/discussion.md   議論             sweep) → targeted fixes
   (spine handed to every perspective)   reports/related-work.md 位置づけ+次読
                                           (dblp-verified bibliography)
 ```
 
-- **Phase 1** — the orchestrator reads the paper itself (papers fit in context; no extract/stitch workers needed), captures bibliographic metadata and the section structure with `[pNN]` page anchors, materializes `spine.md` (the paper's confirmed facts — thesis + direction, running-example map, headline numbers with scope, figure-verified facts), and writes `reports/overview.md` in the Ochiai format: six questions — what is proposed / what is novel / what is the technical core / how was it validated / what is discussed / what to read next — each linking into its detail report.
+- **Phase 1** — the orchestrator reads the paper itself (papers fit in context; no extract/stitch workers needed), captures bibliographic metadata, materializes `source-structure.md` (the paper-authored heading topology with `[pNN]` anchors) and `spine.md` (the paper's confirmed facts — thesis + direction, running-example map, headline numbers with scope, figure-verified facts), and writes `reports/overview.md` in the Ochiai format: six questions — what is proposed / what is novel / what is the technical core / how was it validated / what is discussed / what to read next — each linking into its detail report.
 - **Phase 2** — one perspective report per in-scope perspective, **in parallel**, re-reading just the relevant sections (from the OCR Markdown) and writing a standalone detail report. Each perspective is handed `spine.md` and takes the shared facts from it rather than re-deriving them, so the isolated reports do not diverge.
-- **Finalize** — a single consistency & faithfulness sweep reads the **whole report set at once** (the one thing the isolated per-report passes structurally cannot do) and checks it for (1) cross-report contradictions and (2) faithfulness to the source's logical structure, verifying against `spine.md` and the paper. Its findings drive targeted, source-anchored fixes (a bounded loop, not full regeneration). Under Claude Code the sweep runs in an isolated subagent so only its findings return to the orchestrator.
+- **Finalize** — a single consistency & faithfulness sweep reads the **whole report set at once** (the one thing the isolated per-report passes structurally cannot do) and checks it for (1) cross-report contradictions and (2) faithfulness to the source's logical structure, re-verifying `source-structure.md` and `spine.md` against the paper. Its findings drive targeted, source-anchored fixes (a bounded loop, not full regeneration). Under Claude Code the sweep runs in an isolated subagent so only its findings return to the orchestrator.
 - Scope is confirmed **once up front** (which detail reports to produce — default all five), then the pipeline runs without further prompts.
 
 ### MinerU OCR (mandatory, local)
@@ -39,7 +39,7 @@ OCR materializes `ocr/paper.md` (full text as Markdown with LaTeX math, one `[pN
 | `paper-explainer-generate-site` | Build a browsable **website** from the reports — a landing page plus one authored (restructured, not converted) page per report, ordered by perspective (overview → 背景 → 手法 → 実験 → 議論 → 関連研究) with the overview audio playable in-page. The paper-tuned sibling of `pdf-explainer-generate-site`; reuses pdf-explainer's site worker/assets and differs only in report order and kicker labels. Triggers on "論文レポートをWebサイトにして", "HTMLにして". |
 | `paper-explainer-full-guide` | Run the **whole chain end-to-end** on one paper: summary + perspective reports → overview audio guide → website, confirmed once up front. Triggers on "この論文を全部やって", "サマリから音声・サイトまで一気に". |
 | `paper-explainer-paper-detail` | Internal Phase 2 logic: writes ONE perspective detail report (background / method / experiments / discussion / related-work), taking shared facts from `spine.md`. Applied once per perspective; not invoked directly. |
-| `paper-explainer-consistency-sweep` | Internal Finalize logic: reads the whole report set + `spine.md` + the source, returns a findings list of cross-report contradictions and source-faithfulness / logical-structure drift (it never edits reports). Applied once at Finalize; not invoked directly. |
+| `paper-explainer-consistency-sweep` | Internal Finalize logic: reads the whole report set + `source-structure.md` + `spine.md` + the source, returns findings about contradictions and source-faithfulness / logical-structure drift (it edits nothing). Applied once at Finalize; not invoked directly. |
 
 The **audio** guide reuses pdf-explainer's fully generic audio skills unchanged (there is no paper-specific audio skill): `explainer-audio-dialogue` writes a two-speaker script from `reports/overview.md`, and `explainer-audio-narrate` synthesizes it to `audio/overview.m4a` via a local VOICEVOX ENGINE. paper-explainer's audio is overview-only by design — the perspective detail reports are for reading, not listening.
 
@@ -67,6 +67,7 @@ The work dir is named with a `{year}-{venue}-{short-title}` citation slug (e.g. 
 <slug>/                        # work dir (citation slug)
 ├── <slug>.pdf                 # source PDF, collected in at the end (on confirmation)
 ├── paper.bib                  # dblp canonical BibTeX (or printed-metadata fallback)
+├── source-structure.md        # paper-authored section topology for site attribution
 ├── spine.md                   # Phase 1 confirmed facts — shared source for perspectives + sweep oracle
 ├── ocr/                       # MinerU OCR output (always produced)
 │   ├── paper.md               # full text as Markdown (LaTeX math), [pNN] anchors
@@ -86,7 +87,7 @@ The work dir is named with a `{year}-{venue}-{short-title}` citation slug (e.g. 
 The layout matches pdf-explainer's work-dir conventions (`reports/*.md`, `[pNN]` anchors), so with pdf-explainer installed the pipeline extends into audio and a website:
 
 - **Audio guide** — `explainer-audio-dialogue` (pointed at `overview.md`) → `explainer-audio-narrate`. These pdf-explainer skills are fully source-generic and run unchanged; paper-explainer narrates the overview only.
-- **Website** — `paper-explainer-generate-site` (in this group) builds the site with the correct perspective order and kicker labels; the shared site page worker (`explainer-reading-site-page`), whole-source sweep (`explainer-reading-site-consistency-sweep`), context assets (`explainer-reading-site-library-base`), and hosting (`explainer-reading-site-deploy`) are reused from pdf-explainer. (Running `pdf-explainer-generate-site` directly also *works*, but mislabels the pages as 第N章 — use the paper-explainer one.)
+- **Website** — `paper-explainer-generate-site` (in this group) builds the site with the correct perspective order, kicker labels, and `source-structure.md` authority; the shared site page worker (`explainer-reading-site-page`), whole-source sweep (`explainer-reading-site-consistency-sweep`), context assets/filter (`explainer-reading-site-library-base`), and hosting (`explainer-reading-site-deploy`) are reused. Use the paper-specific consumer; the PDF consumer expects `structured/toc.md` and is not interchangeable.
 - **End-to-end** — `paper-explainer-full-guide` chains summary → overview audio → website in one request.
 
 ## Notes

@@ -54,13 +54,27 @@ Each consumer supplies:
 All other landing strings stay document-type neutral. In particular, the filter
 placeholder is `絞り込む…`, not a chapter- or paper-specific phrase.
 
+## Canonical source-structure artifact
+
+Each consumer supplies one durable artifact containing only source-authored
+headings, with their hierarchy, source-form titles, and source-page anchors:
+
+- PDF explainer: `<WORK_DIR>/structured/toc.md`;
+- Paper explainer: `<WORK_DIR>/source-structure.md`.
+
+The artifact is a required input, not an optional cross-check. Page workers use it
+to classify headings as source-derived or editorial, and the fan-in sweep uses the
+same file as its attribution oracle. A report heading is not evidence that the
+source had that heading; reports may themselves be editorial artifacts.
+
 ## Adding a consumer
 
 Keep the consumer shell thin:
 
 1. Define how it resolves its deterministic page list.
-2. Define the three landing nouns.
-3. Delegate scaffold, authoring, build, manifest, verification, and handoff to this
+2. Define its canonical source-structure artifact.
+3. Define the three landing nouns.
+4. Delegate scaffold, authoring, build, manifest, verification, and handoff to this
    base.
 
 Do not copy this pipeline or shared asset rules into the consumer.

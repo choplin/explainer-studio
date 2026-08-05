@@ -4,7 +4,7 @@
 #
 # Usage:
 #   build-site.sh <src-dir> <out-dir> --assets <base-assets-dir> [--context <dir>]
-#                 [--component <name>]... [--layout <name>]
+#                 [--component <name>]... [--filter <file>]... [--layout <name>]
 #
 # --layout sets the default layout variant for every page in the site; a page's
 # own `layout:` frontmatter overrides it. See build.sh for the variants.
@@ -14,7 +14,7 @@ SKILL_DIR="$(cd "$(dirname "$0")/.." && pwd)"
 srcdir=""; out=""; passthru=()
 while [[ $# -gt 0 ]]; do
   case "$1" in
-    --assets|--context|--component|--layout) passthru+=("$1" "$2"); shift 2 ;;
+    --assets|--context|--component|--filter|--layout) passthru+=("$1" "$2"); shift 2 ;;
     *) if [[ -z "$srcdir" ]]; then srcdir="$1"; elif [[ -z "$out" ]]; then out="$1"; fi; shift ;;
   esac
 done

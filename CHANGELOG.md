@@ -26,6 +26,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Reading sites now require `.p` markup for prose page references, keep page
   anchors out of headings, pass one canonical convention set to every parallel
   page author, and run a whole-source consistency sweep before building.
+- Reading-site restructuring now keeps source-authored topology separate from
+  site-authored reading structure. Editorial headings are visibly attributed in
+  both the article and sidebar, while source headings are checked against the
+  PDF or paper's canonical structure artifact before the site is built.
 
 ## [0.1.0] - 2026-07-27
 

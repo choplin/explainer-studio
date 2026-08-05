@@ -35,7 +35,7 @@ chunk-*.md   outline.md   reports/overview.md
 | `pdf-explainer-summarize` | First full-document pass. Drives the `extract → structure → report` phases. |
 | `explainer-audio-dialogue` | Audio guide, step 1. Rewrites any report Markdown into a NotebookLM-style two-host dialogue script (台本) under `dialogue/`. |
 | `explainer-audio-narrate` | Audio guide, step 2. Synthesizes a dialogue script into a compact AAC/m4a with a local VOICEVOX ENGINE (offline, no API key) + `ffmpeg`, two distinct Japanese voices. |
-| `pdf-explainer-generate-site` | Builds a reading-guide website under `site/` — pages are *authored* for the web (lede, key points, scannable sections), not converted 1:1 from Markdown — with in-page audio players. Build only. |
+| `pdf-explainer-generate-site` | Builds a reading-guide website under `site/` — pages are authored for the web while source-derived headings remain tied to `structured/toc.md` and editorial reading structure stays visibly attributed. Includes in-page audio players. Build only. |
 | `explainer-reading-site-initialize` | One-time hosting setup: a single Cloudflare Pages project + a local library, protected by a Cloudflare Access policy. Run once before the first deploy. |
 | `explainer-reading-site-deploy` | Publishes a built `site/` by adding it as a subpath to the shared library, then deploying the whole library. |
 
@@ -47,8 +47,8 @@ chunk-*.md   outline.md   reports/overview.md
 | `pdf-explainer-pdf-stitch` | Phase 2 worker — single instance. Read+Write+Glob. |
 | `pdf-explainer-pdf-detail` | Internal per-chapter detail worker for `pdf-explainer-full-guide`. |
 | `explainer-reading-site-page` | Site page author — one per report, in parallel. |
-| `explainer-reading-site-consistency-sweep` | Site source-set reviewer — one fan-in pass after parallel page authoring, before the build. |
-| `explainer-reading-site-library-base` | Shared resources, delegated to by name (not invoked directly): the Cloudflare Pages library manager (`library.py`) and the pdf-explainer content context layer (`reading-site.css`), layered on the `explainer-html-docs` base design system. The reading-site nav widgets are `explainer-html-docs`' `reading-nav` opt-in component (pulled in via `--component reading-nav`). |
+| `explainer-reading-site-consistency-sweep` | Site source-set reviewer — one fan-in pass checks source attribution, canonical anchors, and cross-page consistency before the build. |
+| `explainer-reading-site-library-base` | Shared resources, delegated to by name (not invoked directly): the Cloudflare Pages library manager (`library.py`), reading-site content layer (`reading-site.css`), and source/editorial structure filter (`reading-site.lua`), layered on the `explainer-html-docs` base design system. The reading-site nav widgets are `explainer-html-docs`' `reading-nav` opt-in component (pulled in via `--component reading-nav`). |
 
 The five worker skills carry their own constraints and output format, so the orchestrators only choose *when* and *with what inputs* to run them. Under Claude Code each is wrapped by a thin subagent so it runs in an isolated context; on any other agent the same skill is applied inline. This graceful fallback is written into each orchestrator.
 
@@ -75,6 +75,7 @@ Everything lands in one work dir named after the PDF's basename; the source PDF 
 ├── extract/                 # summarize · Phase 1: structured extraction material ([pNN] anchors)
 │   └── chunk-030-049.md
 ├── structured/
+│   ├── toc.md               # summarize · Phase 2: canonical source heading topology
 │   └── outline.md           # summarize · Phase 2: stitched, deduped outline (## Page offset field)
 ├── reports/
 │   ├── overview.md          # summarize · Phase 3: overview report

@@ -14,6 +14,7 @@ The consumer owns only:
 
 - its trigger;
 - an ordered `[{ slug, kicker }]` page profile;
+- the absolute path to its canonical source-structure artifact;
 - three landing-page nouns: guide kicker, cards-section heading, and count-chip unit.
 
 This base owns scaffold, semantic authoring, the single generator build, landing page,
@@ -37,8 +38,9 @@ the later output contract.
 
 ## Preconditions and ownership
 
-The input is `<WORK_DIR>` with at least one `reports/*.md`. `audio/` and
-`ocr/figures/` are optional. If no report exists, stop and ask the consumer's
+The input is `<WORK_DIR>` with at least one `reports/*.md` and the consumer's
+canonical source-structure artifact. `audio/` and `ocr/figures/` are optional. If
+reports or the structure artifact are missing, stop and ask the consumer's
 summarize skill to run first. Audio can be produced through
 [[explainer-audio-dialogue]] and [[explainer-audio-narrate]].
 
@@ -70,12 +72,15 @@ landing, is ready.
 2. Read `references/profile-contract.md` and resolve the consumer profile into one
    deterministic ordered `[{ slug, kicker }]` list. Fix it now; it is the source of
    truth for cards and navigation.
-3. If `site/` already exists, ask before clearing `site/` and `src/`. Recommend a
+3. Resolve the consumer's canonical source-structure artifact and verify it exists.
+   Keep its absolute path as the source-topology authority for every page worker
+   and the fan-in sweep; never infer source structure from authored pages.
+4. If `site/` already exists, ask before clearing `site/` and `src/`. Recommend a
    clean rebuild so removed reports/audio cannot remain as publishable orphans. If
    the user declines, build over the existing tree and warn about stale files.
-4. Create `src/` and `site/audio/`; copy all source audio into `site/audio/`.
+5. Create `src/` and `site/audio/`; copy all source audio into `site/audio/`.
    `src/` and `site/` are reproducible and disposable. Never hand-edit `site/`.
-5. If `ocr/figures/` exists, copy the whole directory to `site/figures/`. Copy every
+6. If `ocr/figures/` exists, copy the whole directory to `site/figures/`. Copy every
    crop because page authors run independently; the generator rewrites report paths
    from `../ocr/figures/...` to `figures/...`.
 
@@ -88,11 +93,12 @@ Read `references/authoring-and-verification.md` completely now.
 1. Apply [[explainer-reading-site-page]] once per report, in parallel when the host
    supports isolated subagents. Each worker writes `src/<slug>.md` and returns only
    the source path, title, and a 2–3 line card summary.
-2. Pass each worker only the absolute report/output paths, site title, profile kicker,
-   figure-directory availability, matching audio filename or `none`, and the exact
-   canonical site-wide authoring conventions from
-   `references/authoring-and-verification.md`. The conventions are an explicit
-   dispatch input because isolated workers cannot infer them from sibling output.
+2. Pass each worker only the absolute report/output paths, the absolute canonical
+   source-structure path, site title, profile kicker, figure-directory availability,
+   matching audio filename or `none`, and the exact canonical site-wide authoring
+   conventions from `references/authoring-and-verification.md`. The conventions
+   are an explicit dispatch input because isolated workers cannot infer them from
+   sibling output.
 3. Do not have workers author head markup, presentation-only classes outside the
    page skill's semantic vocabulary, figure rewrites, or prev/next links. Runtime
    navigation comes from the manifest written in Phase 3.
@@ -101,11 +107,12 @@ Read `references/authoring-and-verification.md` completely now.
    built like every other page.
 5. Apply [[explainer-reading-site-consistency-sweep]] to **every** `src/*.md` at
    once, including the landing. Pass the fixed profile and the same canonical
-   conventions used for page dispatch, plus the site title and consumer landing
-   vocabulary. Apply its targeted findings to `src/` and rerun it until clean. This
-   fan-in gate catches required markup omissions and cross-page structural drift
-   that are valid Markdown and therefore invisible to the generator. Do not begin
-   Phase 3 while findings remain.
+   conventions used for page dispatch, the canonical source-structure path, plus
+   the site title and consumer landing vocabulary. Apply its targeted findings to
+   `src/` and rerun it until clean. This fan-in gate catches source-attribution
+   errors, required markup omissions, and cross-page structural drift that are
+   valid Markdown and therefore invisible to the generator. Do not begin Phase 3
+   while findings remain.
 
 ### Phase 3 — Build once, then write navigation data
 
@@ -115,6 +122,7 @@ Build every `src/*.md` in one pass:
 explainer-html-docs/scripts/build-site.sh <WORK_DIR>/src <WORK_DIR>/site \
   --assets explainer-html-docs/assets \
   --context explainer-reading-site-library-base/assets \
+  --filter explainer-reading-site-library-base/filters/reading-site.lua \
   --component reading-nav
 ```
 
@@ -147,7 +155,10 @@ the user reviews the built artifact before it goes public.
 - Every existing report appears exactly once in a deterministic order and has a
   non-empty kicker.
 - Reports are not color-coded by chapter, section, or perspective.
-- `src/` contains semantic Markdown; `site/` contains generated output.
+- `src/` contains semantic Markdown; `site/` contains generated output. Source
+  and editorial body headings use distinct structure-provenance classes.
+- Source-derived headings match the consumer's canonical source-structure
+  artifact; editorial headings are visibly attributed in both the article and TOC.
 - One `explainer-html-docs` build produces the landing and all report pages.
 - Every source-PDF page reference in prose uses the canonical `.p` form, and no
   page anchor appears in a heading.

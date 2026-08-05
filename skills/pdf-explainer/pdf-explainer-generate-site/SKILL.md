@@ -15,18 +15,26 @@ The whole build pipeline — scaffold, parallel semantic-Markdown authoring, the
 generator build, the semantic landing page, the nav manifest, the gotchas, and the
 success criteria — is the **shared reading-site pipeline** owned by
 [[explainer-reading-site-generate-base]]. **Delegate the build to that skill.** This skill
-adds only what is pdf-specific: the page-ordering profile and the landing vocabulary
-below. Do not re-derive the pipeline here; follow the base skill for every phase.
+adds only what is pdf-specific: the canonical source-structure path, page-ordering
+profile, and landing vocabulary below. Do not re-derive the pipeline here; follow
+the base skill for every phase.
 
 ## When this applies
 
-The input is a pdf-explainer work dir with reports under `reports/`. `audio/` is optional
-(pages without audio get no player). If no report exists yet, run [[pdf-explainer-summarize]]
-first; for audio on the pages, run [[explainer-audio-dialogue]] →
+The input is a pdf-explainer work dir with reports under `reports/` and the
+canonical source structure at `structured/toc.md`. `audio/` is optional (pages
+without audio get no player). If reports or `structured/toc.md` do not exist yet,
+run [[pdf-explainer-summarize]] first; for audio on the pages, run [[explainer-audio-dialogue]] →
 [[explainer-audio-narrate]] first. This skill only *builds* the site; publishing it is
 [[explainer-reading-site-deploy]]'s job.
 
-## pdf-explainer profile (the only pdf-specific part)
+## pdf-explainer inputs
+
+### Canonical source structure
+
+Pass the absolute path to `<WORK_DIR>/structured/toc.md` to the shared pipeline.
+It is required: report headings are editorial artifacts and cannot establish which
+parts, chapters, or sections the PDF itself contains.
 
 ### Ordered page list — `[{ slug, kicker }]`
 
@@ -52,7 +60,7 @@ Site title = the book title.
 
 ## Build
 
-Hand the profile above to [[explainer-reading-site-generate-base]] and run its pipeline
+Hand the profile and canonical source-structure path above to [[explainer-reading-site-generate-base]] and run its pipeline
 (Phase 1 scaffold → Phase 2 author reports + landing → Phase 3 build + nav manifest →
 hand off to [[explainer-reading-site-deploy]]). The base skill's Success criteria are the
 acceptance for this skill.

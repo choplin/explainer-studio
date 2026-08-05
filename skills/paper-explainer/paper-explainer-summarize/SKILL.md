@@ -11,13 +11,16 @@ Digest an academic paper into `reports/overview.md` (a TL;DR + key figure, the O
 ```
 Phase 1 (orchestrator, inline)              Phase 2 (paper-detail, parallel)     Finalize
 read paper (local MinerU OCR)          →    reports/background.md            →   consistency & faithfulness
-biblio metadata + section map [pNN]         reports/method.md                    sweep over the whole set
+biblio metadata + source-structure.md       reports/method.md                    sweep over the whole set
 write spine.md (confirmed facts)            reports/experiments.md               (paper-explainer-consistency-
 write reports/overview.md                   reports/discussion.md                sweep) → targeted fixes
    (spine handed to every perspective)      reports/related-work.md (dblp)
 ```
 
-The work dir's internal layout (a self-contained dir holding `<dir-name>.pdf`, `reports/*.md`, and `[pNN]` anchors) is deliberately identical to pdf-explainer, so explainer-audio-dialogue and pdf-explainer-generate-site work on these artifacts unchanged. (Only the dir *name* differs — paper-explainer uses a `{year}-{venue}-{short-title}` citation slug; the pdf-explainer skills take the work dir as input, so the name does not matter to them.)
+The work dir's internal layout carries reports, `[pNN]` anchors, a factual
+`spine.md`, and a separate `source-structure.md` authority for the paper's own
+section topology. This separation lets shared site authoring restructure reports
+without presenting report-created headings as source sections.
 
 `<SKILL_DIR>` below is this skill's own base directory; the bundled scripts live at `<SKILL_DIR>/scripts/`. Reference them by that skill-root-relative path — no absolute or plugin-root paths.
 

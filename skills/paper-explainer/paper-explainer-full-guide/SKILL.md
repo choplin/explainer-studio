@@ -40,9 +40,9 @@ State the rough cost implication (e.g. "all five reports + audio + site ≈ 5 pe
 
 ## Step 1 — Summary + perspective reports
 
-Follow **[[paper-explainer-summarize]]** in full: Phase 1 (inline MinerU OCR read, bibliographic metadata + section map, `spine.md`, `reports/overview.md`), Phase 2 (parallel perspective detail reports for the in-scope perspectives), and its Finalize (figure coverage + the consistency & faithfulness sweep + fixes). Use the Step 0 answers you already collected — do **not** let it re-ask the detail-report scope or the PDF-collect question. Concretely: supply the detail-report scope and the PDF-collect answer from Step 0 directly when applying [[paper-explainer-summarize]], and skip its Step 0 gate rather than re-presenting it.
+Follow **[[paper-explainer-summarize]]** in full: Phase 1 (inline MinerU OCR read, bibliographic metadata + `source-structure.md`, `spine.md`, `reports/overview.md`), Phase 2 (parallel perspective detail reports for the in-scope perspectives), and its Finalize (figure coverage + the consistency & faithfulness sweep + fixes). Use the Step 0 answers you already collected — do **not** let it re-ask the detail-report scope or the PDF-collect question. Concretely: supply the detail-report scope and the PDF-collect answer from Step 0 directly when applying [[paper-explainer-summarize]], and skip its Step 0 gate rather than re-presenting it.
 
-- This produces `<WORK_DIR>/reports/overview.md` and the in-scope `reports/<perspective>.md`, `<WORK_DIR>/spine.md`, `paper.bib`, and the `ocr/` artifacts.
+- This produces `<WORK_DIR>/reports/overview.md` and the in-scope `reports/<perspective>.md`, `<WORK_DIR>/source-structure.md`, `<WORK_DIR>/spine.md`, `paper.bib`, and the `ocr/` artifacts.
 - [[paper-explainer-summarize]] runs its **own** consistency sweep at Finalize (the whole-report-set check). Do not add a second sweep here — unlike the book pipeline, the paper pipeline's accuracy guard already lives inside Step 1.
 
 ## Step 2 — Overview audio guide (unless "none" in Step 0)
@@ -67,7 +67,7 @@ Follow **[[paper-explainer-generate-site]]** in full to build a browsable websit
 
 - **PDF collection** is handled inside [[paper-explainer-summarize]]'s Finalize (Step 1), per the Step 0 answer — nothing to redo here.
 - **Offer deployment (do not auto-run).** If the site was built (Step 3), tell the user it is ready under `<WORK_DIR>/site/` and offer to publish it with [[explainer-reading-site-deploy]] (a subpath of the shared Cloudflare Pages library, Access-protected) — deployment is outward-facing, so confirm before running it, and note that a first-ever deploy needs the one-time [[explainer-reading-site-initialize]] setup. Do not deploy without explicit confirmation.
-- Print a short manifest of everything produced: `reports/overview.md`, each in-scope `reports/<perspective>.md`, `spine.md`, `paper.bib`, `dialogue/overview.txt`, `audio/overview.m4a`, and the built `site/` (with its page count) — grouped by phase, with the work dir path.
+- Print a short manifest of everything produced: `reports/overview.md`, each in-scope `reports/<perspective>.md`, `source-structure.md`, `spine.md`, `paper.bib`, `dialogue/overview.txt`, `audio/overview.m4a`, and the built `site/` (with its page count) — grouped by phase, with the work dir path.
 
 ## Orchestration rules
 
@@ -79,7 +79,7 @@ Follow **[[paper-explainer-generate-site]]** in full to build a browsable websit
 ## Success criteria (verify the deliverables)
 
 - [ ] Scope (detail reports subset or overview-only, audio yes/none, site build or none, PDF-collect) was confirmed with the user **before** any work started, and the run proceeded from Step 0 to the manifest **without a second interactive scope prompt** (the Step 0 answers alone carried it through).
-- [ ] `reports/overview.md` exists in the Ochiai format, and every in-scope `reports/<perspective>.md` exists; `spine.md` and `paper.bib` were produced, and [[paper-explainer-summarize]]'s own Finalize consistency sweep ran.
+- [ ] `reports/overview.md` exists in the Ochiai format, and every in-scope `reports/<perspective>.md` exists; `source-structure.md`, `spine.md`, and `paper.bib` were produced, and [[paper-explainer-summarize]]'s own Finalize consistency sweep ran.
 - [ ] Unless audio was "none": `dialogue/overview.txt` exists in the `A:`/`B:` format faithful to the overview, and (when VOICEVOX + ffmpeg are available) a non-empty `audio/overview.m4a` was produced and its path + duration reported; otherwise audio was skipped with a clear note.
 - [ ] The overview audio was produced **before** the site build, so the overview site page can embed it.
 - [ ] Unless the site was "none": `<WORK_DIR>/site/` was built via [[paper-explainer-generate-site]] (a page per report in the canonical perspective order with perspective kickers, generated from semantic Markdown by the shared generator) and **not** deployed without explicit confirmation; the user was told it is ready and offered [[explainer-reading-site-deploy]]. (If `explainer-html-docs` / `explainer-reading-site-library-base` were missing, the site was skipped with a clear note.)

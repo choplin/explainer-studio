@@ -8,7 +8,9 @@ No subagent: a paper fits the orchestrator's context, and Phase 2 needs the sect
 
 **Extract while reading:**
 - Bibliographic metadata: title, authors, venue/journal, year, DOI or arXiv URL — **only what is printed in the paper**; if the venue is not printed (arXiv preprint), write "不明 (preprint)" rather than guessing.
-- A section map: every section with its `[pNN]` span, including the References span (Phase 2 needs it).
+- A section map: every source-authored section with its `[pNN]` span, including
+  the References span (Phase 2 needs it). Preserve each heading's source form and
+  level; this map is also materialized as `source-structure.md` below.
 - **A running-example map — only if the paper leans on one worked/running example that more than one perspective will discuss.** Build it once, here — but note the trap: once handed down, this map is the *single source* for every report that uses it, so an error in it propagates to all of them and no cross-report check can catch it (the reports will agree, on the wrong thing). Single-sourcing removes the divergence that would otherwise flag a mistake, so the map must be right at construction, not merely consistent. Build it against ground truth, not prose:
   - **Open the original figure image in `ocr/figures/` with the Read tool** (do not build the map from the OCR sentence — multi-column OCR scrambles word order and swaps which object is looked up by which key, e.g. "a B is retrieved by its id from a previously fetched A").
   - One row per distinct example feature: `feature (the exact code token / label as it appears in the figure) → the concept/label the paper attributes it to → the figure element you read it off (label / arrow / callout) → [pNN]`. The evidence column is mandatory — it forces each attribution to be anchored to something visible in the image and makes the map auditable.
@@ -22,6 +24,24 @@ No subagent: a paper fits the orchestrator's context, and Phase 2 needs the sect
 1. Run `bash <SKILL_DIR>/scripts/dblp_lookup.sh "<title> <first-author surname>"`. Pick the hit whose title/authors/year match the paper; when both a peer-reviewed venue and a CoRR/arXiv preprint (`type` = "Informal and Other Publications") match, prefer the peer-reviewed one.
 2. On a confident match: `bash <SKILL_DIR>/scripts/dblp_bibtex.sh "<key>" > <WORK_DIR>/paper.bib` (the `key` field from step 1).
 3. On no confident match, or if `dblp_bibtex.sh` fails: hand-build a minimal entry from the paper's **printed** metadata only — cite key = the work-dir slug; `@inproceedings` / `@article` / `@misc` by venue kind; fields limited to `author`, `title`, `year`, plus `booktitle`-or-`journal` / `doi` / `url` that actually appear in the paper — and prepend a comment line `% not dblp-verified — from the paper's printed metadata`. Never invent a venue, DOI, or URL.
+
+**Build `<WORK_DIR>/source-structure.md`** — the canonical source-topology
+artifact used by reading-site authoring. Materialize the section map as one row
+per real paper heading, in source order:
+
+```markdown
+# Source structure (canonical)
+
+## Headings
+- [pNN] L<level> | <source-form title, verbatim>
+```
+
+Include only headings present in the paper, including unnumbered source sections
+such as Abstract or References when printed as headings. Do not include Ochiai
+questions, perspective names, report headings, or any other explanatory structure
+introduced by this pipeline. `source-structure.md` answers which divisions the
+paper has; `spine.md` separately answers which confirmed facts downstream reports
+must share.
 
 **Build `<WORK_DIR>/spine.md`** — the paper's confirmed facts, materialized once as a durable artifact. This is the pipeline's single source of truth: it is handed to *every* perspective in Phase 2 (so they reference one confirmed value instead of independently re-deriving it and diverging) **and** it is the oracle the Finalize sweep checks every report against. The failure this prevents is concrete: without a materialized spine, a "handed-down" fact degrades into prompt-only hearsay that each isolated writer re-derives from OCR prose, and the reports diverge until reconciled by hand. Record it as a short Markdown file with these sections (include a section only if the paper has that kind of fact; keep each entry one line with its `[pNN]`):
 

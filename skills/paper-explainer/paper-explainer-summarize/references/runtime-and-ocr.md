@@ -31,6 +31,7 @@ Build the slug as lowercase ASCII kebab-case, filesystem-safe:
 <dir>/<slug>/                  # work dir (named {year}-{venue}-{short-title})
 ├── <slug>.pdf                 # source PDF, collected in + renamed at Finalize (on confirmation)
 ├── paper.bib                  # Phase 1: citation (dblp canonical BibTeX, or printed-metadata fallback)
+├── source-structure.md        # Phase 1: paper-authored headings, levels, and [pNN] anchors
 ├── spine.md                   # Phase 1: confirmed facts (thesis + direction, running-example map, headline numbers + scope, figure-verified facts) — handed to every perspective and used as the Finalize sweep's oracle
 ├── ocr/                       # MinerU OCR output (always produced)
 │   ├── paper.md               # full text as Markdown (LaTeX math), [pNN] anchors

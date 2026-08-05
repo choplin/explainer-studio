@@ -140,7 +140,7 @@ Build a whole site:
 ```bash
 scripts/build-site.sh <src-dir> <out-dir> \
   --assets <explainer-html-docs/assets> [--context <dir>] [--component <name>]... \
-  [--layout <name>]
+  [--filter <consumer-filter.lua>]... [--layout <name>]
 ```
 
 Each `src/*.md` becomes `out/<name>.html` and all pages share one asset set.
