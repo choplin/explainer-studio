@@ -7,29 +7,24 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.2.0] - 2026-08-06
+
+### Added
+
+- Added per-page and whole-build `narrow`, `standard`, and `wide` HTML layouts, with `standard` as the wider default and horizontal scrolling for oversized tables.
+- Added a pre-build whole-source consistency sweep for reading-site markup, navigation, source structure, and cross-page conventions.
+
 ### Changed
 
-- Documented local tools, optional runtimes, network services, and remote assets
-  required by each Explainer Studio capability.
-- Renamed the git-diff explanation skill from `explainer-diff` to
-  `diff-explainer`, matching the subject-first naming of `paper-explainer` and
-  `pdf-explainer`. Invoke it as `/explainer-studio:diff-explainer`.
-- The diff explainer now gathers the context behind a change as a defined step:
-  for a pull request it reads the description and the issues and pull requests it
-  references, for a commit range it reads the commit messages, and in every case
-  it also draws on the conversation and on the repository's own README,
-  changelog, decision records, and conventions. Explanations list the sources
-  they were built from.
+- Documented the local tools, optional runtimes, network services, and remote assets required by each Explainer Studio capability.
+- Renamed `explainer-diff` to `diff-explainer`; invoke it as `/explainer-studio:diff-explainer`.
+- The diff explainer now gathers change context from pull requests, referenced work, commits, conversations, and repository documentation, and lists the sources used.
 
 ### Fixed
 
-- Reading sites now require `.p` markup for prose page references, keep page
-  anchors out of headings, pass one canonical convention set to every parallel
-  page author, and run a whole-source consistency sweep before building.
-- Reading-site restructuring now keeps source-authored topology separate from
-  site-authored reading structure. Editorial headings are visibly attributed in
-  both the article and sidebar, while source headings are checked against the
-  PDF or paper's canonical structure artifact before the site is built.
+- Filterable report and chapter indexes now use a readable single-column layout instead of the compact multi-column card layout.
+- Reading sites now use canonical `.p` prose references, exclude page anchors from headings, and share one convention set across parallel page authors.
+- Reading sites now distinguish editorial structure from source topology, attribute editorial headings, and verify source headings against the canonical structure artifact.
 
 ## [0.1.0] - 2026-07-27
 
@@ -54,5 +49,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   written explanations into audio.
 - Automated structural validation for every bundled Agent Skill package.
 
-[Unreleased]: https://github.com/choplin/explainer-studio/compare/v0.1.0...HEAD
+[Unreleased]: https://github.com/choplin/explainer-studio/compare/v0.2.0...HEAD
+[0.2.0]: https://github.com/choplin/explainer-studio/compare/v0.1.0...v0.2.0
 [0.1.0]: https://github.com/choplin/explainer-studio/releases/tag/v0.1.0

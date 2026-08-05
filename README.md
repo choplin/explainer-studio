@@ -213,7 +213,7 @@ and source reading from synthesis where the source requires it.
 
 ## 📌 Current scope
 
-- Version 0.1.0 provides three applications of the shared HTML explanation
+- Version 0.2.0 provides three applications of the shared HTML explanation
   system: git-diff explainers, long-PDF reading guides, and academic-paper
   reading guides.
 - The supported installation path is the Claude Code plugin. The underlying
@@ -222,7 +222,7 @@ and source reading from synthesis where the source requires it.
 - `paper-explainer` targets papers of roughly 8–30 pages, primarily in computer
   science. Use `pdf-explainer` for dissertations, books, and longer documents.
 - Audio synthesis currently uses Japanese VOICEVOX voices.
-- Report language follows the source or the conversation. Version 0.1.0 does
+- Report language follows the source or the conversation. Version 0.2.0 does
   not provide a single pipeline-wide language selector.
 - Generated sites are local by default. The bundled publishing workflow targets
   a shared Cloudflare Pages library.
