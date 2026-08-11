@@ -187,7 +187,7 @@ capabilities below and to the agent's configured model provider.
 
 ### Development-only dependency
 
-Repository validation uses `skill-validator` v1.5.6 in addition to
+Repository validation uses `skill-validator` v1.6.0 in addition to
 `claude plugin validate`. End users do not need `skill-validator` to run the
 installed plugin.
 

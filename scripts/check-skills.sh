@@ -4,7 +4,7 @@ set -u
 set -o pipefail
 
 readonly REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
-readonly REQUIRED_VALIDATOR_VERSION="v1.5.6"
+readonly REQUIRED_VALIDATOR_VERSION="v1.6.0"
 readonly VALIDATOR_ARGS=(
   validate structure
   --allow-extra-frontmatter

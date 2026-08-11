@@ -23,18 +23,16 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v6
-      - uses: actions/setup-go@v6
-        with:
-          go-version: "1.26.x"
-          cache: false
       - name: Install skill-validator
         run: |
-          git clone https://github.com/choplin/skill-validator.git "${RUNNER_TEMP}/skill-validator"
-          git -C "${RUNNER_TEMP}/skill-validator" checkout be8d7501a54468f4ec1fa697c1ea3846fbb0fac6
-          (
-            cd "${RUNNER_TEMP}/skill-validator"
-            GOBIN="${RUNNER_TEMP}/bin" go install ./cmd/skill-validator
-          )
+          archive="skill-validator_1.6.0_linux_amd64.tar.gz"
+          mkdir -p "${RUNNER_TEMP}/bin"
+          curl -fsSL \
+            "https://github.com/agent-ecosystem/skill-validator/releases/download/v1.6.0/${archive}" \
+            -o "${RUNNER_TEMP}/${archive}"
+          cd "${RUNNER_TEMP}"
+          echo "1c42c832880d8a8d311346c73dfdbd002670df34774583ebad548b350da479f6  ${archive}" | sha256sum --check --strict
+          tar -xzf "${archive}" -C "${RUNNER_TEMP}/bin" skill-validator
           echo "${RUNNER_TEMP}/bin" >> "${GITHUB_PATH}"
       - name: Validate Agent Skills
         run: ./scripts/check-skills.sh
