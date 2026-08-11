@@ -14,8 +14,8 @@ language. Keep them concise enough for every heading and explicit enough to rule
 out source authorship. For example in Japanese:
 
 ```text
-EDITORIAL_STRUCTURE_LABEL: 本サイトによる構成
-EDITORIAL_STRUCTURE_NOTE: 「本サイトによる構成」と表示された区分と見出しは、読解のために本サイトが追加したものであり、原典の区分ではありません。
+EDITORIAL_STRUCTURE_LABEL: 編注
+EDITORIAL_STRUCTURE_NOTE: 「編注」の付いた区分・見出しは、読解のために本サイトが追加したもので、原典にはありません。
 ```
 
 Use the resolved values verbatim in the canonical block below and on every report
@@ -200,8 +200,8 @@ assets by hand across rebuilds.
 - [ ] Pages with editorial headings contain localized
       `editorial-structure-label` and `editorial-structure-note` frontmatter; the
       values exactly match the canonical site-wide strings; the
-      generated article shows the disclosure and every editorial heading badge,
-      and the sidebar contains the same badge text.
+      generated article shows the subdued disclosure and every editorial heading
+      marker, and the sidebar contains the same marker text.
 - [ ] Every prose source-page reference uses `[pNN]{.p}` or
       `[pNN–pMM]{.p}`; none appears in a heading, and sentence punctuation follows
       the anchor. Code, image alt text, and table-header placeholders were left

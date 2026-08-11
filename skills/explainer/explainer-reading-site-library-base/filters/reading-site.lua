@@ -2,9 +2,9 @@
 --
 -- Report authors classify each body heading as either `.source-structure` or
 -- `.editorial-structure`. Source headings stay visually quiet. Editorial headings
--- receive real text (not CSS-only decoration), so both the in-page heading and the
--- generated TOC/sidebar retain the attribution. The first editorial heading also
--- receives an explanatory note.
+-- receive a subdued real-text marker (not CSS-only decoration), so both the in-page
+-- heading and the generated TOC/sidebar retain the attribution. The first editorial
+-- heading also receives an explanatory note.
 
 local function meta_text(meta, key)
   local value = meta[key]

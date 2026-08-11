@@ -13,8 +13,9 @@ source of truth for each and no cross-skill path reference:
 - **`assets/reading-site.css`** — the pdf-explainer **context layer** of the site design system, **content styling only**. It holds the pdf-explainer-specific content components (page anchor, player, hero, cta, index cards, plus the `.hero .lede` tweak); the foundation and Tier 1 reading UI (typography, color model, callouts, chips, tables, pullquote, kicker, lede, keypoints, progressive-enhancement styles) come from the **[[explainer-html-docs]]** base and must be linked first. The reading-site nav *widgets* (the card filter, prev/next, and the all-pages drawer) are **not** here — see below.
 - **`filters/reading-site.lua`** — binds reading-site structure provenance. It
   expands `.editorial-structure` headings into a visible disclosure plus a
-  real-text origin badge, so the article and generated TOC/sidebar retain the
-  same attribution. `.source-structure` headings remain the source-derived layer.
+  subdued real-text origin marker, so the article and generated TOC/sidebar retain
+  the same attribution without competing with the heading. `.source-structure`
+  headings remain the source-derived layer.
 
 The reading-site navigation widgets are owned by the explainer-html-docs **`reading-nav` opt-in component** (`reading-nav.css` / `reading-nav.js`: the live index-card filter, prev/next at the article foot, and a list FAB opening a slide-up **全ページ** drawer, all document-type-neutral). pdf-explainer pulls them in through the generator's `--component reading-nav` (and `library.py` copies them for the index). The nav's **single source of truth is still a per-site generated `nav-manifest.js`** (written by `pdf-explainer-generate-site` — via the shared reading-site build pipeline — from the fixed page order, assigning `window.__HTMLDOCS_NAV`) — it is data, not a copied design-system asset, so a page list change means regenerating that one file, never touching each page's markup.
 

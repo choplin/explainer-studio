@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+
+- Reading-site editorial headings now use a compact `編注` marker and a visually subdued provenance note.
+
 ## [0.2.0] - 2026-08-06
 
 ### Added

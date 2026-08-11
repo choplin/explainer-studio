@@ -81,9 +81,9 @@ Body vocabulary — reach only for these; the generator rejects anything else (a
 
 The reading-site filter expands the first `.editorial-structure` heading into two
 visible attribution surfaces: a disclosure immediately before it and a real-text
-badge on every editorial heading. Because the badge is real heading text, the
+marker on every editorial heading. Because the marker is real heading text, the
 generated sidebar retains the attribution too. Never write those disclosures or
-badges by hand. The two caller-supplied frontmatter strings supply their wording.
+markers by hand. The two caller-supplied frontmatter strings supply their wording.
 
 ## Constraints (meaning and structural provenance)
 

@@ -36,15 +36,16 @@ article { border-top: 3px solid var(--accent); padding-top: .6rem; }
    document text, not generated-content decoration: readers entering through the
    article or through the JS-built TOC receive the same attribution. */
 .structure-note {
-  margin: 1.4rem 0 .8rem; padding: .7rem .9rem;
-  color: var(--muted); background: var(--card); border: 1px solid var(--line);
-  border-left: 4px solid var(--accent); border-radius: 10px; font-size: .86rem;
+  margin: .8rem 0 .35rem; padding: 0;
+  color: var(--muted); background: transparent; border: 0;
+  font-size: .72rem; line-height: 1.55;
 }
+.structure-note p { margin: 0; }
 .structure-origin {
-  display: inline-block; margin-inline-start: .45rem; padding: .08rem .42rem;
-  color: var(--muted); background: var(--card); border: 1px solid var(--line);
-  border-radius: 999px; font-size: .58em; font-weight: 600;
-  line-height: 1.5; vertical-align: .15em; white-space: nowrap;
+  display: inline; margin-inline-start: .35rem; padding: 0;
+  color: var(--muted); background: transparent; border: 0;
+  font-size: .58em; font-weight: 500; letter-spacing: .02em;
+  line-height: inherit; vertical-align: .15em; white-space: nowrap;
 }
 
 /* in-page audio-guide player (sticky under the header) */
