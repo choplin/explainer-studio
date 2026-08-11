@@ -1,0 +1,33 @@
+<!doctype html>
+<!-- Codebase-explainer template variant. It keeps the base single-article
+     skeleton but moves local scripts to the end of body so inline mode remains
+     safe, and conditionally wires the code, diagram, and reading-nav bundles. -->
+<html lang="$if(lang)$$lang$$else$en$endif$">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>$title$</title>
+<script>try{var t=localStorage.getItem('explainer-html-docs-theme');if(t==='dark')document.documentElement.classList.add('theme-dark');else if(t==='light')document.documentElement.classList.add('theme-light');}catch(e){}</script>
+$if(has-code)$<script src="https://cdn.jsdelivr.net/npm/@highlightjs/cdn-assets@11/highlight.min.js" defer></script>
+$endif$<link rel="stylesheet" href="assets/base.css" />
+$if(has-code)$<link rel="stylesheet" href="assets/highlight.css" />
+$endif$$if(has-diagrams)$<link rel="stylesheet" href="assets/diagram.css" />
+$endif$$if(site-mode)$<link rel="stylesheet" href="assets/reading-nav.css" />
+$endif$</head>
+<body class="layout-$if(layout)$$layout$$else$$if(layout-default)$$layout-default$$else$standard$endif$$endif$">
+<header class="site">
+<a href="$if(site-mode)$index.html$else$#$endif$">$if(site-name)$$site-name$$else$Codebase Explainer$endif$</a>
+</header>
+<main>
+<article>
+$body$
+</article>
+</main>
+<footer>$if(footer)$$footer$$endif$</footer>
+<script src="assets/base.js"></script>
+$if(has-code)$<script src="assets/highlight.js"></script>
+$endif$$if(has-diagrams)$<script type="module" src="assets/diagram.js"></script>
+$endif$$if(site-mode)$<script src="assets/nav-manifest.js"></script>
+<script src="assets/reading-nav.js"></script>
+$endif$</body>
+</html>

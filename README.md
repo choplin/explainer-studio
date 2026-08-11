@@ -5,7 +5,7 @@
 Explainer Studio is a Claude Code plugin and reusable explanation system for
 reducing the effort required to understand complex information. Its shared
 authoring contract turns semantic Markdown into structured, navigable HTML;
-the bundled PDF, academic-paper, and git-diff workflows are concrete
+the bundled codebase, PDF, academic-paper, and git-diff workflows are concrete
 applications of that system.
 
 ## ✨ Why Explainer Studio?
@@ -51,6 +51,8 @@ The bundled workflows specialize the analysis stage:
   discussion, and related-work views.
 - **Git diffs** become a reviewer-facing page organized around behavior,
   mental models, risks, verification, and review points.
+- **Codebases** become snapshot explanations that connect architecture and module
+  boundaries to representative execution paths and code evidence.
 
 Dialogue scripts and audio guides are optional companion artifacts. They are
 not required to produce the HTML explanation.
@@ -98,6 +100,15 @@ The result is a single-file HTML explanation that gives the reviewer context, a
 mental model, a guided walkthrough, risks, verification status, and focused
 review points.
 
+To understand how the current codebase, a module, or a feature works, run:
+
+```text
+/explainer-studio:codebase-explainer Explain how authentication is implemented and where I would extend it.
+```
+
+The result is usually one snapshot HTML document. Broad subjects automatically
+expand into a navigable site when they require several independent mental models.
+
 The document pipelines are richer applications of the same HTML system. They
 also require [poppler](https://poppler.freedesktop.org/) for PDF inspection and
 rendering.
@@ -123,6 +134,7 @@ Publishing is offered separately and is never automatic.
 | Goal | Primary output | Skill (Claude Code syntax) |
 | --- | --- | --- |
 | Explain any source material | Understandable HTML | `/explainer-studio:explainer-html-docs` |
+| Understand current code | Snapshot HTML or reading site | `/explainer-studio:codebase-explainer` |
 | Understand a long PDF | Markdown overview | `/explainer-studio:pdf-explainer-summarize` |
 | Explore a long PDF in depth | Reports and reading site | `/explainer-studio:pdf-explainer-full-guide` |
 | Understand an academic paper | Structured Markdown reports | `/explainer-studio:paper-explainer-summarize` |
@@ -148,6 +160,7 @@ Install only what the outputs you want require.
 | Supported plugin installation | Current Claude Code and a Bash-compatible shell | macOS and Linux provide the expected shell environment; native Windows needs WSL or Git Bash for the bundled scripts |
 | HTML generation | `pandoc` on `PATH`, or Nix with flakes enabled | Required by every workflow that produces HTML |
 | Git-diff explanation | Git plus the HTML runtime | Reads the current repository diff and produces one HTML file |
+| Codebase explanation | Git plus the HTML runtime | May follow purpose-relevant documentation or related repositories when available |
 | Long-PDF reports | poppler (`pdfinfo`, `pdftotext`, `pdftoppm`) | Required for PDF inspection, text-layer extraction, and page rendering |
 | Long-PDF figure extraction | `uv`, or an installed MinerU plus Python 3; Nix can supply the runtime | Optional; the report pipeline continues without extracted figure crops |
 | Academic-paper reports | poppler plus `uv`, or poppler plus an installed MinerU and Python 3; `curl` and `jq` for related-work bibliography verification | MinerU is required; `uv` resolves it with `uvx --from 'mineru[core]'` when it is not installed |
@@ -210,12 +223,15 @@ and source reading from synthesis where the source requires it.
   than assigned a guessed URL.
 - **Git diffs** are grouped into a guided behavioral walkthrough rather than
   presented as an undifferentiated sequence of changed lines.
+- **Codebases** distinguish observed implementation, documented intent,
+  inference, and incidental concerns, and disclose both investigated and excluded
+  scope.
 
 ## 📌 Current scope
 
-- Version 0.2.0 provides three applications of the shared HTML explanation
-  system: git-diff explainers, long-PDF reading guides, and academic-paper
-  reading guides.
+- The current plugin provides four applications of the shared HTML explanation
+  system: codebase and git-diff explainers, long-PDF reading guides, and
+  academic-paper reading guides.
 - The supported installation path is the Claude Code plugin. The underlying
   packages follow the Agent Skills layout and can be read by other compatible
   agents, but the parallel worker wrappers are optimized for Claude Code.

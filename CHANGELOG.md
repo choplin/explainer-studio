@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- Added `codebase-explainer` for evidence-backed snapshot explanations of a
+  repository, subsystem, module, feature, or cross-cutting concern.
+
 ### Changed
 
 - Reading-site editorial headings now use a compact `編注` marker and a visually subdued provenance note.
