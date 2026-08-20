@@ -238,7 +238,7 @@ and source reading from synthesis where the source requires it.
 - `paper-explainer` targets papers of roughly 8–30 pages, primarily in computer
   science. Use `pdf-explainer` for dissertations, books, and longer documents.
 - Audio synthesis currently uses Japanese VOICEVOX voices.
-- Report language follows the source or the conversation. Version 0.2.0 does
+- Report language follows the source or the conversation. Version 0.3.0 does
   not provide a single pipeline-wide language selector.
 - Generated sites are local by default. The bundled publishing workflow targets
   a shared Cloudflare Pages library.

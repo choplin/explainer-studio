@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.3.0] - 2026-08-20
+
 ### Added
 
 - Added `codebase-explainer` for evidence-backed snapshot explanations of a
@@ -58,6 +60,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   written explanations into audio.
 - Automated structural validation for every bundled Agent Skill package.
 
-[Unreleased]: https://github.com/choplin/explainer-studio/compare/v0.2.0...HEAD
+[Unreleased]: https://github.com/choplin/explainer-studio/compare/v0.3.0...HEAD
+[0.3.0]: https://github.com/choplin/explainer-studio/compare/v0.2.0...v0.3.0
 [0.2.0]: https://github.com/choplin/explainer-studio/compare/v0.1.0...v0.2.0
 [0.1.0]: https://github.com/choplin/explainer-studio/releases/tag/v0.1.0

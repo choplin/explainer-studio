@@ -1,7 +1,7 @@
 {
   "$schema": "https://json.schemastore.org/claude-code-plugin.json",
   "name": "explainer-studio",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "description": "Shape AI output for human understanding with ready-to-run explainer pipelines and a reusable HTML foundation.",
   "author": {
     "name": "Akihiro Okuno"
