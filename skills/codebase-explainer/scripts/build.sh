@@ -10,8 +10,8 @@ set -euo pipefail
 
 readonly HERE="$(cd "$(dirname "$0")" && pwd)"
 readonly SKILL_DIR="$(cd "${HERE}/.." && pwd)"
-readonly EXPLAINER_ROOT="$(cd "${SKILL_DIR}/.." && pwd)"
-readonly GENERATOR="${EXPLAINER_ROOT}/explainer-html-docs"
+readonly SKILLS_ROOT="$(cd "${SKILL_DIR}/.." && pwd)"
+readonly GENERATOR="${SKILLS_ROOT}/explainer/explainer-html-docs"
 readonly BASE_ASSETS="${GENERATOR}/assets"
 readonly TEMPLATE="${SKILL_DIR}/assets/template-codebase-explainer.html"
 readonly FILTER="${SKILL_DIR}/filters/codebase-explainer.lua"
@@ -43,7 +43,7 @@ done
 [[ -e "${src}" ]] || { echo "build.sh: source not found: ${src}" >&2; exit 2; }
 [[ -n "${out}" ]] || { echo "build.sh: missing <out-dir>" >&2; exit 2; }
 [[ -x "${GENERATOR}/scripts/build.sh" ]] || {
-  echo "build.sh: sibling explainer-html-docs skill not found: ${GENERATOR}" >&2
+  echo "build.sh: shared explainer-html-docs skill not found: ${GENERATOR}" >&2
   exit 2
 }
 

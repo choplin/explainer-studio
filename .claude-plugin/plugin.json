@@ -11,6 +11,8 @@
   "skills": [
     "./skills/explainer/",
     "./skills/book-explainer/",
+    "./skills/codebase-explainer/",
+    "./skills/diff-explainer/",
     "./skills/epub-explainer/",
     "./skills/pdf-explainer/",
     "./skills/paper-explainer/"

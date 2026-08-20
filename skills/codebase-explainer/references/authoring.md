@@ -146,4 +146,4 @@ bash "$CODEBASE_EXPLAINER_DIR/scripts/build.sh" <OUTPUT>/src <OUTPUT>/site
 Pass `--copy` for a single page only when sidecar assets are explicitly wanted.
 Site output is installed only after all pages build and its destination must be
 absent or empty; never clear an existing site without user approval.
-The build requires Pandoc on `PATH` or the sibling HTML skill's bundled Nix runtime.
+The build requires Pandoc on `PATH` or the shared HTML skill's bundled Nix runtime.

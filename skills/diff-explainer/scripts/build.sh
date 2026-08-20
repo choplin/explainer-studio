@@ -18,8 +18,8 @@ set -euo pipefail
 
 HERE="$(cd "$(dirname "$0")" && pwd)"
 ED="$(cd "$HERE/.." && pwd)"
-EXPLAINER_ROOT="$(cd "$ED/.." && pwd)"
-GEN="$EXPLAINER_ROOT/explainer-html-docs"
+SKILLS_ROOT="$(cd "$ED/.." && pwd)"
+GEN="$SKILLS_ROOT/explainer/explainer-html-docs"
 BASE="$GEN/assets"
 COMP="$BASE/components"
 

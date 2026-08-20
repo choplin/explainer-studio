@@ -36,7 +36,7 @@ is part of the work.
 
 ## Required dependencies
 
-Resolve `[[explainer-html-docs]]` as the sibling `explainer-html-docs` skill. Stop
+Resolve `[[explainer-html-docs]]` as the shared `explainer-html-docs` skill. Stop
 with a clear message if it is unavailable. Before authoring, read both:
 
 - this skill's [`references/authoring.md`](references/authoring.md);
