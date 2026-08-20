@@ -6,15 +6,25 @@ user-invocable: true
 
 # Deploy Site — add a book to the hosted library
 
-Publish a pre-built book site (`<WORK_DIR>/site/`, from [[pdf-explainer-generate-site]]) by adding it as a subpath to the shared **library** created by [[explainer-reading-site-initialize]], then deploying the whole library to its one Cloudflare Pages project. The book lands at `https://<project>.pages.dev/<slug>/`; earlier books stay put; the one Cloudflare Access policy already covers it.
+Publish a pre-built reading site (`<WORK_DIR>/site/`, from the matching PDF,
+EPUB, or paper site consumer) by adding it as a subpath to the shared **library**
+created by [[explainer-reading-site-initialize]], then deploying the whole library
+to its one Cloudflare Pages project. The book lands at
+`https://<project>.pages.dev/<slug>/`; earlier books stay put; the one Cloudflare
+Access policy already covers it.
 
-Kept separate from [[pdf-explainer-generate-site]] (which only builds `site/`) so the generated site can be reviewed before it goes online, and so all hosting knowledge lives here.
+Kept separate from [[book-explainer-generate-site]] and the paper consumer (which
+only build `site/`) so generated sites can be reviewed before they go online and
+all hosting knowledge lives here.
 
 The library manager (`library.py`) is owned by the **`explainer-reading-site-library-base`** skill; this skill runs it and drives wrangler. If `explainer-reading-site-library-base` is not installed, stop and say so rather than guessing a path.
 
 ## When this applies
 
-The inputs are a built `<WORK_DIR>/site/` and an already-initialized library. If `site/` does not exist, run [[pdf-explainer-generate-site]] first. If the library is not set up yet (first ever deploy), run [[explainer-reading-site-initialize]] first — this skill only adds to an existing library.
+The inputs are a built `<WORK_DIR>/site/` and an already-initialized library. If
+`site/` does not exist, run the source format's site consumer first. If the library
+is not set up yet (first ever deploy), run [[explainer-reading-site-initialize]]
+first — this skill only adds to an existing library.
 
 ## Prerequisites
 
@@ -53,7 +63,10 @@ Run **both `library.py` and wrangler without the command sandbox** (`dangerously
 - **Deploy always targets the whole `public/`, never one book.** `wrangler pages deploy` replaces the project's entire content with the given directory, so deploying a single book's `site/` would wipe every other book. Always deploy the library root from `library.py public`. `library.py add` is what puts the book into that root first.
 - **Access is already handled by [[explainer-reading-site-initialize]].** It covers the whole project, so a new subpath is protected automatically — no per-book Access step. If `curl` unexpectedly returns 200, Access was never enabled; point the user to initialize-site step 4.
 - **Never report the protection state from a local file.** Access lives in the Cloudflare dashboard; `library.json` does not record it (by design — see [[explainer-reading-site-library-base]]). The only way to know whether the site is protected is to ask the deployed URL, which is what step 4's `curl -sI` does. Telling the user "the site is public" on the strength of a local record is how you hand them a confident falsehood.
-- **Regenerate, then redeploy.** [[pdf-explainer-generate-site]] rebuilds `<WORK_DIR>/site/` from source; this skill copies whatever is there now. Re-run [[pdf-explainer-generate-site]] before redeploying a changed book (same slug replaces it in place — gated behind a user-confirmed `--force`).
+- **Regenerate, then redeploy.** The matching PDF, EPUB, or paper consumer rebuilds
+  `<WORK_DIR>/site/` from source; this skill copies whatever is there now. Re-run
+  that consumer before redeploying a changed book (same slug replaces it in place —
+  gated behind a user-confirmed `--force`).
 - **Pages limits: 25 MiB per file, 20,000 files across the whole library.** [[explainer-audio-narrate]]'s 64 kbps m4a (~5 MB/10 min) is fine; a hand-added WAV can exceed 25 MiB and the deploy will reject it — re-encode it.
 
 ## Success criteria

@@ -10,6 +10,8 @@
   "repository": "https://github.com/choplin/explainer-studio",
   "skills": [
     "./skills/explainer/",
+    "./skills/book-explainer/",
+    "./skills/epub-explainer/",
     "./skills/pdf-explainer/",
     "./skills/paper-explainer/"
   ]

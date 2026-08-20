@@ -1,9 +1,9 @@
-/* pdf-explainer site — context layer on top of explainer-html-docs base.css.
-   Owned by explainer-reading-site-library-base. Consumed by pdf-explainer-generate-site (report
-   pages) and library.py (the library index) so the whole site shares one visual
-   language.
+/* Reading-site context layer on top of explainer-html-docs base.css.
+   Owned by explainer-reading-site-library-base. Consumed by book and paper site
+   generators (report pages) and library.py (the library index) so the whole site
+   shares one visual language.
 
-   This file holds ONLY pdf-explainer's *content* styling — the page anchor, the
+   This file holds ONLY reading-site *content* styling — source locators, the
    audio-guide player, chip variants, and the landing / library index cards. The
    reading-site *navigation widgets* (the index-card filter, prev/next, and the
    all-pages drawer) are NOT here: they moved to the explainer-html-docs
@@ -23,13 +23,18 @@ article { border-top: 3px solid var(--accent); padding-top: .6rem; }
 
 /* kicker, lede, and keypoints are Tier 1 UI components owned by base.css.
    Authored here via those classes; the .hero .lede override below is the only
-   pdf-explainer-specific tweak. */
+   reading-site-specific tweak. */
 
-/* page anchor: the [pNN] link back to the source PDF, kept inline */
+/* Typed source locators: compact PDF pages and readable EPUB chapter paths. */
 .p {
   font-size: .72em; color: var(--muted); background: var(--card);
   border: 1px solid var(--line); border-radius: 999px; padding: 0 .45em;
   white-space: nowrap; vertical-align: .1em;
+}
+.source-locator {
+  color: var(--muted); background: var(--card);
+  border: 1px solid var(--line); border-radius: .4rem; padding: .05em .4em;
+  font-size: .78em; white-space: normal;
 }
 
 /* Structure provenance. The reading-site filter emits both of these as real
@@ -78,7 +83,7 @@ article { border-top: 3px solid var(--accent); padding-top: .6rem; }
 /* The index cards. The reading-nav filter (opt-in component) enhances this list at
    runtime when it is marked `data-reading-filter` (see the index templates) — its
    .filter / .filter-empty / .rn-hidden chrome lives in reading-nav.css; the card
-   styling below is pdf-explainer content and stays here. */
+   styling below is reading-site content and stays here. */
 ol.cards { list-style: none; margin: 1.2rem 0; padding: 0; display: grid; gap: .8rem; }
 ol.cards li {
   background: var(--card); border: 1px solid var(--line);

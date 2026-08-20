@@ -33,7 +33,9 @@ If any is missing, report what is missing and stop.
   `index.md`.
 - Absolute path to the consumer's canonical source-structure artifact. This is
   `<WORK_DIR>/structured/toc.md` for PDF explainers and
-  `<WORK_DIR>/source-structure.md` for paper explainers.
+  `<WORK_DIR>/source-structure.md` for paper explainers. EPUB also supplies
+  `<WORK_DIR>/epub/locators.json`.
+- The locator kind: `pdf-page` or `epub`.
 - The canonical site-wide authoring conventions passed identically to every page
   worker.
 - The Phase 1 ordered `[{ slug, kicker }]` profile, so required pages, order, and
@@ -58,6 +60,11 @@ inside the sentence it supports.
 Do not reinterpret lookalikes that are not prose source references: fenced or
 inline code, image alt text, and table-header placeholders such as `| [pNN] |`.
 Read Markdown structure and context; do not report matches from a blind regex pass.
+
+For EPUB, the canonical prose form is
+`[display]{.source-locator data-locator="canonical"}`. The canonical value must
+exist in the supplied locator map. EPUB prose must not contain fabricated `.p`
+anchors.
 
 ## What to check
 
@@ -85,6 +92,8 @@ Read the complete source set before reporting anything.
 2. **Page-anchor vocabulary.** Find every prose source reference that is bare,
    split, malformed, or uses a non-canonical range form. Check both single anchors
    and ranges; matching only `\[p\d+\]` is insufficient.
+   For EPUB, instead validate every `.source-locator` against the supplied map and
+   report missing attributes, unknown canonical values, and fabricated `.p` spans.
 3. **Heading placement and punctuation.** Find anchors in headings and anchors
    stranded after sentence punctuation. State whether the heading anchor must move
    or can be deleted because the following body already preserves it.
@@ -119,7 +128,7 @@ Return only a findings list. If clean, say:
 
 Otherwise return one item per finding, ordered by impact, with:
 
-- `type`: `source-attribution` / `bare-anchor` / `range-anchor` / `heading-anchor` /
+- `type`: `source-attribution` / `bare-anchor` / `range-anchor` / `invalid-locator` / `heading-anchor` /
   `anchor-punctuation` / `required-structure` / `cross-page-drift` /
   `profile-coverage`;
 - `locus`: source path and heading or line precise enough for a targeted edit;

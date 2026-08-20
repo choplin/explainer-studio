@@ -131,13 +131,14 @@ function Div(el)
   return el
 end
 
--- Figure path: a consumer's report embeds crops as ../ocr/figures/X (a path
--- relative to reports/); on the generated site the crops are copied to figures/X.
+-- Source-media paths are relative to reports/. PDF crops are copied to figures/;
+-- EPUB-native images and SVGs are copied to media/.
 -- Rewrite the prefix so a page never points outside the site root — this makes
 -- the caller's "grep '../'" review check unnecessary (the guarantee is at
 -- generation time, not review time).
 function Image(el)
   el.src = el.src:gsub("^%.%./ocr/figures/", "figures/")
+  el.src = el.src:gsub("^%.%./epub/media/", "media/")
   return el
 end
 

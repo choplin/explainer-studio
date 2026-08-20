@@ -7,6 +7,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- Added a source-neutral full-book pipeline and a native EPUB adapter that
+  preserves reading order, source structure, XHTML semantics, original media,
+  and stable source locators without converting EPUB input to PDF.
+- Added explicit detection for reflowable, fixed-layout, image-only, and
+  DRM-protected EPUB input, with unsupported formats routed to a clear stop.
+
+### Changed
+
+- Book reading-site generation now shares one PDF/EPUB entry point while
+  preserving typed EPUB locators, original EPUB media, and PDF page anchors.
+- PDF and EPUB chapter reports now share one cross-chapter consistency sweep.
+
 ## [0.3.0] - 2026-08-20
 
 ### Added

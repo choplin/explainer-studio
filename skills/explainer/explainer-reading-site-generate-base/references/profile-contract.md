@@ -19,13 +19,18 @@ and kickers communicate location; color remains reserved for meaning.
 
 ## Current consumer profiles
 
-### PDF explainer
+### Book explainer
 
 1. `overview` with kicker `全体レポート`.
 2. `chapter-N` in natural numeric order, so `chapter-2` precedes `chapter-10`, with
    kicker `第N章`.
 3. Any unmatched report last in natural order with a kicker derived from the
    title-cased slug.
+
+Use this ordering for both PDF and EPUB books. PDF source references are `.p`
+anchors. EPUB source references are `.source-locator` spans validated against
+`epub/locators.json`, and original EPUB media is copied from `epub/media/` to
+`site/media/`.
 
 ### Paper explainer
 
@@ -59,7 +64,8 @@ placeholder is `絞り込む…`, not a chapter- or paper-specific phrase.
 Each consumer supplies one durable artifact containing only source-authored
 headings, with their hierarchy, source-form titles, and source-page anchors:
 
-- PDF explainer: `<WORK_DIR>/structured/toc.md`;
+- Book explainer: `<WORK_DIR>/structured/toc.md`; EPUB additionally supplies
+  `<WORK_DIR>/epub/locators.json` as the canonical locator map;
 - Paper explainer: `<WORK_DIR>/source-structure.md`.
 
 The artifact is a required input, not an optional cross-check. Page workers use it
@@ -74,7 +80,8 @@ Keep the consumer shell thin:
 1. Define how it resolves its deterministic page list.
 2. Define its canonical source-structure artifact.
 3. Define the three landing nouns.
-4. Delegate scaffold, authoring, build, manifest, verification, and handoff to this
+4. Define the locator kind and any original-media directory.
+5. Delegate scaffold, authoring, build, manifest, verification, and handoff to this
    base.
 
 Do not copy this pipeline or shared asset rules into the consumer.

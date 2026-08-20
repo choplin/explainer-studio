@@ -17,7 +17,7 @@ chunk-*.md   outline.md   reports/overview.md
                               ├─ 🔊  report → dialogue/<slug>.txt → audio/<slug>.m4a
                               │      (explainer-audio-dialogue → explainer-audio-narrate)
                               └─ 🌐  reports/*.md + audio/*.m4a → site/ → Cloudflare Pages
-                                     (pdf-explainer-generate-site → explainer-reading-site-deploy)
+                                     (book-explainer-generate-site → explainer-reading-site-deploy)
 ```
 
 - **Phase 1 — extract**: split the body into chunks, read each visually in parallel, write structured *material* (not a finished report) with `[pNN]` page anchors.
@@ -35,7 +35,8 @@ chunk-*.md   outline.md   reports/overview.md
 | `pdf-explainer-summarize` | First full-document pass. Drives the `extract → structure → report` phases. |
 | `explainer-audio-dialogue` | Audio guide, step 1. Rewrites any report Markdown into a NotebookLM-style two-host dialogue script (台本) under `dialogue/`. |
 | `explainer-audio-narrate` | Audio guide, step 2. Synthesizes a dialogue script into a compact AAC/m4a with a local VOICEVOX ENGINE (offline, no API key) + `ffmpeg`, two distinct Japanese voices. |
-| `pdf-explainer-generate-site` | Builds a reading-guide website under `site/` — pages are authored for the web while source-derived headings remain tied to `structured/toc.md` and editorial reading structure stays visibly attributed. Includes in-page audio players. Build only. |
+| `book-explainer-generate-site` | Builds the shared PDF/EPUB reading-guide website under `site/`, including in-page audio. Build only. |
+| `pdf-explainer-generate-site` | Compatibility entry point that fixes the source format to PDF and delegates to `book-explainer-generate-site`. |
 | `explainer-reading-site-initialize` | One-time hosting setup: a single Cloudflare Pages project + a local library, protected by a Cloudflare Access policy. Run once before the first deploy. |
 | `explainer-reading-site-deploy` | Publishes a built `site/` by adding it as a subpath to the shared library, then deploying the whole library. |
 

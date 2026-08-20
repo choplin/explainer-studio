@@ -25,6 +25,7 @@ Pass only:
 
 - absolute source report path;
 - absolute canonical source-structure artifact path supplied by the consumer;
+- source locator kind and, for EPUB, the absolute locator-map path;
 - absolute output path `<WORK_DIR>/src/<slug>.md`;
 - site title;
 - kicker from the Phase 1 ordered list;
@@ -49,6 +50,9 @@ CANONICAL SITE-WIDE AUTHORING CONVENTIONS
   not by demoting their source headings into the editorial hierarchy.
 - Every source-PDF page reference in prose uses `.p`: `[p31]{.p}` for one page,
   `[p31–p33]{.p}` for a range.
+- Every EPUB source reference uses
+  `[display]{.source-locator data-locator="canonical"}` and the canonical value
+  exists in the supplied locator map. Never synthesize `[pNN]` for EPUB.
 - A page reference never appears in a heading. Move an otherwise-unrepresented
   reference to the first following paragraph; delete a heading copy only when the
   following body already preserves it.
@@ -61,8 +65,9 @@ CANONICAL SITE-WIDE AUTHORING CONVENTIONS
 This block is deliberately both part of the page skill and part of the dispatch
 contract. Isolated workers must not infer a site-wide vocabulary independently.
 
-The worker carries any `../ocr/figures/...` references unchanged; the generator
-rewrites them. It does not author head markup, presentation-only classes outside the
+The worker carries any `../ocr/figures/...` or `../epub/media/...` references
+unchanged; the generator rewrites them. It does not author head markup,
+presentation-only classes outside the
 page skill's semantic vocabulary, prev/next links, or path rewrites.
 It returns only the source path, page title, and a 2–3 line card summary. Trust the
 reply; do not re-read the finished source to compose the landing.
@@ -99,9 +104,9 @@ Compose:
 6. The consumer's cards-section `##` heading.
 7. A filterable card grid with one card per page in profile order.
 
-If a returned summary contains a source-PDF page reference, preserve it with the
-same canonical `.p` notation in landing prose. Never put it in the landing H1, cards
-heading, or a card title.
+If a returned summary contains a source reference, preserve its consumer-specific
+typed notation in landing prose. Never put it in the landing H1, cards heading, or
+a card title.
 
 Use this card notation:
 
@@ -202,14 +207,17 @@ assets by hand across rebuilds.
       values exactly match the canonical site-wide strings; the
       generated article shows the subdued disclosure and every editorial heading
       marker, and the sidebar contains the same marker text.
-- [ ] Every prose source-page reference uses `[pNN]{.p}` or
-      `[pNN–pMM]{.p}`; none appears in a heading, and sentence punctuation follows
-      the anchor. Code, image alt text, and table-header placeholders were left
+- [ ] Every prose source reference follows the selected locator kind: PDF uses
+      `[pNN]{.p}` or `[pNN–pMM]{.p}`; EPUB uses `.source-locator` with a mapped
+      canonical `data-locator`. None appears in a heading, and punctuation follows
+      the reference. Code, image alt text, and table-header placeholders were left
       alone.
 - [ ] The whole-source consistency sweep read every `src/*.md`, all findings were
       fixed, and its final result was clean before the build ran.
 - [ ] No generated page retains `../ocr/figures/...`; every `<img src>` resolves
       under `site/figures/`.
+- [ ] No generated EPUB page retains `../epub/media/...`; every `<img src>`
+      resolves under `site/media/`.
 - [ ] Every report with matching audio has a player; unmatched audio appears on the
       landing; every referenced file exists under `site/audio/`.
 - [ ] `site/assets/` contains `base.css`, `base.js`, `reading-site.css`,

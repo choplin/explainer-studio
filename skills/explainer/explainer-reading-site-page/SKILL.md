@@ -15,7 +15,8 @@ layers throughout authoring, generation, and navigation.
 
 ## When this applies
 
-The `pdf-explainer-generate-site` skill applies this procedure once per report file, in parallel. It is not for direct user requests and is not invoked proactively.
+The shared reading-site generator applies this procedure once per report file, in
+parallel. It is not for direct user requests and is not invoked proactively.
 
 ## Inputs provided by the caller
 
@@ -24,15 +25,18 @@ The caller provides the following. If any is missing, report what is missing and
 - Absolute path to the source report Markdown
 - Absolute path to the canonical source-structure artifact. For PDF explainers
   this is `<WORK_DIR>/structured/toc.md`; for paper explainers it is
-  `<WORK_DIR>/source-structure.md`. Read it before authoring and treat it as the
+  `<WORK_DIR>/source-structure.md`; for EPUB explainers it is
+  `<WORK_DIR>/structured/toc.md` plus the caller-supplied
+  `<WORK_DIR>/epub/locators.json`. Read it before authoring and treat it as the
   authority for which parts/chapters/sections exist, their hierarchy, their
   source-form titles, and their page anchors.
 - Absolute output path for the source (`<WORK_DIR>/src/<slug>.md`)
 - Site title, and this page's kicker label (e.g. 第2章 / 全体レポート)
-- Whether `<WORK_DIR>/ocr/figures/` exists (harvested figure crops the caller copies into `site/figures/`)
+- Whether PDF `<WORK_DIR>/ocr/figures/` or EPUB `<WORK_DIR>/epub/media/` exists
+  (the caller copies the applicable source media into the site)
 - Audio file name under `site/audio/` if a matching guide exists (else "none")
 - The canonical site-wide authoring conventions from the caller, including the
-  page-anchor grammar and the exact site-wide editorial-structure label and note.
+  source-locator grammar and the exact site-wide editorial-structure label and note.
   Treat them as requirements, not suggestions; copy the two attribution strings
   verbatim rather than translating them page by page. If the conventions conflict
   with this skill, report the conflict and stop rather than choosing a page-local
@@ -49,7 +53,7 @@ site-name: "← <SITE_TITLE>"        # header link back to the index
 editorial-structure-label: "<exact EDITORIAL_STRUCTURE_LABEL from caller>"
 editorial-structure-note: "<exact EDITORIAL_STRUCTURE_NOTE from caller>"
 context-css:
-  - reading-site.css                 # pdf-explainer content styling
+  - reading-site.css                 # shared reading-site content styling
   - reading-nav.css                # reading-nav widget chrome (explainer-html-docs component)
 context-js:
   - nav-manifest.js                # page-nav data — must load before the script that reads it
@@ -73,7 +77,9 @@ Body vocabulary — reach only for these; the generator rejects anything else (a
 | One striking sentence (≤1 per page) | `::: {.pullquote}` … `:::` |
 | An inline highlighted term | `[term]{.mark}` |
 | A source-PDF page anchor | `[p31]{.p}` / `[p31–p33]{.p}` |
+| An EPUB source locator | `[Chapter 3 › Section]{.source-locator data-locator="OEBPS/Text/ch03.xhtml#section"}` |
 | A harvested figure | `![説明](../ocr/figures/fig-p031-1.jpg)` — **carry the source path as-is**; the generator rewrites `../ocr/figures/` → `figures/` so nothing points outside the site |
+| Original EPUB media | `![説明](../epub/media/OEBPS/Images/figure.svg)` — keep the source path; the generator rewrites it to `media/…` |
 | An in-page audio player (only if the caller gave an audio file) | `::: {.player src=audio/<file>}` `:::` |
 | Tabular data | a plain Markdown table — wrapped in `.tablewrap` automatically |
 | A code sample | a ` ```{.nohighlight} ` fenced block |
@@ -109,23 +115,27 @@ Everything mechanical is the generator's guarantee — you do **not** write HTML
   groups several real chapters or sections, name those source units in a list,
   table, or cards beneath the editorial heading; do not demote their source
   headings into that editorial hierarchy.
-- **Every source-PDF page reference uses `.p`.** Keep every source anchor and
-  write a single page as `[p31]{.p}` and a range as `[p31–p33]{.p}` at the point
-  it annotates. A bare `[p31]` or `[p31–p33]` in prose is invalid even though it
-  is legal Markdown and the generator would accept it. Do not drop anchors —
-  they are the link back to the PDF.
-- **Never put a page anchor in a heading.** It pollutes both the generated
+- **Every source reference uses the caller's locator kind.** PDF writes a single
+  page as `[p31]{.p}` and a range as `[p31–p33]{.p}`. EPUB writes a display label
+  as `.source-locator` with its mapped canonical `data-locator`. A bare or
+  cross-kind reference is invalid. Do not drop locators: they are the link back
+  to the source.
+- **Never put a source locator in a heading.** It pollutes both the generated
   heading id and the navigation/TOC label. If the heading is the only place that
-  carries the reference, move the anchor into the first following paragraph; if
+  carries the reference, move the locator into the first following paragraph; if
   that paragraph already carries the same reference, remove it from the heading.
-- **Put sentence punctuation after the anchor**, for example
+- **Put sentence punctuation after the locator**, for example
   `…である [p14]{.p}。`, not `…である。 [p14]{.p}`. This keeps the reference
   attached to the claim it supports.
 - Treat a bracketed token as a page anchor only when it is a source reference in
   prose. Do not rewrite fenced or inline code, image alt text, or a table-header
   placeholder such as `| [pNN] |` merely because it resembles one.
 - **Write in the language of the source report.**
-- **Carry only the figures the source report actually embeds** — do not go hunting in `figures/` for extra crops. If the caller said `ocr/figures/` does not exist, the report has no figures; do not invent any. Never a bare figure: it appears where the prose discusses it, with the report's explanation intact, and the alt text says what it shows.
+- **Carry only the media the source report actually embeds** — do not go hunting
+  in PDF `figures/` or EPUB `media/` for extras. If the applicable source-media
+  directory does not exist, do not invent figures. Never use bare media: place it
+  where the prose discusses it, retain the explanation, and write meaningful alt
+  text.
 - **Do not author prev/next links.** Page-to-page navigation is rendered at runtime by `reading-nav.js` (the explainer-html-docs reading-nav component) from the site's `nav-manifest.js` (loaded via the `context-js` frontmatter) — one source for the page order. Hand-authored neighbor links are exactly the drift a single source removes.
 
 ## How to restructure (this is the point of this skill)
@@ -165,12 +175,17 @@ the reading path—not whether its heading sequence differs from the report.
 
 ## Output
 
-Write the finished source to the given output path (`<WORK_DIR>/src/<slug>.md`) — unconditionally, without prompting about an existing file. This is an orchestrator-dispatched worker; the parent [[pdf-explainer-generate-site]] already confirmed clearing/overwriting before dispatching. Do NOT run the generator yourself — the orchestrator builds every source into HTML in one pass afterward.
+Write the finished source to the given output path (`<WORK_DIR>/src/<slug>.md`) —
+unconditionally, without prompting about an existing file. The consumer already
+confirmed clearing/overwriting before dispatching. Do not run the generator
+yourself; the orchestrator builds every source into HTML in one pass afterward.
 
-Before replying, re-read the finished source and inspect its Markdown context. Verify
-that every prose source reference—including ranges—uses `.p`, none is in a heading,
-and punctuation follows the anchor; verify separately that code, image alt text, and
-table-header placeholders were not rewritten. Compare every `.source-structure`
+Before replying, re-read the finished source and inspect its Markdown context.
+Verify that every prose source reference uses the caller-selected locator kind:
+PDF ranges use `.p`; EPUB references use `.source-locator`, carry a mapped
+`data-locator`, and never invent `.p`. No locator belongs in a heading, and sentence
+punctuation follows it. Verify separately that code, image alt text, and table-header
+placeholders were not rewritten. Compare every `.source-structure`
 heading with the canonical structure artifact; verify that every other body heading
 is `.editorial-structure`, uses no source-like structural label, and has the two
 localized attribution fields in frontmatter. Fix the page before returning if any

@@ -1,12 +1,12 @@
 ---
 name: explainer-reading-site-generate-base
-description: "Internal build orchestrator invoked by pdf-explainer-generate-site and paper-explainer-generate-site. Turns reports into semantic pages, a landing page, assets, and navigation using the consumer's ordering profile and vocabulary."
+description: "Internal build orchestrator invoked by book and paper site consumers. Turns reports into semantic pages, a landing page, assets, and navigation using the consumer's ordering profile and vocabulary."
 user-invocable: false
 ---
 
 # explainer-reading-site-generate-base — shared build pipeline
 
-This skill owns the pipeline shared by [[pdf-explainer-generate-site]],
+This skill owns the pipeline shared by [[book-explainer-generate-site]],
 [[paper-explainer-generate-site]], and future consumers that turn a work directory's
 `reports/` into a reading-guide site.
 
@@ -15,6 +15,8 @@ The consumer owns only:
 - its trigger;
 - an ordered `[{ slug, kicker }]` page profile;
 - the absolute path to its canonical source-structure artifact;
+- its locator kind (`pdf-page` or `epub`) and EPUB locator map when applicable;
+- its optional original-media source and destination;
 - three landing-page nouns: guide kicker, cards-section heading, and count-chip unit.
 
 This base owns scaffold, semantic authoring, the single generator build, landing page,
@@ -39,7 +41,8 @@ the later output contract.
 ## Preconditions and ownership
 
 The input is `<WORK_DIR>` with at least one `reports/*.md` and the consumer's
-canonical source-structure artifact. `audio/` and `ocr/figures/` are optional. If
+canonical source-structure artifact. `audio/`, PDF `ocr/figures/`, and EPUB
+`epub/media/` are optional. If
 reports or the structure artifact are missing, stop and ask the consumer's
 summarize skill to run first. Audio can be produced through
 [[explainer-audio-dialogue]] and [[explainer-audio-narrate]].
@@ -67,8 +70,8 @@ landing, is ready.
 
 ### Phase 1 — Scaffold
 
-1. Inventory `reports/*.md`, audio files (`.m4a`, `.mp3`, `.wav`), and
-   `ocr/figures/*`.
+1. Inventory `reports/*.md`, audio files (`.m4a`, `.mp3`, `.wav`), PDF
+   `ocr/figures/*`, and EPUB `epub/media/*` as applicable.
 2. Read `references/profile-contract.md` and resolve the consumer profile into one
    deterministic ordered `[{ slug, kicker }]` list. Fix it now; it is the source of
    truth for cards and navigation.
@@ -83,6 +86,9 @@ landing, is ready.
 6. If `ocr/figures/` exists, copy the whole directory to `site/figures/`. Copy every
    crop because page authors run independently; the generator rewrites report paths
    from `../ocr/figures/...` to `figures/...`.
+7. If the consumer supplied `epub/media/`, copy it recursively to `site/media/`.
+   The generator rewrites `../epub/media/...` to `media/...`; keep original bytes
+   and relative manifest paths.
 
 Do not copy design assets in this phase. The generator copies them in Phase 3.
 
@@ -94,8 +100,9 @@ Read `references/authoring-and-verification.md` completely now.
    supports isolated subagents. Each worker writes `src/<slug>.md` and returns only
    the source path, title, and a 2–3 line card summary.
 2. Pass each worker only the absolute report/output paths, the absolute canonical
-   source-structure path, site title, profile kicker, figure-directory availability,
-   matching audio filename or `none`, and the exact canonical site-wide authoring
+   source-structure path, locator kind and EPUB map when applicable, site title,
+   profile kicker, source-media availability, matching audio filename or `none`,
+   and the exact canonical site-wide authoring
    conventions from `references/authoring-and-verification.md`. The conventions
    are an explicit dispatch input because isolated workers cannot infer them from
    sibling output.
@@ -113,6 +120,9 @@ Read `references/authoring-and-verification.md` completely now.
    errors, required markup omissions, and cross-page structural drift that are
    valid Markdown and therefore invisible to the generator. Do not begin Phase 3
    while findings remain.
+6. Run any deterministic locator validator supplied by the consumer. The EPUB
+   consumer rejects unknown canonical locators here before Pandoc; PDF and paper
+   consumers need no extra command because `.p` is self-validating.
 
 ### Phase 3 — Build once, then write navigation data
 
@@ -162,6 +172,8 @@ the user reviews the built artifact before it goes public.
 - One `explainer-html-docs` build produces the landing and all report pages.
 - Every source-PDF page reference in prose uses the canonical `.p` form, and no
   page anchor appears in a heading.
+- Every EPUB source reference uses `.source-locator` with a canonical
+  `data-locator` present in the consumer's map, and no fabricated `.p` appears.
 - The whole-source consistency sweep passes after parallel authoring and before the
   one site build.
 - `nav-manifest.js` is the only page-navigation source.

@@ -4,31 +4,35 @@ description: "Internal resource package invoked by reading-site initialize, depl
 user-invocable: false
 ---
 
-# pdf-explainer site base
+# Reading-site library base
 
 Owns the three resources shared across the reading-site skills, so there is one
 source of truth for each and no cross-skill path reference:
 
 - **`scripts/library.py`** — manages a persistent, document-type-neutral **library**: one deploy root accumulates documents as subpaths, so one Cloudflare Pages project (and one Access policy) can serve the whole collection. The namespace is selected with `--namespace <name>` (or `LIBRARY_NAMESPACE`); it defaults to `pdf-explainer`, preserving the existing `${XDG_DATA_HOME:-$HOME/.local/share}/pdf-explainer/` library. Local filesystem + JSON only — no network, no wrangler (the site skills run wrangler themselves). **It writes outside the workspace, so a sandboxed agent must run it with the sandbox off** (under Claude Code: `dangerouslyDisableSandbox: true`); the XDG library is not a path a command sandbox grants write access to, and `init`/`add` die with a `PermissionError` there. Needing no network does not make a command sandbox-safe — *where it writes* is what decides that.
-- **`assets/reading-site.css`** — the pdf-explainer **context layer** of the site design system, **content styling only**. It holds the pdf-explainer-specific content components (page anchor, player, hero, cta, index cards, plus the `.hero .lede` tweak); the foundation and Tier 1 reading UI (typography, color model, callouts, chips, tables, pullquote, kicker, lede, keypoints, progressive-enhancement styles) come from the **[[explainer-html-docs]]** base and must be linked first. The reading-site nav *widgets* (the card filter, prev/next, and the all-pages drawer) are **not** here — see below.
+- **`assets/reading-site.css`** — the shared **context layer** of the reading-site design system, **content styling only**. It holds reading-site content components (source anchors, player, hero, cta, index cards, plus the `.hero .lede` tweak); the foundation and Tier 1 reading UI (typography, color model, callouts, chips, tables, pullquote, kicker, lede, keypoints, progressive-enhancement styles) come from the **[[explainer-html-docs]]** base and must be linked first. The reading-site nav *widgets* (the card filter, prev/next, and the all-pages drawer) are **not** here — see below.
 - **`filters/reading-site.lua`** — binds reading-site structure provenance. It
   expands `.editorial-structure` headings into a visible disclosure plus a
   subdued real-text origin marker, so the article and generated TOC/sidebar retain
   the same attribution without competing with the heading. `.source-structure`
   headings remain the source-derived layer.
 
-The reading-site navigation widgets are owned by the explainer-html-docs **`reading-nav` opt-in component** (`reading-nav.css` / `reading-nav.js`: the live index-card filter, prev/next at the article foot, and a list FAB opening a slide-up **全ページ** drawer, all document-type-neutral). pdf-explainer pulls them in through the generator's `--component reading-nav` (and `library.py` copies them for the index). The nav's **single source of truth is still a per-site generated `nav-manifest.js`** (written by `pdf-explainer-generate-site` — via the shared reading-site build pipeline — from the fixed page order, assigning `window.__HTMLDOCS_NAV`) — it is data, not a copied design-system asset, so a page list change means regenerating that one file, never touching each page's markup.
+The reading-site navigation widgets are owned by the explainer-html-docs **`reading-nav` opt-in component** (`reading-nav.css` / `reading-nav.js`: the live index-card filter, prev/next at the article foot, and a list FAB opening a slide-up **全ページ** drawer, all document-type-neutral). Book and paper consumers pull them in through the generator's `--component reading-nav` (and `library.py` copies them for the index). The nav's **single source of truth is still a per-site generated `nav-manifest.js`** (written via the shared reading-site build pipeline from the fixed page order, assigning `window.__HTMLDOCS_NAV`) — it is data, not a copied design-system asset, so a page list change means regenerating that one file, never touching each page's markup.
 
-`pdf-explainer-generate-site` builds its pages through the [[explainer-html-docs]] generator, passing this dir as the generator's `--context` (so `reading-site.css` is copied into each built site's `assets/`), its filter as `--filter`, and `--component reading-nav` (so the widget bundle is copied alongside `base.css`/`base.js`, which come from `--assets`). `library.py` copies all of them into the library's `public/assets/` for the index page — so the library index and every book page share one visual language and one interaction kit.
+[[book-explainer-generate-site]] and the paper consumer build pages through the
+[[explainer-html-docs]] generator, passing this directory as `--context`, its
+filter as `--filter`, and `--component reading-nav`. `library.py` copies the same
+assets into the library index, so every reading site shares one visual language
+and interaction kit.
 
 The base design system itself (`base.css` / `base.js`) is **not** owned here — it lives in the sibling **[[explainer-html-docs]]** skill, which pdf-explainer consumes as a copy-mode base (see that skill's "Consuming this base"). Color carries meaning only: chapters are not color-coded, and anything colored without a meaning uses `--accent`.
 
 ## Delegation
 
-Other pdf-explainer skills reference these by the base-skill-relative path (all skills install as siblings under the skills root):
+Reading-site consumers reference these by the base-skill-relative path (all skills install as siblings under the skills root):
 
 - `python3 explainer-reading-site-library-base/scripts/library.py <subcommand> [--namespace <name>]` — run the library manager. The option follows the subcommand; omit it for the compatible `pdf-explainer` default.
-- `explainer-reading-site-library-base/assets/reading-site.css` — the pdf-explainer content context asset to copy into a site's `assets/`.
+- `explainer-reading-site-library-base/assets/reading-site.css` — the shared content context asset to copy into a site's `assets/`.
 - `explainer-reading-site-library-base/filters/reading-site.lua` — the
   source/editorial structure-provenance filter passed to the generator.
 - `explainer-html-docs/assets/components/reading-nav/reading-nav.css` and `.../reading-nav.js` — the reading-nav widget bundle (pulled in via the generator's `--component reading-nav`).

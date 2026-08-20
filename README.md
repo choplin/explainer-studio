@@ -45,7 +45,7 @@ understandable HTML
 
 The bundled workflows specialize the analysis stage:
 
-- **Books, manuals, and long PDFs** become an overview, chapter reports, and a
+- **Books, manuals, EPUBs, and long PDFs** become an overview, chapter reports, and a
   source-anchored reading site.
 - **Academic papers** become an overview plus background, method, experiments,
   discussion, and related-work views.
@@ -113,11 +113,15 @@ The document pipelines are richer applications of the same HTML system. They
 also require [poppler](https://poppler.freedesktop.org/) for PDF inspection and
 rendering.
 
-For a book, manual, thesis, or other long PDF:
+For a book in PDF or DRM-free reflowable EPUB form:
 
 ```text
-/explainer-studio:pdf-explainer-full-guide /absolute/path/to/book.pdf
+/explainer-studio:book-explainer-full-guide /absolute/path/to/book.epub
 ```
+
+Use `pdf-explainer-full-guide` directly when you specifically want the PDF
+adapter. EPUB text, structure, tables, notes, images, and SVGs are read natively;
+the pipeline does not rasterize or convert the book to PDF.
 
 For a conference paper, journal paper, or preprint:
 
@@ -137,6 +141,8 @@ Publishing is offered separately and is never automatic.
 | Understand current code | Snapshot HTML or reading site | `/explainer-studio:codebase-explainer` |
 | Understand a long PDF | Markdown overview | `/explainer-studio:pdf-explainer-summarize` |
 | Explore a long PDF in depth | Reports and reading site | `/explainer-studio:pdf-explainer-full-guide` |
+| Understand a reflowable EPUB | Markdown overview | `/explainer-studio:epub-explainer-summarize` |
+| Explore a PDF or EPUB book in depth | Reports and reading site | `/explainer-studio:book-explainer-full-guide` |
 | Understand an academic paper | Structured Markdown reports | `/explainer-studio:paper-explainer-summarize` |
 | Explore an academic paper in depth | Reports and reading site | `/explainer-studio:paper-explainer-full-guide` |
 | Review code changes | Reviewer-facing HTML | `/explainer-studio:diff-explainer` |
@@ -162,6 +168,7 @@ Install only what the outputs you want require.
 | Git-diff explanation | Git plus the HTML runtime | Reads the current repository diff and produces one HTML file |
 | Codebase explanation | Git plus the HTML runtime | May follow purpose-relevant documentation or related repositories when available |
 | Long-PDF reports | poppler (`pdfinfo`, `pdftotext`, `pdftoppm`) | Required for PDF inspection, text-layer extraction, and page rendering |
+| Reflowable-EPUB reports | Python 3 | Uses only the standard library; fixed-layout, image-only, and DRM-protected books are detected and stopped explicitly |
 | Long-PDF figure extraction | `uv`, or an installed MinerU plus Python 3; Nix can supply the runtime | Optional; the report pipeline continues without extracted figure crops |
 | Academic-paper reports | poppler plus `uv`, or poppler plus an installed MinerU and Python 3; `curl` and `jq` for related-work bibliography verification | MinerU is required; `uv` resolves it with `uvx --from 'mineru[core]'` when it is not installed |
 | Audio synthesis | VOICEVOX ENGINE, Python 3, `curl`, and `ffmpeg` | Optional; dialogue scripts remain available when synthesis is skipped |
@@ -200,9 +207,9 @@ capabilities below and to the agent's configured model provider.
 
 ### Development-only dependency
 
-Repository validation uses `skill-validator` v1.6.0 in addition to
-`claude plugin validate`. End users do not need `skill-validator` to run the
-installed plugin.
+Repository validation uses `skill-validator` v1.6.0 and `claude plugin validate`.
+The EPUB adapter's optional development checks use `pytest` and `ruff`.
+End users do not need these tools to run the installed plugin.
 
 ## 🎯 Accuracy and trust model
 
@@ -215,6 +222,9 @@ and source reading from synthesis where the source requires it.
 - **Long PDFs** are extracted in page chunks, stitched into one canonical
   structure, and only then summarized. Chapter reports resolve their scope back
   to the source pages.
+- **Reflowable EPUBs** are read from the OPF spine and authored navigation,
+  preserving XHTML semantics and original media. Reports resolve to stable
+  spine-resource/fragment locators instead of invented page numbers.
 - **Academic papers** produce a shared fact spine before independent perspective
   reports are written. A final whole-report sweep checks contradictions and
   drift from the paper's argument.

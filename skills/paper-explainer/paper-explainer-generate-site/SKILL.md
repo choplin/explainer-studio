@@ -31,6 +31,11 @@ is [[explainer-reading-site-deploy]]'s job.
 
 ## paper-explainer inputs
 
+### Source locator kind
+
+Pass `pdf-page` to the shared page-authoring and fan-in sweep contracts. Paper
+prose continues to use `[pNN]{.p}` / `[pNN–pMM]{.p}`; no EPUB locator map applies.
+
 ### Canonical source structure
 
 Pass the absolute path to `<WORK_DIR>/source-structure.md` to the shared pipeline.

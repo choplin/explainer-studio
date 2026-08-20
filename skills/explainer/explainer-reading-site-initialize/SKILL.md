@@ -6,7 +6,12 @@ user-invocable: true
 
 # Initialize Site — one-time hosting setup
 
-Set up the **single hosting target** that every pdf-explainer book is later published into. Run this **once**; afterward [[explainer-reading-site-deploy]] adds each book as a subpath to the same Cloudflare Pages project, so there is one URL and one Cloudflare Access policy for the whole collection.
+Set up the **single hosting target** that PDF, EPUB, and paper reading sites are
+later published into. Run this **once**; afterward
+[[explainer-reading-site-deploy]] adds each document as a subpath to the same
+Cloudflare Pages project, so there is one URL and one Cloudflare Access policy for
+the whole collection. The `pdf-explainer` storage namespace remains unchanged for
+backward compatibility.
 
 Why a shared target: `wrangler pages deploy` replaces a project's entire content each run, and a `*.pages.dev` name is **globally unique across all of Cloudflare** (a taken name gets random characters appended). Deploying each book as its own project would therefore claim a new global name every time and leave the old ones orphaned. Instead, this skill claims one project name and one local **library** directory that accumulates every book; deploys push that whole directory.
 

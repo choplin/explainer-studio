@@ -12,6 +12,14 @@ local function meta_text(meta, key)
   return pandoc.utils.stringify(value)
 end
 
+function Span(el)
+  if not el.classes:includes("source-locator") then return el end
+  if el.attributes["data-locator"] == nil or el.attributes["data-locator"] == "" then
+    error("reading-site: source-locator spans require a canonical data-locator")
+  end
+  return el
+end
+
 function Pandoc(doc)
   local label = meta_text(doc.meta, "editorial-structure-label")
   local note = meta_text(doc.meta, "editorial-structure-note")

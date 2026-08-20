@@ -19,7 +19,7 @@ This skill is **only orchestration**: it decides scope, order, and what to run a
 
 - **poppler** (`command -v pdftoppm`) — required by the reading phases. If missing, install per [[pdf-explainer-summarize]]'s gotcha (`brew install poppler` / `apt-get install poppler-utils`). Do not remove it.
 - **VOICEVOX ENGINE + `ffmpeg`** — for the audio synthesis step ([[explainer-audio-narrate]] synthesizes via a local VOICEVOX ENGINE and encodes m4a with `ffmpeg`; both are cross-platform). If either is unavailable, the pipeline still runs through the dialogue script; skip audio and say so.
-- **`explainer-html-docs` and `explainer-reading-site-library-base` skills** — the site build step's design system substrate ([[pdf-explainer-generate-site]] copies its assets from them). If either is not installed, [[pdf-explainer-generate-site]] stops rather than guessing an asset path; skip the site build and say so.
+- **`explainer-html-docs` and `explainer-reading-site-library-base` skills** — the site build step's design system substrate ([[book-explainer-generate-site]] delegates to them). If either is not installed, [[book-explainer-generate-site]] stops rather than guessing an asset path; skip the site build and say so.
 - The source PDF path, and its page count (`pdfinfo <path> | grep Pages`).
 
 `<WORK_DIR>` is the single work dir named after the PDF's basename (`<dir>/<name>/`), exactly as [[pdf-explainer-summarize]] defines it. Everything below lands there.
@@ -39,7 +39,7 @@ This is the one interactive gate. Because the full run can fan out to many worke
 4. **Collect the source PDF into the work dir at the end?** — deferred to Finalize; [[pdf-explainer-summarize]] normally asks this. Note it here so it is not asked again mid-run.
 5. **Text source** — *default: visual reading* (any PDF). Only if the born-digital probe passes ([[pdf-explainer-summarize]]'s `text_layer.sh --probe`), offer the **text-layer** option (more faithful for code / commands / numbers / console output, born-digital ebooks only). This is [[pdf-explainer-summarize]]'s Step 0 question, asked here so it is not asked again.
 6. **Figure harvest** — runs during Step 1 with its runtime resolved automatically by [[pdf-explainer-summarize]]'s `preflight.sh` (poppler + MinerU from PATH/uv, else the bundled flake; crops diagrams/plots into `ocr/figures/`; a first run downloads models and runs unsandboxed). Default on; note it here and let the user skip it, and know it self-skips if the runtime is unresolvable.
-7. **Site** — *default: build the site.* Whether to author a browsable website from the reports ([[pdf-explainer-generate-site]], Step 6): one authored page per report with the matching audio guide playable in-page. Accept "none" to stop after the reports/audio. **Publishing is not part of this run**: [[pdf-explainer-generate-site]] deliberately keeps `site/` local so it can be reviewed before it goes public, and [[explainer-reading-site-deploy]] is an outward-facing action. Note here that the site is only *built*; deployment is offered at the end and confirmed then (see Finalize), never auto-run.
+7. **Site** — *default: build the site.* Whether to author a browsable website from the reports ([[book-explainer-generate-site]], Step 6): one authored page per report with the matching audio guide playable in-page. Accept "none" to stop after the reports/audio. **Publishing is not part of this run**: [[book-explainer-generate-site]] deliberately keeps `site/` local so it can be reviewed before it goes public, and [[explainer-reading-site-deploy]] is an outward-facing action. Note here that the site is only *built*; deployment is offered at the end and confirmed then (see Finalize), never auto-run.
 
 State the rough cost implication (e.g. "all 8 chapters + option C ≈ 8 detail workers, 9 audio guides, and 9 authored site pages"). If the user names a target length or subset, honor it over the defaults.
 
@@ -78,16 +78,20 @@ For each dialogue script from Step 3, run **[[explainer-audio-narrate]]** to syn
 
 ## Step 5 — Cross-chapter consistency sweep (accuracy guard)
 
-After all chapter reports are written, read the finished `reports/*.md` and check for: (a) a proper noun's classifying attribute stated inconsistently across chapters — e.g. a system called column-oriented in one chapter and row-oriented in another; at most one is right, so re-read the offending source span to settle it; and (b) register drift — a chapter in ですます調 when the set is である調. Fix what you find. This is a light editorial pass over the reports only — do not re-run the reading phases. It is the book-pipeline analogue of paper-explainer's consistency sweep, and the net that catches per-chapter faithfulness/style errors the individual workers can't see across each other.
+Apply [[book-explainer-consistency-sweep]] to all finished `reports/*.md`, passing
+`structured/toc.md` as the canonical structure and `pdf-page` as the locator kind.
+It checks contradictory classifications, terminology and register drift, source
+heading attribution, and `.p` anchor consistency, rereading only a narrow offending
+source span when needed. Do not rerun the reading phases.
 
 Run this **before** Step 6: the site pages are authored from `reports/`, so any fix made after the site is built would leave the site out of sync with the corrected reports. (Audio in Steps 3–4 is intentionally derived earlier; the site, as the reviewable/publishable artifact, is built from the swept reports.)
 
 ## Step 6 — Site (unless "none" in Step 0)
 
-Follow **[[pdf-explainer-generate-site]]** in full to build a browsable website under `<WORK_DIR>/site/` from `reports/` (and the `audio/` guides, played in-page): scaffold assets and figures, author one page per report in parallel, then write the landing page.
+Follow **[[book-explainer-generate-site]]** with the source format fixed to PDF to build a browsable website under `<WORK_DIR>/site/` from `reports/` (and the `audio/` guides, played in-page): scaffold assets and figures, author one page per report in parallel, then write the landing page.
 
-- **Build only — do not deploy here.** [[pdf-explainer-generate-site]] deliberately keeps `site/` local so it can be reviewed before going public; publishing is [[explainer-reading-site-deploy]]'s job and is handled at Finalize as an offer, confirmed then.
-- Delegate the mechanics (scaffold, per-page authoring, index) to [[pdf-explainer-generate-site]] — do not duplicate them here. If `explainer-html-docs` or `explainer-reading-site-library-base` is not installed, [[pdf-explainer-generate-site]] stops; skip the site build and say so rather than working around it.
+- **Build only — do not deploy here.** [[book-explainer-generate-site]] deliberately keeps `site/` local so it can be reviewed before going public; publishing is [[explainer-reading-site-deploy]]'s job and is handled at Finalize as an offer, confirmed then.
+- Delegate the mechanics (scaffold, per-page authoring, index) to [[book-explainer-generate-site]] — do not duplicate them here. If `explainer-html-docs` or `explainer-reading-site-library-base` is not installed, [[book-explainer-generate-site]] stops; skip the site build and say so rather than working around it.
 - If the site scope was "none", skip this step.
 
 ## Finalize
@@ -100,7 +104,7 @@ Follow **[[pdf-explainer-generate-site]]** in full to build a browsable website 
 
 - **Confirm once (Step 0), then run through.** Do not re-prompt between phases; only stop on a real failure (missing poppler, unwritable work dir, a sub-skill error).
 - **Delegate, don't duplicate.** Each phase's mechanics (chunk sizes, worker types, dialogue patterns, voices) live in the sub-skill — follow it there so this orchestrator stays correct if a sub-skill changes.
-- **Parallelize the independent fan-outs** — extraction chunks (Step 1, via [[pdf-explainer-summarize]]), per-chapter detail workers (Step 2), and per-report site-page authoring + review (Step 6, via [[pdf-explainer-generate-site]]) — and keep dependent phases sequential (each step needs the prior step's files).
+- **Parallelize the independent fan-outs** — extraction chunks (Step 1, via [[pdf-explainer-summarize]]), per-chapter detail workers (Step 2), and per-report site-page authoring + review (Step 6, via [[book-explainer-generate-site]]) — and keep dependent phases sequential (each step needs the prior step's files).
 - **File-based hand-off only.** Sub-skills and workers write to files under `<WORK_DIR>` and return short status; never echo report or page text back into the orchestrator's context.
 
 ## Success criteria (verify the deliverables)
@@ -112,5 +116,5 @@ Follow **[[pdf-explainer-generate-site]]** in full to build a browsable website 
 - [ ] For the selected audio scope, a `dialogue/<slug>.txt` exists for each target, in the `A:`/`B:` format, faithful to its source report.
 - [ ] For each dialogue script (when VOICEVOX + ffmpeg are available), a non-empty `audio/<slug>.m4a` was produced and its path + duration reported; otherwise audio was skipped with a clear note.
 - [ ] The cross-chapter consistency sweep ran **before** the site build, so `site/` reflects the corrected reports.
-- [ ] Unless the site scope was "none", `<WORK_DIR>/site/` was built via [[pdf-explainer-generate-site]] (a page per report, its own review pass applied) and **not** deployed without explicit confirmation; the user was told it is ready and offered [[explainer-reading-site-deploy]]. (If `explainer-html-docs` / `explainer-reading-site-library-base` were missing, the site was skipped with a clear note.)
+- [ ] Unless the site scope was "none", `<WORK_DIR>/site/` was built via [[book-explainer-generate-site]] (a page per report, its own review pass applied) and **not** deployed without explicit confirmation; the user was told it is ready and offered [[explainer-reading-site-deploy]]. (If `explainer-html-docs` / `explainer-reading-site-library-base` were missing, the site was skipped with a clear note.)
 - [ ] A final manifest of all artifacts (with the work dir path) was shown to the user.
