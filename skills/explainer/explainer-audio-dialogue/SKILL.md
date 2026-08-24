@@ -20,6 +20,11 @@ The input is **any Markdown**; nothing is hard-wired to a specific file. In part
 
 Pick whichever source matches the guide the user wants. If they want a guide over a document that has not been digested yet, run [[pdf-explainer-summarize]] first (or just point this skill at any existing Markdown).
 
+Before planning any script, read `audio-guide-design.md`. It owns the content
+selection, explanatory depth, multi-guide calibration, and size diagnostics that
+make the result an audio guide rather than a spoken report. This file owns the
+two-speaker dialogue mechanics applied after that selection.
+
 ## Output location
 
 Write the script under a `dialogue/` directory, kept separate from the synthesized audio (which [[explainer-audio-narrate]] puts in a sibling `audio/` directory):
@@ -104,12 +109,17 @@ Two speakers **stay on one point and work it**, rather than each announcing the 
 
 ## How to write it (two stages)
 
-**Plan the friction, then script.** Do not write the script cold. First jot a private scratchpad. Crucially, the scratchpad is **not just an outline of points** — an outline of points is exactly what produces a solo lecture split in two. For each load-bearing point also plan **where a listener trips**:
+**Select, plan the friction, then script.** Do not write the script cold.
 
-1. The source's 3–6 load-bearing points, in order.
-2. For each point: **what a smart listener would plausibly get wrong about it** — the too-simple version, the wrong analogy, the step that seems skippable. This is the fuel for A's 誤解の提示; without it, A has nothing to be wrong about.
-3. Where an abstraction needs a concrete example, and where a claim needs evidence.
-4. A one-line hook and the closing takeaway.
+1. Apply `audio-guide-design.md` and record the listener destination,
+   explanatory spine, selected evidence, and conversational acts in a private
+   scratchpad.
+2. For each act, plan **what a smart listener would plausibly get wrong** — the
+   too-simple version, wrong analogy, or apparently skippable step. This is the
+   fuel for A's 誤解の提示.
+3. Mark where an abstraction needs one concrete example, a claim needs its
+   representative evidence, and the hook and closing takeaway belong; then write
+   the script.
 
 Only the final `A:`/`B:` script is written to the file; the scratchpad is scaffolding.
 
@@ -118,7 +128,7 @@ Only the final `A:`/`B:` script is written to the file; the scratchpad is scaffo
 - **Short turns, switch often.** Keep any single turn short — a few sentences, roughly **~100 characters per line as a cap**. Long monologues from B are the classic failure. (Note this is necessary, not sufficient: chopping a lecture into 100-char pieces and alternating them still fails the deletion test.)
 - **Natural, but calibrated for TTS.** A little spoken texture helps, but go easy on fillers: VOICEVOX reads inserted 「えーと」「あの…」 awkwardly. Prefer naturally flowing phrasing over sprinkled filler words.
 - **Faithful to the source.** Cover the source's real points; do not invent facts. A's misconceptions are *staged*, and B must correct them from the source — never invent a wrong fact that goes uncorrected.
-- **Depth follows the source.** An overview (`reports/overview.md`) → a broad tour of every top-level section. A deep-dive report → go deep on that one part, keeping the specifics (definitions, figures, mechanisms).
+- **Depth follows the guide design.** Keep the altitude and selected evidence established through `audio-guide-design.md`; dialogue must not pull discarded reference detail back in merely to create another exchange.
 - **Spoken Japanese, TTS-ready.** No headings, bullets, markup, code blocks, or URLs read aloud. **Drop `[pNN]` page anchors.** Keep the register consistent with the chosen style preset. Gloss tricky readings, English acronyms, and ambiguous numbers so the TTS says them right.
 - **Arc.** Open with a one-line hook; build from simpler to more complex; close with a short wrap-up and a final takeaway.
 
@@ -129,6 +139,10 @@ Only the final `A:`/`B:` script is written to the file; the scratchpad is scaffo
 If the user *asks* for a length ("5分で", "15分くらい"), treat it as a **budget for how much of the source to cover** — cover fewer points more properly, or more points — not as a quota of turns to fill. Say so if the source cannot honestly fill the requested time.
 
 For estimating only (not for targeting): at the default VOICEVOX rate Japanese audio runs **~340 characters/minute**, so ~3,200 spoken characters ≈ 10 minutes. Use this to *report* the expected duration, and to sanity-check that a requested length is achievable — never to inflate a script up to it.
+
+Before handoff, apply `audio-guide-design.md`'s diagnostic check and report its
+measurements. Revisit the content selection when warned; do not edit toward a
+number at the expense of the explanatory spine.
 
 ## Hand off to synthesis
 
@@ -142,8 +156,13 @@ After writing the script, tell the user the script path and that [[explainer-aud
 - [ ] B's answers are visibly shaped by A's turns — B is responding, not reciting the next paragraph.
 - [ ] A dialogue script file exists in the `A:`/`B:` format under `dialogue/`, parseable by [[explainer-audio-narrate]] (at least one `A:` and one `B:` turn).
 - [ ] Content is faithful to the source; A's misconceptions are staged and always corrected, never left standing as fact.
+- [ ] The `audio-guide-design.md` selection check passed before dialogue-specific checks were applied.
+- [ ] Spoken characters, estimated duration, and source compression ratio were reported; warnings triggered a qualitative content-selection recheck rather than a forced runtime target.
 - [ ] No markup, `[pNN]` anchors, or page-only artifacts remain in the spoken text.
 
 ## References
 
+- `audio-guide-design.md` — the required guide-design procedure: listener
+  destination, explanatory spine, content selection, altitude, pilot calibration,
+  and diagnostic size check. *Read before writing every script.*
 - `references.md` — the evidence base: why a second speaker earns its keep (vicarious-learning research), the Japanese explainer-dialogue genre's own move catalog (ゆっくり解説 / ずんだもん×めたん), and the NotebookLM/podcast sources for pacing and format. *Read when refining the dialogue-writing patterns.*

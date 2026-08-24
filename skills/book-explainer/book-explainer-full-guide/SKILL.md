@@ -21,13 +21,37 @@ Run in this order:
 1. adapter summarize → `structured/toc.md`, `structured/outline.md`, and
    `reports/overview.md`;
 2. adapter detail for every selected top-level chapter, in parallel where safe;
-3. [[explainer-audio-dialogue]] and [[explainer-audio-narrate]] for requested
-   reports when the local runtime is available;
-4. [[book-explainer-consistency-sweep]] over all reports;
-5. [[book-explainer-generate-site]], which detects the adapter artifacts and
+3. [[explainer-audio-dialogue]] for requested reports, with a guide-design pilot
+   before any multi-report fan-out and a diagnostic comparison of the set;
+4. [[explainer-audio-narrate]] for the finished scripts when the local runtime is
+   available;
+5. [[book-explainer-consistency-sweep]] over all reports;
+6. [[book-explainer-generate-site]], which detects the adapter artifacts and
    delegates to the shared reading-site generator.
 
 The shared contract is file-based: downstream phases consume `structured/` and
 `reports/`, not adapter internals. Source references stay typed: PDF uses `.p` and
 EPUB uses `.source-locator`. Finish with a manifest grouped by reports, dialogue,
 audio, and site, and offer deployment separately.
+
+When audio covers one report, follow [[explainer-audio-dialogue]] in full,
+including its required guide-design procedure and diagnostic size check.
+
+When audio covers more than one report, do not generate every dialogue in the
+first fan-out. Choose one representative pilot first: prefer the selected detail
+report with the most speakable source prose, or the overview when no detail report
+is selected. Generate it with [[explainer-audio-dialogue]] and review its listener
+destination, explanatory spine, evidence selection, and altitude. Use that
+content-selection pattern—not its runtime—as calibration when generating the
+remaining targets in parallel.
+
+Before narration, make a compact table for every script containing its slug,
+source characters, spoken characters, compression ratio, and estimated duration.
+Use [[explainer-audio-dialogue]]'s warnings to find scripts whose creation choices
+need another look. Among three or more detail guides, a duration or compression
+ratio above twice the detail-guide median is another prompt to recheck the spine
+and evidence selection—not a demand for equal runtimes. Revise when the guide has
+drifted into a spoken report. A warning alone does not block a faithful guide; ask
+the user only when the proposed remedy changes the confirmed deliverable, such as
+splitting one guide into a series. [[book-explainer-consistency-sweep]] remains
+responsible only for report accuracy and consistency.

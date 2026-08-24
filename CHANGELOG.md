@@ -21,6 +21,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   preserving typed EPUB locators, original EPUB media, and PDF page anchors.
 - PDF and EPUB chapter reports now share one cross-chapter consistency sweep.
 
+### Fixed
+
+- Audio dialogue generation now builds around an explanatory spine and
+  representative evidence, calibrates multi-chapter runs with one pilot, and
+  uses duration and source compression as diagnostics for spoken-report drift.
+
 ## [0.3.0] - 2026-08-20
 
 ### Added

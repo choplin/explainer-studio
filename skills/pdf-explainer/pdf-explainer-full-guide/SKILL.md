@@ -67,7 +67,10 @@ For each audio target selected in Step 0 (per scope A / B / C), follow **[[expla
 - overview → `dialogue/overview.txt` — a **broad** guide (touches every top-level section lightly).
 - each in-scope chapter report → `dialogue/<chapter-slug>.txt` — a **focused, deeper** guide.
 - Use the Step 0 length for each. Let the source set depth (overview → broad, detail → deep).
-- These are independent per target; they may be written in parallel, but keep each faithful to its own source report.
+- With one target, follow [[explainer-audio-dialogue]] in full, including its required guide-design procedure and diagnostic size check.
+- With multiple targets, first generate one representative pilot: prefer the selected chapter report with the most speakable source prose, or the overview when no chapter report is selected. Review its listener destination, explanatory spine, evidence selection, and altitude. Use that content-selection pattern—not its runtime—as calibration before generating the remaining targets in parallel.
+- After all scripts exist, make a compact table of slug, source characters, spoken characters, compression ratio, and estimated duration. Use the individual warnings to find scripts whose creation choices need another look. With at least three chapter guides, a duration or compression ratio above twice the chapter-guide median is another prompt to recheck the spine and evidence selection, not a demand for equal runtimes.
+- Revise a script when it has drifted into a spoken report. A warning alone does not block a faithful guide; ask the user only when the proposed remedy changes the confirmed deliverable, such as splitting one guide into a series. Finish this diagnostic comparison before Step 4; the report consistency sweep in Step 5 does not inspect dialogue size.
 
 ## Step 4 — Audio
 
@@ -102,7 +105,7 @@ Follow **[[book-explainer-generate-site]]** with the source format fixed to PDF 
 
 ## Orchestration rules
 
-- **Confirm once (Step 0), then run through.** Do not re-prompt between phases; only stop on a real failure (missing poppler, unwritable work dir, a sub-skill error).
+- **Confirm once (Step 0), then run through.** Do not re-prompt between phases; only stop on a real failure (missing poppler, unwritable work dir, a sub-skill error) or when a proposed remedy would change the confirmed scope.
 - **Delegate, don't duplicate.** Each phase's mechanics (chunk sizes, worker types, dialogue patterns, voices) live in the sub-skill — follow it there so this orchestrator stays correct if a sub-skill changes.
 - **Parallelize the independent fan-outs** — extraction chunks (Step 1, via [[pdf-explainer-summarize]]), per-chapter detail workers (Step 2), and per-report site-page authoring + review (Step 6, via [[book-explainer-generate-site]]) — and keep dependent phases sequential (each step needs the prior step's files).
 - **File-based hand-off only.** Sub-skills and workers write to files under `<WORK_DIR>` and return short status; never echo report or page text back into the orchestrator's context.
@@ -113,7 +116,7 @@ Follow **[[book-explainer-generate-site]]** with the source format fixed to PDF 
 - [ ] `structured/toc.md` (the canonical spine) exists, and `reports/overview.md` covers every top-level section in it.
 - [ ] `reports/<chapter>.md` exists for every in-scope chapter (none silently dropped).
 - [ ] Each chapter worker was handed its span's figure crops (when `ocr/figures.md` exists) and a fixed register directive; the cross-chapter consistency sweep ran and no proper noun's classifying attribute or report register is inconsistent across chapters.
-- [ ] For the selected audio scope, a `dialogue/<slug>.txt` exists for each target, in the `A:`/`B:` format, faithful to its source report.
+- [ ] For the selected audio scope, a `dialogue/<slug>.txt` exists for each target, in the `A:`/`B:` format, faithful to its source report; multi-target runs used a guide-design pilot before fan-out and a diagnostic comparison before synthesis.
 - [ ] For each dialogue script (when VOICEVOX + ffmpeg are available), a non-empty `audio/<slug>.m4a` was produced and its path + duration reported; otherwise audio was skipped with a clear note.
 - [ ] The cross-chapter consistency sweep ran **before** the site build, so `site/` reflects the corrected reports.
 - [ ] Unless the site scope was "none", `<WORK_DIR>/site/` was built via [[book-explainer-generate-site]] (a page per report, its own review pass applied) and **not** deployed without explicit confirmation; the user was told it is ready and offered [[explainer-reading-site-deploy]]. (If `explainer-html-docs` / `explainer-reading-site-library-base` were missing, the site was skipped with a clear note.)
