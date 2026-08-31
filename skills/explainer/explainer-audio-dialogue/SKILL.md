@@ -39,20 +39,55 @@ Write the script under a `dialogue/` directory, kept separate from the synthesiz
 Plain text. One turn per speaker, prefixed with `A:` or `B:`. This is exactly what [[explainer-audio-narrate]] consumes.
 
 ```
-# style: zundamon
+# style: natural
 # Lines starting with '#' are comments and are ignored.
-A: これって要するに、全部まとめて読ませればいいって話でしょう？
-B: それだと崩れるのだ。後半を読む頃には、前半を忘れているのだ。
-A: 接頭辞のない行は、
+A: この行で話者Aの発話が始まります。
+B: この行で話者Bに切り替わります。
+   接頭辞のない行は、
    直前の話者の発話としてそのまま続きます。
 ```
-
-(The exchange above also shows the shape to aim for — A is *wrong* and B has to break the wrong idea. See *Why two speakers at all* below.)
 
 - **First line: `# style: <preset>`** — the style preset this script is written in (see *Style presets* below). It is a `#` comment, so [[explainer-audio-narrate]] ignores it as spoken text but reads it to pick the matching voices automatically. Always emit it.
 - `A:` / `B:` (lowercase and full-width `：` also accepted) starts a turn.
 - Lines without a prefix continue the current turn.
 - `#` lines and blank lines are ignored.
+
+## Spoken orientation
+
+Every guide must identify itself in its first 2–4 spoken turns. The listener
+must be able to determine, without seeing the filename or player UI:
+
+- the book or document being discussed;
+- whether this is an overview or a focused guide;
+- the topic covered in this recording;
+- what they should understand by the end.
+
+Comments and metadata do not satisfy this requirement because they are not
+spoken. Resolve the source title from an explicit document title, a title
+provided by the caller, or a source heading, in that order. Do not invent a
+title. If the source has no formal title, speak an accurate description that
+identifies it.
+
+For an overview, use this shape while adapting the wording to the source:
+
+```text
+A: 今回は『アジャイルデータモデリング』という本の全体像を見ていくのね。
+B: そうなのだ。この本は、利用者との会話から分析用のデータモデルを作る方法を扱っているのだ。
+A: 聞き終える頃には、テーブル設計より前に何を決めるべきか説明できるようになるのね。
+B: そのために、まず従来の要件収集がなぜうまくいかないのかから考えるのだ。
+```
+
+For a focused guide, use this shape while adapting the wording to the source:
+
+```text
+A: 今回は『アジャイルデータモデリング』の中から、業務システムと分析システムの違いを掘り下げるのね。
+B: そうなのだ。聞き終える頃には、同じデータでも目的によってモデルを分ける理由が分かるのだ。
+A: では、正規化された業務データベースをそのまま分析に使えないのはなぜ？
+B: そこから考えていくのだ。
+```
+
+Do not copy either example mechanically. Preserve the four required pieces of
+information, but write an opening that belongs to the actual source and topic.
 
 ## Style presets (口調 & voices)
 
@@ -111,15 +146,15 @@ Two speakers **stay on one point and work it**, rather than each announcing the 
 
 **Select, plan the friction, then script.** Do not write the script cold.
 
-1. Apply `audio-guide-design.md` and record the listener destination,
-   explanatory spine, selected evidence, and conversational acts in a private
-   scratchpad.
+1. Apply `audio-guide-design.md` and record the source title, guide kind, spoken
+   topic, listener destination, opening orientation, central hook, explanatory
+   spine, selected evidence, and conversational acts in a private scratchpad.
 2. For each act, plan **what a smart listener would plausibly get wrong** — the
    too-simple version, wrong analogy, or apparently skippable step. This is the
    fuel for A's 誤解の提示.
-3. Mark where an abstraction needs one concrete example, a claim needs its
-   representative evidence, and the hook and closing takeaway belong; then write
-   the script.
+3. Mark where an abstraction needs one concrete example and a claim needs its
+   representative evidence. Write the spoken orientation first, then the hook
+   or central misconception, and close with the planned takeaway.
 
 Only the final `A:`/`B:` script is written to the file; the scratchpad is scaffolding.
 
@@ -130,7 +165,7 @@ Only the final `A:`/`B:` script is written to the file; the scratchpad is scaffo
 - **Faithful to the source.** Cover the source's real points; do not invent facts. A's misconceptions are *staged*, and B must correct them from the source — never invent a wrong fact that goes uncorrected.
 - **Depth follows the guide design.** Keep the altitude and selected evidence established through `audio-guide-design.md`; dialogue must not pull discarded reference detail back in merely to create another exchange.
 - **Spoken Japanese, TTS-ready.** No headings, bullets, markup, code blocks, or URLs read aloud. **Drop `[pNN]` page anchors.** Keep the register consistent with the chosen style preset. Gloss tricky readings, English acronyms, and ambiguous numbers so the TTS says them right.
-- **Arc.** Open with a one-line hook; build from simpler to more complex; close with a short wrap-up and a final takeaway.
+- **Arc.** Open with a short spoken orientation, then move into the hook or central misconception. A content question is not an orientation unless it also tells the listener what source and topic they are hearing. Build from simpler to more complex; close with a short wrap-up and a final takeaway.
 
 ## Length is an outcome, not a target
 
@@ -144,12 +179,30 @@ Before handoff, apply `audio-guide-design.md`'s diagnostic check and report its
 measurements. Revisit the content selection when warned; do not edit toward a
 number at the expense of the explanatory spine.
 
+## Standalone listening check
+
+Read only the first four spoken turns without using the filename or surrounding
+UI. Confirm that a listener can answer:
+
+1. What source is this about?
+2. Is this an overview or a focused guide?
+3. What topic does this recording cover?
+4. What should the listener understand by the end?
+
+Rewrite the opening if any answer is missing or ambiguous. The opening sequence
+is: identify the recording, state its listener destination, introduce the hook
+or central misconception, then enter the main explanation.
+
 ## Hand off to synthesis
 
 After writing the script, tell the user the script path and that [[explainer-audio-narrate]] can turn it into audio (or offer to run it). Do not synthesize audio here.
 
 ## Success criteria
 
+- [ ] The first 2–4 spoken turns identify the source, guide kind, topic, and listener destination.
+- [ ] The recording remains identifiable when played without its filename or surrounding UI.
+- [ ] The opening orientation is spoken rather than stored only in comments.
+- [ ] The hook follows the orientation instead of replacing it.
 - [ ] **Passes the deletion test**: with all of A's turns removed, B's turns alone do NOT stand as a complete solo explanation — something load-bearing is lost. (If they do stand alone, the script is a lecture split in two: rewrite, don't ship.)
 - [ ] A voices at least one **誤解の提示** or **言い換えの検算** that B corrects. A is wrong, or at least imprecise, somewhere.
 - [ ] No turn by A consists solely of a reaction or a content-free prompt (「なるほど」「すごいわね」「次は？」).

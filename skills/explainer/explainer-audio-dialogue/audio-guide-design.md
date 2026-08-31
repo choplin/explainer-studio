@@ -11,9 +11,30 @@ guide whose content was selected at the wrong level.
 
 ## Start from the listener's destination
 
-Write one sentence describing what the listener should understand or be able to
-explain at the end. Then write the **explanatory spine**: the ordered claims and
-causal links needed to reach that destination.
+Before selecting content, record this planning block in the private scratchpad:
+
+```text
+source_title:
+guide_kind: overview | focused
+spoken_topic:
+listener_destination:
+opening_orientation:
+central_hook:
+```
+
+Resolve `source_title` from an explicit document title, a caller-provided title,
+or a source heading, in that order. Do not invent a title. If the source has no
+formal title, use an accurate spoken description that identifies it.
+
+Write `listener_destination` as one sentence describing what the listener should
+understand or be able to explain at the end. `opening_orientation` must carry the
+source title, guide kind, spoken topic, and destination into the first 2–4 spoken
+turns; a private plan or comment alone does not satisfy this requirement. Keep
+`central_hook` separate so that the hook follows the orientation rather than
+replacing it.
+
+Then write the **explanatory spine**: the ordered claims and causal links needed
+to reach that destination.
 
 The spine is not the source's heading list. If it mirrors the report section by
 section, it is probably an inventory rather than an explanation. Reorder source
@@ -93,8 +114,11 @@ otherwise faithful guide or force it toward a number.
 
 ## Selection check
 
-- [ ] The listener's destination and explanatory spine are explicit in the
-  private plan.
+- [ ] The source title, guide kind, spoken topic, listener destination, opening
+  orientation, central hook, and explanatory spine are explicit in the private
+  plan.
+- [ ] The opening orientation appears in the first 2–4 spoken turns rather than
+  only in the private plan or comments.
 - [ ] Every included detail has a core or representative supporting job.
 - [ ] Repeated examples, figures, numbers, and evidence were consolidated.
 - [ ] Decision-changing caveats and source qualifications remain intact.
