@@ -2,7 +2,7 @@
 
 Digest an **academic paper PDF** (a conference/journal paper or preprint, typically 8–30 pages, mainly CS) into an Ochiai-format overview plus per-perspective detail reports — capturing the paper's novelty, usefulness, and validation explicitly.
 
-The sibling of [`pdf-explainer`](../pdf-explainer): where pdf-explainer scales a **book** through a heavy extract→structure→report pipeline, paper-explainer runs a light two-phase pipeline tuned for short papers — and shares pdf-explainer's work-dir conventions so its audio and site skills work on paper artifacts unchanged.
+The sibling of [`pdf-explainer`](../pdf-explainer): where pdf-explainer scales a **book** through a heavy extract→structure→report pipeline, paper-explainer runs a light two-phase pipeline tuned for short papers. Both profiles share the same Artifact-only Content brief, Planning, audio, cross-medium, and coordination contracts.
 
 ## How it works
 
@@ -36,12 +36,15 @@ OCR materializes `ocr/paper.md` (full text as Markdown with LaTeX math, one `[pN
 | Skill | Role |
 |-------|------|
 | `paper-explainer-summarize` | The summary pipeline: scope confirmation → Phase 1 (inline OCR read + spine + overview) → Phase 2 (parallel perspective reports) → Finalize (consistency sweep + fixes). Triggers on "この論文をまとめて", "落合フォーマットで読んで", "summarize this paper". |
-| `paper-explainer-generate-site` | Build a browsable **website** from the reports — a landing page plus one authored (restructured, not converted) page per report, ordered by perspective (overview → 背景 → 手法 → 実験 → 議論 → 関連研究) with the overview audio playable in-page. Reuses the shared reading-site workers and assets with a paper-specific report order and kicker labels. Triggers on "論文レポートをWebサイトにして", "HTMLにして". |
-| `paper-explainer-full-guide` | Run the **whole chain end-to-end** on one paper: summary + perspective reports → overview audio guide → website, confirmed once up front. Triggers on "この論文を全部やって", "サマリから音声・サイトまで一気に". |
+| `paper-explainer` | Coordinates new runs, continuation, selective rebuilds, and explicit exact-run resume through the shared workflow. Triggers on "この論文を理解したい", "音声だけ作り直して", or "サイトを追加して". |
+| `paper-explainer-generate-site` | Internal site-production owner. Builds the paper-specific report order and labels from exact planning Artifacts. |
 | `paper-explainer-paper-detail` | Internal Phase 2 logic: writes ONE perspective detail report (background / method / experiments / discussion / related-work), taking shared facts from `spine.md`. Applied once per perspective; not invoked directly. |
 | `paper-explainer-consistency-sweep` | Internal Finalize logic: reads the whole report set + `source-structure.md` + `spine.md` + the source, returns findings about contradictions and source-faithfulness / logical-structure drift (it edits nothing). Applied once at Finalize; not invoked directly. |
 
-The **audio** guide reuses pdf-explainer's fully generic audio skills unchanged (there is no paper-specific audio skill): `explainer-audio-dialogue` writes a two-speaker script from `reports/overview.md`, and `explainer-audio-narrate` synthesizes it to `audio/overview.m4a` via a local VOICEVOX ENGINE. paper-explainer's audio is overview-only by design — the perspective detail reports are for reading, not listening.
+The **audio** guide uses the shared audio skills: `explainer-audio-dialogue`
+writes a two-speaker script and `explainer-audio-narrate` synthesizes it via a
+local VOICEVOX ENGINE. The overview is the default paper audio target; an
+explicit run may also select a perspective report.
 
 The per-perspective report templates and the strict bibliographic constraints live in `paper-explainer-paper-detail`; the whole-set check criteria live in `paper-explainer-consistency-sweep`. The orchestrator passes each only its inputs. Under Claude Code each is wrapped by a thin subagent (`agents/paper-explainer-paper-detail` for the parallel perspective writers, `agents/paper-explainer-consistency-sweep` for the Finalize sweep) so it runs in an isolated context; on any other agent the same skill is applied inline. This graceful fallback is written into the orchestrator.
 
@@ -82,13 +85,16 @@ The work dir is named with a `{year}-{venue}-{short-title}` citation slug (e.g. 
     └── related-work.md        # 位置づけ + 次に読むべき論文 (dblp-verified)
 ```
 
-### Interop with pdf-explainer
+### Shared content workflow
 
-The layout matches pdf-explainer's work-dir conventions (`reports/*.md`, `[pNN]` anchors), so with pdf-explainer installed the pipeline extends into audio and a website:
+Use `paper-explainer` with either a source PDF or this work directory.
+It inventories existing reports and runs only the required downstream slice:
 
-- **Audio guide** — `explainer-audio-dialogue` (pointed at `overview.md`) → `explainer-audio-narrate`. These pdf-explainer skills are fully source-generic and run unchanged; paper-explainer narrates the overview only.
-- **Website** — `paper-explainer-generate-site` (in this group) builds the site with the correct perspective order, kicker labels, and `source-structure.md` authority; the shared site page worker (`explainer-reading-site-page`), whole-source sweep (`explainer-reading-site-consistency-sweep`), context assets/filter (`explainer-reading-site-library-base`), and hosting (`explainer-reading-site-deploy`) are reused. Use the paper-specific consumer; the PDF consumer expects `structured/toc.md` and is not interchangeable.
-- **End-to-end** — `paper-explainer-full-guide` chains summary → overview audio → website in one request.
+- **Audio** uses shared dialogue and narration phase owners.
+- **Website** uses `paper-explainer-generate-site` internally, preserving
+  `source-structure.md`, `spine.md`, perspective order, and kicker labels.
+- **Rebuild/resume** uses immutable Run requests, Content briefs, Manifests, and
+  optional checkpoint decisions; the Manifest is not mutable status.
 
 ## Notes
 

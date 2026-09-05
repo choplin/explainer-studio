@@ -12,6 +12,14 @@ Write ONE perspective-specific detail report for an academic paper that the `pap
 
 The `paper-explainer-summarize` skill applies this procedure once per in-scope perspective (background / method / experiments / discussion / related-work), in parallel — one isolated run each. It is not for direct user requests and is not invoked proactively.
 
+When called from the content workflow, apply
+[[explainer-content-workflow-base]] with the `paper` profile. Run in a fresh
+session from Artifacts alone: require the exact run request; source and digest;
+`source-structure.md` and `spine.md` paths/digests; perspective and source span;
+assigned figure inventory; output path; and its `create` or `replace` action.
+Validate them before reading and never recover scope, language, or overwrite
+choices from conversation history.
+
 ## Inputs provided by the caller
 
 The caller provides the following. If any is missing, report what is missing and stop.
@@ -75,8 +83,13 @@ Before drafting, read exactly one matching reference file completely. The text i
 
 ## Output
 
-Write the report to the given output path.
+Write the report to the exact output path. In a content workflow, `create` must
+fail if it exists and `replace` authorizes overwriting only that path.
 
 ## Reply
 
-Return only the file path and a one-line summary (do not return the body). For related-work, also state how many entries were dblp-verified vs unverified. If an assigned figure contradicted a spine running-example map row, say so in one line (which row, what the figure shows) so the orchestrator can correct the shared spine.
+Return the file path and digest, AI acceptance result, and a one-line summary
+(do not return the body). For related-work, also state how many entries were
+dblp-verified vs unverified. If an assigned figure contradicted a spine
+running-example map row, identify it so the orchestrator can correct the spine.
+Return a structured blocker when required inputs or checks fail.

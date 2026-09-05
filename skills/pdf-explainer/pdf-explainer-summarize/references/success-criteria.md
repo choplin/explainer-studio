@@ -8,5 +8,5 @@
 - [ ] `reports/overview.md` reads as one standalone piece: sections connect, non-obvious terms are defined at first use, and it is followable without the source (a light coherence pass, not a source-faithfulness sweep).
 - [ ] The body-start page was detected; front matter (TOC/preface) was not transcribed as content.
 - [ ] If the run was a partial page range, `reports/overview.md` states the covered range and the continuation point.
-- [ ] If the figure-harvest runtime resolved (via `preflight.sh` — PATH/uv/nix), `ocr/figures.md` exists and every figure a report embeds is explained in place (no bare image); unused crops may remain unreferenced (no exhaustive-coverage requirement). If the runtime was unresolvable, the manifest says figure harvest was skipped.
+- [ ] If the figure-harvest runtime resolved (via `preflight.sh` — PATH/uv/nix), `ocr/figures.md` exists and every figure a report embeds is explained in place (no bare image); unused crops may remain unreferenced (no exhaustive-coverage requirement). If the runtime was unresolvable, the handoff inventory says figure harvest was skipped.
 - [ ] If the text-layer option was chosen, each chunk was read from `extract/text-*.md` (not visually), and it was offered only after the born-digital probe passed.

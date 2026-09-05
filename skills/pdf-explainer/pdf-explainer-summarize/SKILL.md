@@ -1,6 +1,6 @@
 ---
 name: pdf-explainer-summarize
-description: "Digest a book, manual, or other long non-paper PDF into a source-anchored Markdown overview. Use when the requested deliverable is a report, digest, or summary. Use paper-explainer-summarize for academic papers, direct reading for short PDFs, and pdf-explainer-full-guide when chapter reports, audio, and a site are also wanted."
+description: "Digest a book, manual, or other long non-paper PDF into a source-anchored Markdown overview. Use when the requested deliverable is only a report, digest, or summary. Use paper-explainer-summarize for academic papers, direct reading for short PDFs, and book-explainer for coordinated reports, audio, site, rebuild, or resume."
 user-invocable: true
 ---
 
@@ -8,9 +8,23 @@ user-invocable: true
 
 Convert a large PDF into a Markdown report through three phases that progressively compress information: **extract → structure → report**. Separating faithful extraction from interpretive synthesis is what prevents the boundary inconsistencies that appear when a report is written directly from fixed page ranges. Run the heavy phases (extraction and structuring) in isolated contexts so the source pages and intermediate material never fill the orchestrator's context; the final report phase reads only the already-compressed outline, so the orchestrator writes it directly.
 
+## Book-workflow invocation
+
+When this skill owns the PDF report phase of the book workflow, apply
+[[explainer-content-workflow-base]] with the `book` profile. Require the exact immutable run request and
+the caller's validated source identity, output paths, actions, and digests.
+Use the source options, report scope, language, and replacement decisions
+recorded there instead of asking again or relying on an earlier session. A
+`create` action must not overwrite an existing Artifact; a `replace` action
+applies only to its exact target. Return exact produced paths and digests, AI
+acceptance checks, and any structured blocker so a fresh coordinator session
+can continue from the files alone.
+
+When invoked directly, use the interactive option procedure below.
+
 ## Before starting — read the runtime and option contract
 
-Read [`references/runtime-and-options.md`](references/runtime-and-options.md) completely before running any command or creating the work directory. It contains the original Gotchas, Prerequisites, Step 0 option gate, and work-directory layout without abridgment.
+Read [`references/runtime-and-options.md`](references/runtime-and-options.md) completely before running any command or creating the work directory. It contains the original Gotchas, Prerequisites, Step 0 option gate, and work-directory layout without abridgment. In a book-workflow invocation, treat the immutable run request as the already-resolved Step 0 option gate and ask only when an input is missing or incompatible.
 
 ## Phase 0 — Figure harvest (orchestrator, Bash, unsandboxed)
 
@@ -49,7 +63,7 @@ Apply the **`pdf-explainer-pdf-stitch`** skill once, reading all `extract/chunk-
 - **Assemble `structured/outline.md` against the spine:** its heading tree is `toc.md`'s (same titles/anchors), with the boundary-joined, deduped content filled under each. Do not invent a second structure.
 - Preserve the figure references the chunks recorded (from `ocr/figures.md`) against their sections, so the outline knows which figure belongs where.
 - Record a boundary note: what was joined, where coverage stops mid-section (if partial), and any TOC↔heading cross-check discrepancy.
-- Record the printed-page↔PDF-page offset in a `## Page offset` field near the top of both files (e.g. "printed page N = PDF page N + 27", or "none detected") so the full-guide's chapter-detail workers can convert printed page numbers to PDF pages.
+- Record the printed-page↔PDF-page offset in a `## Page offset` field near the top of both files (e.g. "printed page N = PDF page N + 27", or "none detected") so `book-explainer` can resolve chapter-detail source pages.
 
 **Under Claude Code**, dispatch a single `pdf-explainer-pdf-stitch` subagent; **otherwise** apply the skill inline. Pass the `extract/` directory absolute path, the output path `structured/outline.md` (the spine `toc.md` is written beside it), any captured printed TOC, and — if Phase 0 ran — the `ocr/figures.md` absolute path so it can keep figure references against their sections. It returns only the spine heading count and one line on boundary decisions.
 
@@ -75,7 +89,8 @@ Phases 1–2 each run a dedicated procedure that lives in its own portable skill
 - **`pdf-explainer-pdf-extract`** — Phase 1, one per chunk in parallel. Read+Write only (no Bash, so it cannot install software or convert PDFs itself).
 - **`pdf-explainer-pdf-stitch`** — Phase 2, single instance. Read+Write+Glob.
 
-When per-chapter detail reports are needed, [[pdf-explainer-full-guide]] applies the internal **`pdf-explainer-pdf-detail`** worker.
+When per-chapter detail reports are needed, [[book-explainer]] applies the
+internal **`pdf-explainer-pdf-detail`** worker.
 
 ## Bundled scripts
 

@@ -41,7 +41,7 @@ The caller provides the following. If any is missing, do not guess — report wh
 2. Transcribe each page's content as structured Markdown in the format below. Do not over-summarize; keep enough information density that the later phase can rebuild the chapter structure. Do not drop definitions, numbers, figures/tables, or key terms. In text-layer mode, preserve code / commands / numeric output verbatim (that fidelity is the reason the mode was chosen).
 3. As you go, list every document heading you cross in the `## Headings` stream (see format): its level, its **source-form title verbatim** (untranslated, unreworded), and the `[pNN]` immediately preceding it. This stream is structure only — the prose transcription still lives in `## Extracted content`.
 4. If assigned figures were provided, add each to the `## Figures` block (see format) — its `figures/…` path, page, and caption — so no harvested figure is lost.
-5. Write the output to the given output path. This is an orchestrator-dispatched worker: write unconditionally and do **not** prompt about an existing file — overwrite confirmation is handled once by the parent skill ([[pdf-explainer-summarize]] / [[pdf-explainer-full-guide]]) at the work-dir level.
+5. Write the output to the given output path. This is an orchestrator-dispatched worker: write unconditionally and do **not** prompt about an existing file — overwrite authorization is handled by [[pdf-explainer-summarize]] from the request supplied by [[book-explainer]].
 
 ## Output format
 

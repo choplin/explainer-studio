@@ -1,13 +1,25 @@
 ---
 name: book-explainer-generate-site
-description: "Build a local reading site from existing PDF or EPUB book reports, preserving the source format's typed locators and original media. Use when a book work directory already contains reports and the user wants a browsable site."
-user-invocable: true
+description: "Internal site-production phase that builds a local PDF or EPUB book reading site from an exact run request, Content brief, Run Manifest, canonical structure, and report set."
+user-invocable: false
 ---
 
 # Generate a book reading site
 
-Require `<WORK_DIR>/reports/*.md` and `<WORK_DIR>/structured/toc.md`. Detect the
-source adapter from durable work-directory artifacts:
+Apply [[explainer-content-workflow-base]], read its Artifact contract, and
+require the `book` profile. Own only site authoring and local build; do not
+perform workflow discovery, user consultation, Content modeling, or Planning.
+
+Require exact paths and digests for the run request, selected Content brief,
+Run Manifest, canonical source structure, and every planned source report. The
+Manifest entry must select this site output with `create` or `replace`. Return a
+structured missing/incompatible-input result otherwise. Never infer the latest
+planning Artifact.
+
+The planning Artifacts provide the shared interpretive model and resolved run
+plan, but are not exclusive inputs. Reread reports or the narrow source locus
+whenever fidelity requires it. Detect the source adapter from durable
+work-directory artifacts:
 
 - EPUB when `epub/locators.json` exists;
 - PDF otherwise, when reports use canonical `.p` source anchors.
@@ -30,6 +42,13 @@ reports as follows:
 
 Use landing vocabulary `読書ガイド`, `チャプター`, and `章`. Use the supplied
 title when present; otherwise resolve it from the adapter metadata or overview.
+
+Keep the source-authored order and divisions as the site's navigation backbone.
+Use the selected content brief to explain the book-wide mental model, chapter
+roles, and cross-chapter relationships in the landing page and appropriate
+report pages. Use the manifest mappings to confirm the selected scope. Never
+reorder, merge, suppress, or rename source divisions merely because the brief
+groups its explanatory items differently.
 
 ## Adapter inputs
 
@@ -54,3 +73,8 @@ python3 <SKILL_DIR>/scripts/validate_locators.py \
 
 Unknown or missing EPUB locators and EPUB prose using PDF `.p` anchors block the
 build. Finish by reporting `<WORK_DIR>/site/` and offering deployment separately.
+Run all normal AI checks and return the exact output inventory and digest to the
+coordinator. Human interaction belongs to the coordinator. When
+`human_gates.site: true`, mark the checked site as the checkpoint subject; a
+later phase may accept it only with the matching checkpoint-decision Artifact.
+Never treat that decision as permission to deploy.

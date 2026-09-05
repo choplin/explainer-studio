@@ -1,6 +1,6 @@
 ---
 name: pdf-explainer-pdf-detail
-description: "Internal per-chapter worker invoked by pdf-explainer-full-guide after summarization. Re-reads one resolved chapter span visually or from a faithful text layer and writes a standalone detail report with [pNN] source anchors."
+description: "Internal per-chapter worker invoked by book-explainer for PDF input. Re-read one resolved chapter span visually or from a faithful text layer and write a standalone detail report with [pNN] source anchors."
 user-invocable: false
 ---
 
@@ -10,7 +10,18 @@ You re-read the span the caller has resolved — from the source PDF (visually) 
 
 ## When this applies
 
-`pdf-explainer-full-guide` resolves each chapter's page range from the canonical spine's `[pNN]` anchors and then applies this procedure once per in-scope chapter. It is not for direct user requests and is not invoked proactively.
+`book-explainer` resolves each chapter's page range from the canonical spine's
+`[pNN]` anchors and applies this procedure once per in-scope chapter. It is not
+for direct user requests and is not invoked proactively.
+
+When called from the book workflow, apply [[explainer-content-workflow-base]]
+with the `book` profile.
+This worker must be runnable in a fresh session: require the exact immutable run
+request, source path and digest, canonical structure paths and digests, resolved
+source span, target report path, and its `create` or `replace` action. Validate
+them before reading. Do not recover a missing scope, policy, or overwrite choice
+from conversation history. Return the report path and digest, AI acceptance
+checks, and a structured blocker when applicable.
 
 ## Inputs provided by the caller
 
@@ -56,8 +67,12 @@ Append these standalone sections **after** the prose body, each only when its ma
 
 ## Output
 
-Write to the given output path — unconditionally, without prompting about an existing file. This is an orchestrator-dispatched worker; [[pdf-explainer-full-guide]] handles overwrite confirmation before dispatching.
+Write to the exact output path without prompting. The caller has already
+materialized the decision: `create` must fail if the file exists, while
+`replace` authorizes overwriting this path only.
 
 ## Reply
 
-Return only the file path and a one-line summary (do not return the body).
+Return the file path and digest, acceptance-check result, and a one-line summary
+(do not return the body). Return a structured blocker instead when required
+inputs or checks fail.

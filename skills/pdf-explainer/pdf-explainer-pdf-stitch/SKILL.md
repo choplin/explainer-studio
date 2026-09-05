@@ -30,7 +30,7 @@ The caller provides the following. If any is missing, report what is missing and
 - Do NOT install any software (brew / pip / uv / apt / npm, etc.).
 - Read all input via the Read tool. You may use Glob to enumerate `chunk-*.md`.
 - Write output to the file and return only a short status to the caller. Do NOT echo the reconstructed body in your reply (to conserve the caller's context).
-- Write the content in the language of the source or the conversation. Keep the structural field names below (## Page offset, ## Headings, ## Boundary notes) as written — `pdf-explainer-full-guide` locates the spine's headings and the offset field by name for its chapter-detail workers.
+- Write the content in the language of the source or the conversation. Keep the structural field names below (## Page offset, ## Headings, ## Boundary notes) as written — `book-explainer` locates the spine's headings and the offset field by name for its chapter-detail workers.
 
 ## Work
 
@@ -46,7 +46,9 @@ The caller provides the following. If any is missing, report what is missing and
 
 ## Output
 
-Write both files — unconditionally, without prompting about an existing file (this is an orchestrator-dispatched worker; the parent [[pdf-explainer-summarize]] / [[pdf-explainer-full-guide]] handles overwrite confirmation at the work-dir level).
+Write both files without prompting. This is an orchestrator-dispatched worker;
+[[pdf-explainer-summarize]] receives exact create/replace authorization from
+[[book-explainer]].
 
 **`toc.md`** — the canonical structural spine, one row per heading in reading order:
 

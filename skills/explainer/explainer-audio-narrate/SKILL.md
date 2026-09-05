@@ -16,6 +16,20 @@ The script manages the engine for you: if one is already running it is reused, o
 
 Use when a dialogue script in the `A:`/`B:` line format already exists — produced by [[explainer-audio-dialogue]] or written by hand. If there is no script yet, run [[explainer-audio-dialogue]] first.
 
+When this skill runs as a source-workflow narration phase, also apply
+[[explainer-content-workflow-base]] and read the selected profile. The caller
+must provide exact paths and SHA-256 digests for the immutable run request, Run
+Manifest, and dialogue Artifact, plus the Manifest's unique audio output entry.
+Validate that the entry's action is `create` or `replace`, that it names the
+supplied dialogue as its input, and that any selected prerequisite checkpoint
+has a matching decision Artifact. Stop with a structured missing or
+incompatible-input result instead of inferring a current Manifest, dialogue, or
+output from conversation history. This phase writes only the planned audio
+Artifact and returns its path, digest, duration, acceptance checks, and blocker.
+
+Outside a content workflow, an explicitly supplied dialogue path and output
+choice are sufficient; no run request or Manifest is required.
+
 The script format (also documented in [[explainer-audio-dialogue]]):
 
 - `A:` / `B:` (lowercase and full-width `：` accepted) starts a speaker turn.
@@ -38,7 +52,7 @@ explainer-audio-narrate/dialogue-to-audio.sh <script.txt> [output.m4a] [--play]
 ```
 
 - If the output path is omitted, it defaults to the script path with an `.m4a` extension. The output format follows the extension you pass: `.m4a` encodes AAC (requires `ffmpeg`), any other extension writes WAV. Prerequisites (`python3`, `curl`, and `ffmpeg` for m4a) are checked up front, before the engine starts, so a missing tool fails fast.
-- Write the audio into an `audio/` directory that sits beside the script's `dialogue/` directory: the script `<WORK_DIR>/dialogue/<slug>.txt` → audio `<WORK_DIR>/audio/<slug>.m4a`. Create `audio/` if missing. This keeps the editable script (`dialogue/`) separate from the disposable, re-synthesizable audio (`audio/`). Audio is re-synthesizable, but still don't silently clobber a file that's already there: if the target `<slug>.m4a` already exists, confirm before overwriting it.
+- Write the audio into an `audio/` directory that sits beside the script's `dialogue/` directory: the script `<WORK_DIR>/dialogue/<slug>.txt` → audio `<WORK_DIR>/audio/<slug>.m4a`. Create `audio/` if missing. This keeps the editable script (`dialogue/`) separate from the disposable, re-synthesizable audio (`audio/`). In a planned workflow, overwrite only when the immutable Manifest marks this exact path `replace`; `create` must fail if the path already exists. In standalone use, confirm before overwriting an existing target.
 - `--play` synthesizes and then plays the result with `afplay` (macOS).
 
 > **Run without the command sandbox.** The script talks to a local VOICEVOX ENGINE over `localhost` (and spawns it when one isn't already running), which a command sandbox blocks. Invoke it with `dangerouslyDisableSandbox: true`. (The `ffmpeg` m4a encoding itself is self-contained and would run fine under a sandbox; it's the engine networking that needs it off.)

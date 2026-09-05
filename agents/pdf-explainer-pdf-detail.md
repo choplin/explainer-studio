@@ -1,7 +1,7 @@
 ---
 name: pdf-explainer-pdf-detail
 description: |
-  Internal subagent for pdf-explainer-full-guide. Re-reads a resolved chapter span of an already-digested PDF (visually, or from a faithful text layer) and writes a thorough, standalone detail report with [pNN] anchors. Dispatched via subagent_type by the orchestrator — NOT triggered directly by user requests and NOT proactively.
+  Internal subagent for the book-explainer PDF profile. Re-reads a resolved chapter span of an already-digested PDF (visually, or from a faithful text layer) and writes a thorough, standalone detail report with [pNN] anchors. Dispatched via subagent_type by the orchestrator — NOT triggered directly by user requests and NOT proactively.
 model: inherit
 color: magenta
 tools:

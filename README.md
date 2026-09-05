@@ -116,22 +116,56 @@ rendering.
 For a book in PDF or DRM-free reflowable EPUB form:
 
 ```text
-/explainer-studio:book-explainer-full-guide /absolute/path/to/book.epub
+/explainer-studio:book-explainer /absolute/path/to/book.epub
 ```
 
-Use `pdf-explainer-full-guide` directly when you specifically want the PDF
-adapter. EPUB text, structure, tables, notes, images, and SVGs are read natively;
-the pipeline does not rasterize or convert the book to PDF.
+The coordinator selects the PDF or EPUB adapter from the source. EPUB text,
+structure, tables, notes, images, and SVGs are read natively; the pipeline does
+not rasterize or convert the book to PDF.
+
+The same profile entry point also continues or rebuilds an existing work
+directory. For example, to create or rebuild only audio after book reports
+already exist:
+
+```text
+/explainer-studio:book-explainer /absolute/path/to/work-dir
+```
+
+The coordinator validates existing artifacts, asks which terminal outputs are
+wanted, and runs only the smallest required slice. A new execution gets an
+immutable run request and manifest; exact-run resume requires naming its
+manifest explicitly.
 
 For a conference paper, journal paper, or preprint:
 
 ```text
-/explainer-studio:paper-explainer-full-guide /absolute/path/to/paper.pdf
+/explainer-studio:paper-explainer /absolute/path/to/paper.pdf
 ```
 
-Each full guide confirms its scope once, builds the local HTML site, and
-finishes with a manifest of the reports and optional companion artifacts.
-Publishing is offered separately and is never automatic.
+Pass an existing paper work directory to the same command to add or rebuild
+selected audio/site outputs without regenerating valid reports.
+
+Book and paper coordinators share this complete workflow:
+
+```text
+source
+  -> profile-specific extraction, structure, and evidence
+  -> overview and detail reports
+  -> report consistency
+  -> media-independent Content brief
+  -> immutable run Manifest
+  -> optional dialogue/audio and/or reading site
+  -> possible cross-medium consistency
+  -> handoff
+```
+
+Each phase can run in a fresh AI session from declared artifacts alone. A
+profile selects the source-specific report structure and site owner; Content
+briefs, run planning, audio, cross-medium checks, and coordination semantics are
+shared. The source remains authoritative, and later phases may consult it,
+structure/evidence, and reports whenever needed. With no optional human
+checkpoints selected, the coordinator runs continuously through the requested
+local outputs. Publishing is separate and never automatic.
 
 ## 🧭 Choose the right workflow
 
@@ -140,11 +174,11 @@ Publishing is offered separately and is never automatic.
 | Explain any source material | Understandable HTML | `/explainer-studio:explainer-html-docs` |
 | Understand current code | Snapshot HTML or reading site | `/explainer-studio:codebase-explainer` |
 | Understand a long PDF | Markdown overview | `/explainer-studio:pdf-explainer-summarize` |
-| Explore a long PDF in depth | Reports and reading site | `/explainer-studio:pdf-explainer-full-guide` |
+| Explore a long PDF in depth | Reports, optional audio, and/or reading site | `/explainer-studio:book-explainer` |
 | Understand a reflowable EPUB | Markdown overview | `/explainer-studio:epub-explainer-summarize` |
-| Explore a PDF or EPUB book in depth | Reports and reading site | `/explainer-studio:book-explainer-full-guide` |
+| Explore, continue, or selectively rebuild a PDF or EPUB book explanation | Reports, optional audio, and/or reading site | `/explainer-studio:book-explainer` |
 | Understand an academic paper | Structured Markdown reports | `/explainer-studio:paper-explainer-summarize` |
-| Explore an academic paper in depth | Reports and reading site | `/explainer-studio:paper-explainer-full-guide` |
+| Explore, continue, or selectively rebuild an academic-paper explanation | Reports, optional audio, and/or reading site | `/explainer-studio:paper-explainer` |
 | Review code changes | Reviewer-facing HTML | `/explainer-studio:diff-explainer` |
 
 Compatible agents can also select a skill automatically from a natural-language
@@ -246,7 +280,7 @@ and source reading from synthesis where the source requires it.
   packages follow the Agent Skills layout and can be read by other compatible
   agents, but the parallel worker wrappers are optimized for Claude Code.
 - `paper-explainer` targets papers of roughly 8–30 pages, primarily in computer
-  science. Use `pdf-explainer` for dissertations, books, and longer documents.
+  science. Use `book-explainer` for dissertations, books, and longer documents.
 - Audio synthesis currently uses Japanese VOICEVOX voices.
 - Report language follows the source or the conversation. Version 0.3.0 does
   not provide a single pipeline-wide language selector.

@@ -6,6 +6,15 @@ user-invocable: false
 
 # Paper report-set consistency & faithfulness sweep
 
+When called from the content workflow, apply
+[[explainer-content-workflow-base]] with the `paper` profile. Require the exact
+run request plus paths/digests for all in-scope reports, `source-structure.md`,
+`spine.md`, and the source/OCR evidence. Validate them in a fresh session and
+return a structured missing/incompatible-input result rather than infer current
+files. This phase remains read-only and returns its normal findings as the AI
+acceptance result; the report owner applies targeted fixes and returns the final
+checked report inventory.
+
 The `paper-explainer-summarize` pipeline writes the overview (Phase 1) and each perspective detail report (Phase 2) in **isolated contexts** that are never reconciled against each other — deliberately, for context hygiene. The structural cost of that isolation is that **no agent ever sees the whole report set at once**, so two failure classes slip through every per-report self-check:
 
 1. **Cross-report contradictions** — two reports state the same fact differently (a conclusion's direction, a running-example attribution, a headline number's scope, a figure-derived trend). Each report is internally fine; they disagree only when read side by side.

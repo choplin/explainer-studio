@@ -1,12 +1,17 @@
 ---
 name: book-explainer-consistency-sweep
-description: "Internal cross-chapter review for PDF and EPUB book reports that checks factual, terminology, register, and source-locator consistency before site generation."
+description: "Internal report-consistency phase for PDF and EPUB books. Check all in-scope reports against canonical source structure and typed source locators before shared content modeling."
 user-invocable: false
 ---
 
-# Cross-chapter consistency sweep
+# Book consistency sweep
 
-Read all finished `reports/*.md`, the consumer's canonical source structure, and
+Apply [[explainer-content-workflow-base]], read its Artifact contract, and
+require the `book` profile. Use only exact Artifacts supplied by the coordinator;
+do not infer current inputs from conversation or version numbers.
+
+Require the run request, all in-scope finished reports, the canonical source
+structure, and
 its locator authority (`structured/toc.md` for PDF; `structured/toc.md` plus
 `epub/locators.json` for EPUB). Check:
 

@@ -20,6 +20,25 @@ The input is **any Markdown**; nothing is hard-wired to a specific file. In part
 
 Pick whichever source matches the guide the user wants. If they want a guide over a document that has not been digested yet, run [[pdf-explainer-summarize]] first (or just point this skill at any existing Markdown).
 
+When invoked as a source-workflow phase, first apply
+[[explainer-content-workflow-base]], read the selected profile, and require exact
+paths and digests for the run request, selected Content brief, Run Manifest,
+planned dialogue entry, profile structure/evidence, and source report. Validate
+them before applying the guide-design procedure. Use the entry's destination,
+source divisions, and explanatory-obligation references as planning context.
+Return a structured missing/incompatible-input result rather than recovering
+choices from prior conversation or selecting the latest planning Artifact.
+
+Continue to treat the named report as the immediate content source, and consult
+the canonical structure, other reports, or narrow source loci when the script
+needs book-wide context or fidelity checks. Planning Artifacts supplement those
+sources; they never replace them. Set-level fan-out and human interaction belong
+to the workflow coordinator, not to this single-script authoring skill.
+
+For an unrelated standalone Markdown input, the Markdown file and explicitly
+supplied output choices are the complete Artifact input. Continue with the
+normal single-document procedure without inventing workflow Artifacts.
+
 Before planning any script, read `audio-guide-design.md`. It owns the content
 selection, explanatory depth, multi-guide calibration, and size diagnostics that
 make the result an audio guide rather than a spoken report. This file owns the
@@ -32,7 +51,7 @@ Write the script under a `dialogue/` directory, kept separate from the synthesiz
 - If the source is inside a pdf-explainer work dir (`<dir>/<name>/`), write to `<WORK_DIR>/dialogue/<slug>.txt`.
 - Otherwise write `dialogue/<slug>.txt` next to the source Markdown.
 
-`<slug>` names the source: `overview` for `reports/overview.md`, the section slug for a deep-dive report (e.g. `chapter-2`), otherwise the source basename. Create the `dialogue/` directory if missing. The dialogue script is the editable text artifact; keeping it apart from generated `audio/` (which is disposable and re-synthesizable) makes it easy to review and edit before narration. Because the script is meant to be hand-edited, **don't silently overwrite one**: if `dialogue/<slug>.txt` already exists, confirm before replacing it — overwrite, keep it, or write under a different slug.
+`<slug>` names the source: `overview` for `reports/overview.md`, the section slug for a deep-dive report (e.g. `chapter-2`), otherwise the source basename. Create the `dialogue/` directory if missing. The dialogue script is the editable text artifact; keeping it apart from generated `audio/` (which is disposable and re-synthesizable) makes it easy to review and edit before narration. In a planned workflow, write only the exact Manifest path: `create` must fail if it exists, while `replace` authorizes replacing that path only. In standalone use, do not silently overwrite an existing script; confirm whether to replace it, keep it, or use a different slug.
 
 ## Dialogue script format
 

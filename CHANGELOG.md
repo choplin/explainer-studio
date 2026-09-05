@@ -14,12 +14,41 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   and stable source locators without converting EPUB input to PDF.
 - Added explicit detection for reflowable, fixed-layout, image-only, and
   DRM-protected EPUB input, with unsupported formats routed to a clear stop.
+- Added one shared content-production workflow for book and paper explainers,
+  covering source-specific reports, content modeling, planning, optional audio
+  and reading-site production, consistency checks, and final handoff.
+- Added an artifact-only phase contract so every workflow phase can run in a
+  fresh AI session without relying on earlier conversation history.
+- Added durable workflow artifacts with distinct roles: a source-first Content
+  brief, a per-execution run request, an immutable Manifest of resolved inputs
+  and outputs, and optional immutable human checkpoint decisions.
 
 ### Changed
 
+- **Breaking:** Renamed the workflow entry points from
+  `book-explainer-full-guide`, `pdf-explainer-full-guide`, and
+  `paper-explainer-full-guide` to `book-explainer` and `paper-explainer`.
+- **Breaking:** Book and paper entry points are now coordinators rather than
+  monolithic generation procedures. They reconcile existing artifacts, resolve
+  the dependency closure for the requested outputs, and delegate each phase to
+  its owning skill.
+- Workflow runs now start from a new source, an existing work directory, or an
+  explicitly selected Manifest. Existing artifacts may be reused while only
+  missing or intentionally replaced reports, audio, or site outputs are built.
+- Human gates are now optional and checkpoint-specific. Without selected human
+  gates, coordinators continue through all phases required for the requested
+  local outputs.
 - Book reading-site generation now shares one PDF/EPUB entry point while
   preserving typed EPUB locators, original EPUB media, and PDF page anchors.
 - PDF and EPUB chapter reports now share one cross-chapter consistency sweep.
+- Shared content modeling and planning treat each source's authored structure
+  as authoritative and use the Content brief only as a cross-media aid.
+
+### Removed
+
+- Removed the `book-explainer-full-guide`, `pdf-explainer-full-guide`, and
+  `paper-explainer-full-guide` commands. Use `book-explainer` for PDF and EPUB
+  books, and `paper-explainer` for academic papers.
 
 ### Fixed
 

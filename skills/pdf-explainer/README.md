@@ -14,10 +14,9 @@ extract  →  structure  →  report            (pdf-explainer-summarize)
   ▼            ▼             ▼
 chunk-*.md   outline.md   reports/overview.md
                               │
-                              ├─ 🔊  report → dialogue/<slug>.txt → audio/<slug>.m4a
-                              │      (explainer-audio-dialogue → explainer-audio-narrate)
-                              └─ 🌐  reports/*.md + audio/*.m4a → site/ → Cloudflare Pages
-                                     (book-explainer-generate-site → explainer-reading-site-deploy)
+                              └─ book-explainer workflow coordination
+                                   ├─ 🔊 dialogue/<slug>.txt → audio/<slug>.m4a
+                                   └─ 🌐 site/ → Cloudflare Pages (separate deploy)
 ```
 
 - **Phase 1 — extract**: split the body into chunks, read each visually in parallel, write structured *material* (not a finished report) with `[pNN]` page anchors.
@@ -31,12 +30,11 @@ chunk-*.md   outline.md   reports/overview.md
 
 | Skill | Role |
 |-------|------|
-| `pdf-explainer-full-guide` | End-to-end: runs the whole pipeline on one PDF in a single request — chains summarize → deep-dive (per chapter) → audio-dialogue → audio-narrate. Confirms scope once up front, then runs the phases. |
+| `book-explainer` | Coordinates new, continued, rebuilt, or resumed PDF/EPUB book explanations through the shared content workflow. |
 | `pdf-explainer-summarize` | First full-document pass. Drives the `extract → structure → report` phases. |
 | `explainer-audio-dialogue` | Audio guide, step 1. Rewrites any report Markdown into a NotebookLM-style two-host dialogue script (台本) under `dialogue/`. |
 | `explainer-audio-narrate` | Audio guide, step 2. Synthesizes a dialogue script into a compact AAC/m4a with a local VOICEVOX ENGINE (offline, no API key) + `ffmpeg`, two distinct Japanese voices. |
-| `book-explainer-generate-site` | Builds the shared PDF/EPUB reading-guide website under `site/`, including in-page audio. Build only. |
-| `pdf-explainer-generate-site` | Compatibility entry point that fixes the source format to PDF and delegates to `book-explainer-generate-site`. |
+| `pdf-explainer-generate-site` | Compatibility entry point that requests a local PDF site through the shared coordinator. |
 | `explainer-reading-site-initialize` | One-time hosting setup: a single Cloudflare Pages project + a local library, protected by a Cloudflare Access policy. Run once before the first deploy. |
 | `explainer-reading-site-deploy` | Publishes a built `site/` by adding it as a subpath to the shared library, then deploying the whole library. |
 
@@ -46,7 +44,8 @@ chunk-*.md   outline.md   reports/overview.md
 |-------|------|
 | `pdf-explainer-pdf-extract` | Phase 1 worker — one per chunk, in parallel. Read+Write only. |
 | `pdf-explainer-pdf-stitch` | Phase 2 worker — single instance. Read+Write+Glob. |
-| `pdf-explainer-pdf-detail` | Internal per-chapter detail worker for `pdf-explainer-full-guide`. |
+| `pdf-explainer-pdf-detail` | Internal per-chapter PDF detail worker for `book-explainer`. |
+| `book-explainer-generate-site` | Internal PDF/EPUB site-production phase. Consumes exact planning Artifacts; build only. |
 | `explainer-reading-site-page` | Site page author — one per report, in parallel. |
 | `explainer-reading-site-consistency-sweep` | Site source-set reviewer — one fan-in pass checks source attribution, canonical anchors, and cross-page consistency before the build. |
 | `explainer-reading-site-library-base` | Shared resources, delegated to by name (not invoked directly): the Cloudflare Pages library manager (`library.py`), reading-site content layer (`reading-site.css`), and source/editorial structure filter (`reading-site.lua`), layered on the `explainer-html-docs` base design system. The reading-site nav widgets are `explainer-html-docs`' `reading-nav` opt-in component (pulled in via `--component reading-nav`). |
@@ -56,7 +55,7 @@ The five worker skills carry their own constraints and output format, so the orc
 ## When skills activate
 
 - **summarize**: "PDFをレポートにして", "この本を要約して", "turn this PDF into a markdown report"
-- **full-guide**: "この本を全部やって", "summaryから音声まで一気に", "do everything for this PDF"
+- **book-explainer**: "この本を理解したい", "音声だけ作り直して", "サイトを追加して"
 - **audio-dialogue / audio-narrate**: "音声ガイドを作って", "台本を音声にして"
 - **generate-site / deploy-site / initialize-site**: "サイトを作って", "この本を公開して", "配信の初期設定"
 
@@ -80,7 +79,7 @@ Everything lands in one work dir named after the PDF's basename; the source PDF 
 │   └── outline.md           # summarize · Phase 2: stitched, deduped outline (## Page offset field)
 ├── reports/
 │   ├── overview.md          # summarize · Phase 3: overview report
-│   └── chapter-2.md         # full-guide: per-chapter detail report
+│   └── chapter-2.md         # book-explainer: per-chapter detail report
 ├── dialogue/                # audio-dialogue: two-host dialogue script (台本, editable)
 ├── audio/                   # audio-narrate: synthesized audio (disposable, re-generatable)
 └── site/                    # generate-site: authored website (disposable, rebuilt on re-run)
@@ -88,6 +87,9 @@ Everything lands in one work dir named after the PDF's basename; the source PDF 
 
 ## Notes
 
-- `[pNN]` anchors are always **PDF** page numbers. The printed-page ↔ PDF-page offset is recorded once in the outline's `## Page offset` field so full-guide chapter-detail workers can convert printed page numbers.
+- `[pNN]` anchors are always **PDF** page numbers. The printed-page ↔ PDF-page offset is recorded once in the outline's `## Page offset` field so `book-explainer` can resolve chapter-detail source pages.
 - Report content is written in the language of the source PDF (or the conversation); the skills' own instructions and structural field names are in English.
-- For academic papers (conference/journal/preprint), use `paper-explainer-summarize` instead — it produces an Ochiai-format overview and dblp-verified bibliography. paper-explainer shares this work-dir layout, so the audio and site skills work on paper artifacts unchanged.
+- For academic papers (conference/journal/preprint), use
+  `paper-explainer` or `paper-explainer-summarize` instead. The shared
+  workflow reuses Content modeling, Planning, and audio while selecting the
+  paper-specific report and site owners.

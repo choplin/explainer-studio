@@ -1,7 +1,7 @@
 ---
 name: epub-explainer-epub-detail
 description: |
-  Internal chapter-detail worker for the EPUB full-guide pipeline. Resolves one source division to its native spine range and writes a locator-anchored standalone report. Never triggered proactively.
+  Internal chapter-detail worker for the book-explainer EPUB profile. Resolves one source division to its native spine range and writes a locator-anchored standalone report. Never triggered proactively.
 model: inherit
 color: cyan
 tools:

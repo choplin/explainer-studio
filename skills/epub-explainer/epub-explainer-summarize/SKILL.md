@@ -10,6 +10,19 @@ Convert one EPUB through `inspect → extract → structure → report`. The ada
 reads the OPF spine, EPUB 3 navigation or NCX, XHTML, and original media. It does
 not convert the book to PDF or screenshots.
 
+## Book-workflow invocation
+
+When this skill owns the EPUB report phase of the book workflow, apply
+[[explainer-content-workflow-base]] with the `book` profile. Require the exact immutable run request and
+the caller's validated source identity, output paths, actions, and digests.
+Use its resolved source options, report scope, language, and replacement
+decisions instead of conversation history or another prompt. A `create` action
+must not overwrite an existing Artifact; a `replace` action applies only to its
+exact target. Return exact produced paths and digests, AI acceptance checks, and
+any structured blocker so another session can continue from Artifacts alone.
+
+When invoked directly, use the interactive option procedure below.
+
 ## Before starting
 
 Read `references/source-locator-contract.md` and `references/output-contract.md`
@@ -17,6 +30,10 @@ completely. Require an absolute EPUB path and choose `<WORK_DIR>` from the EPUB
 basename. If adapter outputs already exist, confirm before regeneration and pass
 `--force` only after confirmation. Confirm the report language; default to the
 conversation language.
+
+In a book-workflow invocation, the run request supplies the absolute paths,
+language, and replacement decisions. Do not reconfirm them; pass `--force` only
+when the exact adapter outputs are planned as `replace`.
 
 ## Phase 0 — preflight and native extraction
 

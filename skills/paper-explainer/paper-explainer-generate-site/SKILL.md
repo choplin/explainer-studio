@@ -1,10 +1,22 @@
 ---
 name: paper-explainer-generate-site
-description: "Build a static reading site from existing paper-explainer reports, including overview audio when present. Use when reports already exist and the user wants a local site. Use explainer-reading-site-deploy to publish it."
-user-invocable: true
+description: "Internal paper site-production phase that builds a local reading site from an exact run request, Content brief, Run Manifest, source structure/evidence, and report set."
+user-invocable: false
 ---
 
 # Generate Site — paper-explainer reports as an authored website
+
+Apply [[explainer-content-workflow-base]], read its Artifact contract, and
+require the `paper` profile. Own only site authoring and local build; do not
+perform workflow discovery, user consultation, Content modeling, or Planning.
+
+Require exact paths/digests for the run request, selected Content brief, Run
+Manifest, `source-structure.md`, `spine.md`, and every planned report. The unique
+site entry must be `create` or `replace`; otherwise return a structured
+missing/incompatible-input result. Never infer latest planning Artifacts.
+
+Planning Artifacts supplement rather than replace reports and paper evidence.
+Consult the narrow source/OCR locus whenever fidelity requires it.
 
 Turn a **paper-explainer** work dir (`<dir>/<slug>/`, at least one report under
 `reports/` — typically `overview.md` plus the perspective reports) into a
@@ -18,16 +30,6 @@ success criteria — is the **shared reading-site pipeline** owned by
 adds only what is paper-specific: the canonical source-structure path,
 page-ordering profile, and landing vocabulary below. Do not re-derive the pipeline
 here; follow the base skill for every phase.
-
-## When this applies
-
-The input is a paper-explainer work dir with reports under `reports/` and the
-canonical paper section structure at `source-structure.md`. `audio/` is optional
-(pages without audio get no player). If reports or `source-structure.md` do not
-exist yet, run [[paper-explainer-summarize]] first; for the overview audio on the page, run
-[[explainer-audio-dialogue]] (pointed at `reports/overview.md`) →
-[[explainer-audio-narrate]] first. This skill only *builds* the site; publishing it
-is [[explainer-reading-site-deploy]]'s job.
 
 ## paper-explainer inputs
 
@@ -80,4 +82,7 @@ Site title = the paper title (from `reports/overview.md`'s `<h1>`).
 Hand the profile and canonical source-structure path above to [[explainer-reading-site-generate-base]] and run its pipeline
 (Phase 1 scaffold → Phase 2 author reports + landing → Phase 3 build + nav manifest →
 hand off to [[explainer-reading-site-deploy]]). The base skill's Success criteria are the
-acceptance for this skill.
+acceptance for this skill. Return the exact output inventory/digest and AI checks
+to the coordinator. Human interaction belongs to the coordinator. If `site` is a
+selected human gate, return the checked site as its checkpoint subject. Never
+treat approval as permission to deploy.

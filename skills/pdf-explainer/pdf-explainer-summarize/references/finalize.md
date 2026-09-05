@@ -31,4 +31,5 @@ To make the work dir a single self-contained folder, move the source PDF into it
 
 - **This relocates the user's original file, so confirm first.** Ask the user before moving; if they decline, leave the PDF where it is — the digest is already complete either way. Never move without an explicit yes.
 - If the PDF is already inside the work dir (a re-run, or the user moved it earlier), there is nothing to do.
-- Once collected, the source for later full-guide chapter-detail workers is `<WORK_DIR>/<name>.pdf`.
+- Once collected, the source for later `book-explainer` chapter-detail workers
+  is `<WORK_DIR>/<name>.pdf`.

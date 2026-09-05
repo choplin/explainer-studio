@@ -22,6 +22,21 @@ The work dir's internal layout carries reports, `[pNN]` anchors, a factual
 section topology. This separation lets shared site authoring restructure reports
 without presenting report-created headings as source sections.
 
+## Content-workflow invocation
+
+When this skill owns the paper report phase, apply
+[[explainer-content-workflow-base]] with the `paper` profile. Require the exact
+immutable run request and its source identity, final work directory, report
+scope, output actions, and source options. Use those values instead of asking
+again or relying on an earlier session. The shared coordinator has already
+resolved the citation-slug directory during read-only preflight; write directly
+there and do not rename it. A `create` action must not overwrite an Artifact,
+and `replace` applies only to its exact target.
+
+Return exact produced paths/digests, report-consistency checks, and any
+structured blocker. In direct standalone use, retain the interactive and
+provisional-directory procedures below.
+
 `<SKILL_DIR>` below is this skill's own base directory; the bundled scripts live at `<SKILL_DIR>/scripts/`. Reference them by that skill-root-relative path — no absolute or plugin-root paths.
 
 ## Before starting — read the runtime contract
@@ -30,7 +45,11 @@ Read [`references/runtime-and-ocr.md`](references/runtime-and-ocr.md) completely
 
 ## Step 0 — Confirm scope once, up front
 
-One interactive gate before any work; do not re-prompt between phases. (OCR needs no question — MinerU runs locally and was already verified in Prerequisites; mention it will run and that a first run downloads models and takes a while.) Ask:
+One interactive gate before any work in standalone use; do not re-prompt between
+phases. In a content-workflow invocation, the run request is the resolved gate,
+so do not ask again. (OCR needs no question — MinerU runs locally and was already
+verified in Prerequisites; mention it will run and that a first run downloads
+models and takes a while.) In standalone use, ask:
 
 1. **Detail reports** — *default: all five* (background / method / experiments / discussion / related-work). Accept a subset or "overview only".
 2. **Collect the source PDF into the work dir at Finalize?** — note the answer now so it is not asked again.
